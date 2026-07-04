@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "ai-trading-bot"
+version = "1.0.0"
+description = "AI Trading Bot with FastAPI integration"
+authors = ["Son Ho <hothson@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "*"
+numpy = "*"
+requests = "*"
+openai = "*"
+fastapi = "*"
+uvicorn = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

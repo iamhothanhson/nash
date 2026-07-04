@@ -1,0 +1,36 @@
+name: Demo Deployment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - demo
+
+jobs:
+  deploy-demo:
+    runs-on: ubuntu-latest
+    env:
+      DEMO_HOST_EXPECTED: 45.76.186.154
+      DEMO_USER_EXPECTED: root
+      DEMO_PATH_EXPECTED: /root/ai-trading-bot
+      DEMO_SERVICE_EXPECTED: bot-demo.service
+
+    steps:
+      - name: Validate DEMO target only
+        run: |
+          test "${{ secrets.DEMO_VPS_HOST }}" = "$DEMO_HOST_EXPECTED"
+          test "${{ secrets.DEMO_VPS_USER }}" = "$DEMO_USER_EXPECTED"
+
+      - name: Deploy to DEMO VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEMO_VPS_HOST }}
+          username: ${{ secrets.DEMO_VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd "/root/ai-trading-bot"
+            git fetch origin
+            git reset --hard origin/demo
+            git clean -fd
+            .venv/bin/pip install -r requirements.txt
+            sudo systemctl restart "bot-demo.service"

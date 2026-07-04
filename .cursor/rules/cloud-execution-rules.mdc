@@ -1,0 +1,69 @@
+---
+# NashR Shared Agent Rules
+alwaysApply: true
+---
+
+## 1. Branching & Sync
+- Always sync before starting:
+  - `git checkout production`
+  - `git pull origin production`
+- Create feature branch:
+  - `git checkout -b cursor/<short-description>`
+
+## 2. Safety Constraints (CRITICAL)
+- NEVER deploy to:
+  - `LIVE`
+  - `DEMO`
+- Only operate in:
+  - local
+  - backtesting
+  - CI
+
+## 3. Change Classification
+### Small Changes
+- Logging
+- Refactor (no logic change)
+- Config/UI
+- Action: run `make test-fast`
+
+### Non-Trivial Changes (MANDATORY)
+Includes:
+- Entry / Exit
+- Risk / Position sizing
+- Execution
+- Reconciliation
+- Strategy logic
+- Required:
+  - `python3 app/backtesting/backtest.py --days 7 --all`
+
+## 4. Validation Pipeline
+Before PR:
+1. `make test-fast`
+2. `make test-integration` (if needed)
+3. Backtest (if non-trivial)
+
+## 5. Pull Request Rules
+- Must include:
+  - Summary
+  - Risk level: Low / Medium / High
+  - Backtest result (if applicable)
+- Target:
+  - `production`
+
+## 6. Slack Notification
+After PR send:
+- PR link
+- Summary
+- Risk level
+- Backtest result
+
+## 7. Failure Handling
+If:
+- Tests fail
+- Backtest worse than before
+- Errors occur
+
+Then:
+- STOP
+- DO NOT create PR
+- Report logs + reason

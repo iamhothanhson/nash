@@ -28,7 +28,7 @@ class BinanceMarketplace:
 
     def __init__(self, client: BinanceClient | None = None):
         self.client = client or BinanceClient()
-        self.history_dir = Path(__file__).resolve().parents[1] / "history_data"
+        self.history_dir = Path(__file__).resolve().parents[2] / "data" / "history_data"
 
     def get_market_data(
         self,

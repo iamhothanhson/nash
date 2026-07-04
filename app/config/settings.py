@@ -110,7 +110,7 @@ if MODE not in ("backtest", "demo", "live"):
 DATA_SOURCE = os.getenv("DATA_SOURCE", "mainnet").strip().lower()
 if DATA_SOURCE not in ("mainnet", "testnet", "history"):
     raise ValueError(f"Invalid DATA_SOURCE: {DATA_SOURCE!r}; use mainnet | testnet | history")
-# When true, backtest.py --fetch may download klines into history_data/*.csv.
+# When true, backtest.py --fetch may download klines into data/history_data/*.csv.
 # When false, --fetch is blocked; DATA_SOURCE=testnet/mainnet still use live Binance klines.
 HISTORY_AUTO_FETCH = os.getenv("HISTORY_AUTO_FETCH", "true").strip().lower() == "true"
 # DATA_SOURCE=history only: when true, slice day windows relative to latest local CSV row.

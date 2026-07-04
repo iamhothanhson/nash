@@ -1228,8 +1228,8 @@ def _normalize_symbol(symbol: str) -> str:
 
 
 def _clear_trade_journal_for_backtest() -> None:
-    """Delete everything under project ``position_history/``, then recreate an empty folder."""
-    root = Path(__file__).resolve().parent.parent.parent / "position_history"
+    """Delete everything under project ``data/position_history/``, then recreate an empty folder."""
+    root = Path(__file__).resolve().parent.parent.parent / "data" / "position_history"
     if root.is_dir():
         shutil.rmtree(root)
     root.mkdir(parents=True, exist_ok=True)
@@ -1237,7 +1237,7 @@ def _clear_trade_journal_for_backtest() -> None:
 
 def _prepare_runtime_positions_for_backtest() -> None:
     project_root = Path(__file__).resolve().parent.parent.parent
-    data_file = project_root / "runtime_data" / "runtime_positions.json"
+    data_file = project_root / "data" / "runtime_data" / "runtime_positions.json"
     data_file.parent.mkdir(parents=True, exist_ok=True)
     data_file.write_text("[]\n", encoding="utf-8")
 
@@ -3099,7 +3099,7 @@ def main() -> int:
         "--daily-stat",
         action="store_true",
         dest="daily_stat",
-        help="Upsert each simulated UTC day into performance/mm-yyyy_statistics.json (same schema as live snapshots)",
+        help="Upsert each simulated UTC day into data/performance/mm-yyyy_statistics.json (same schema as live snapshots)",
     )
     parser.add_argument(
         "--exit-metrics",
@@ -3124,7 +3124,7 @@ def main() -> int:
         metavar="SYMBOL",
         default=None,
         help=(
-            "Download history_data CSVs for listed symbols only (e.g. RENDER), then run backtest. "
+            "Download data/history_data CSVs for listed symbols only (e.g. RENDER), then run backtest. "
             "Bare --fetch fetches all settings.SYMBOLS. Omit --fetch to rely on HISTORY_AUTO_FETCH "
             "(when true, missing ranges are fetched for every symbol in the backtest run)."
         ),

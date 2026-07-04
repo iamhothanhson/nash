@@ -25,7 +25,7 @@ _EXCHANGE_CACHE_DATE: str | None = None
 
 
 def _cache_path() -> Path:
-    return Path(__file__).resolve().parent.parent.parent / "runtime_data" / "exchange_balance.json"
+    return Path(__file__).resolve().parent.parent.parent / "data" / "runtime_data" / "exchange_balance.json"
 
 
 def _load_disk_cache() -> dict[str, Any] | None:

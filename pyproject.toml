@@ -1,22 +1,22 @@
 [tool.poetry]
-name = "ai-trading-bot"
+name = "Nash"
 version = "1.0.0"
-description = "AI Trading Bot with FastAPI integration"
-authors = ["Son Ho <hothson@gmail.com>"]
+description = "Crypto Trading Bot with FastAPI"
+authors = ["Ho Thanh Son <hothson@gmail.com>"]
 readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
-pandas = "*"
-numpy = "*"
-requests = "*"
-openai = "*"
-fastapi = "*"
-uvicorn = "*"
+pandas = ">=2.3.3"
+numpy = ">=2.2.6"
+requests = "^2.34.2"
+openai = "^2.44.0"
+fastapi = "^0.139.0"
+uvicorn = "^0.50.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "*"
+pytest = "^9.1.1"
 
 [build-system]
 requires = ["poetry-core"]

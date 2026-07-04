@@ -9,12 +9,12 @@ __pycache__/
 .venv/
 venv/
 .vscode/
-position_history/*
-runtime_data/*
-performance/*
+data/position_history/*
+data/runtime_data/*
+data/performance/*
 artifacts/*
 !artifacts/backtest_baseline.json
 !artifacts/backtest_symbol_baseline.json
 data/loss_position/*
-reports/*
+data/daily/*
 data/position_analysis/position_analysis_data.json

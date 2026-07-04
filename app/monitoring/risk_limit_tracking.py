@@ -1,9 +1,9 @@
 """
-Single-day JSON snapshot: ``runtime_data/risk_limit_tracking.json``.
+Single-day JSON snapshot: ``data/runtime_data/risk_limit_tracking.json``.
 
 **Contract (live / demo, default path):** whenever this file is **created or replaced**
 on disk (via ``_write_tracking``), the same row is mirrored into
-``performance/mm-yyyy_statistics.json`` as a **day snapshot** (``SNAPSHOT_EXPORT_KEYS``).
+``data/performance/mm-yyyy_statistics.json`` as a **day snapshot** (``SNAPSHOT_EXPORT_KEYS``).
 
 Schema (written to disk; legacy ``total_pnl`` / ``current_balance`` rows are
 migrated on read):
@@ -22,11 +22,11 @@ Stops new entries when:
 - ``daily_pnl_percent`` >= ``TARGET_DAILY_ROI`` (when ``TARGET_DAILY_ROI`` < 9999)
 
 After each successful write to the risk tracking file, the same day’s metrics
-(export keys only) are upserted into ``performance/mm-yyyy_statistics.json``
+(export keys only) are upserted into ``data/performance/mm-yyyy_statistics.json``
 (one JSON per calendar month). Override directory with ``PERFORMANCE_DIR`` (or legacy ``PERFORMANCE_STAT_DIR``).
 
 **Backtest:** when ``sim_date_iso`` is set, the risk file still updates each sim
-day but **does not** write ``performance/`` on every bar (avoids mixing
+day but **does not** write ``data/performance/`` on every bar (avoids mixing
 simulated days into the same month file as live). Use ``backtest.py --daily-stat``
 or a separate ``PERFORMANCE_DIR`` for simulated month snapshots.
 """
@@ -68,14 +68,14 @@ def tracking_path() -> Path:
     raw = os.getenv("RISK_LIMIT_TRACKING_PATH", "").strip()
     if raw:
         return Path(raw)
-    return _project_root() / "runtime_data" / "risk_limit_tracking.json"
+    return _project_root() / "data" / "runtime_data" / "risk_limit_tracking.json"
 
 
 def performance_dir() -> Path:
     raw = os.getenv("PERFORMANCE_DIR", "").strip() or os.getenv("PERFORMANCE_STAT_DIR", "").strip()
     if raw:
         return Path(raw)
-    return _project_root() / "performance"
+    return _project_root() / "data" / "performance"
 
 
 def performance_stat_dir() -> Path:
@@ -258,7 +258,7 @@ def row_to_snapshot(row: dict[str, Any], *, open_count: int | None = None) -> di
 
 
 def read_today_snapshot(*, open_count: int | None = None) -> dict[str, Any] | None:
-    """Current UTC day row from ``runtime_data/risk_limit_tracking.json`` as a performance snapshot."""
+    """Current UTC day row from ``data/runtime_data/risk_limit_tracking.json`` as a performance snapshot."""
     try:
         row = _read_row(tracking_path())
         if row is None:
@@ -393,7 +393,7 @@ def notify_monthly_cumulative_telegram(
 
 def read_day_snapshot_for_date(date_iso: str) -> dict[str, Any] | None:
     """
-    Load one day's snapshot from ``performance/MM-YYYY_statistics.json`` if present.
+    Load one day's snapshot from ``data/performance/MM-YYYY_statistics.json`` if present.
 
     ``date_iso`` must be ``YYYY-MM-DD`` (UTC calendar day used in month files).
     """
@@ -429,7 +429,7 @@ def read_day_snapshot_for_date(date_iso: str) -> dict[str, Any] | None:
 
 def upsert_performance_snapshot(snapshot: dict[str, Any]) -> None:
     """
-    Upsert one day (``SNAPSHOT_EXPORT_KEYS``) into ``performance/mm-yyyy_statistics.json``.
+    Upsert one day (``SNAPSHOT_EXPORT_KEYS``) into ``data/performance/mm-yyyy_statistics.json``.
 
     Used when the risk tracking file is written and when ``backtest.py`` is run with
     ``--daily-stat``.
@@ -487,7 +487,7 @@ def _sync_month_performance(row: dict[str, Any]) -> None:
 
 def _write_tracking(path: Path, row: dict[str, Any], *, sync_month: bool = True) -> None:
     """
-    Persist ``path`` and optionally mirror the row into ``performance/`` (``*_statistics.json``).
+    Persist ``path`` and optionally mirror the row into ``data/performance/`` (``*_statistics.json``).
 
     All live/demo updates go through here with ``sync_month=True`` so each disk
     write of the risk JSON is followed by an upsert of that UTC day's snapshot.
@@ -535,12 +535,12 @@ def ensure_today(
     Load or create the row for the effective calendar day; reset when the day changes.
 
     ``sim_date_iso`` (``YYYY-MM-DD``): use simulated UTC date (backtest). When set, the
-    risk JSON is still written to ``tracking_path()`` but ``performance/`` is not
+    risk JSON is still written to ``tracking_path()`` but ``data/performance/`` is not
     updated on each write (use backtest ``--daily-stat`` for month files).
 
     ``open_at_eod``: when the UTC day rolls over, set the completed day's ``open`` field
     to this count (positions still open at the prior day's end) before syncing to
-    ``performance/``.
+    ``data/performance/``.
     """
     path = tracking_path()
     today = _effective_date_iso(sim_date_iso)
@@ -560,7 +560,7 @@ def ensure_today(
                     prev_day["open"] = max(0, int(open_at_eod))
                 _sync_month_performance(prev_day)
             except Exception as exc:
-                file_log(f"[RISK LIMIT TRACK WARN] persist completed day to performance | {exc}")
+                file_log(f"[RISK LIMIT TRACK WARN] persist completed day to data/performance | {exc}")
         row = _normalize_row(existing, today=today, balance=bal)
         _write_tracking(path, row, sync_month=sync_m)
         return row

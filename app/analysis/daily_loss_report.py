@@ -1,6 +1,6 @@
 """
 Daily loss report — aggregates position analysis records closed on a given date
-and saves a structured report to reports/loss_analysis/daily/YYYY-MM-DD_loss.json.
+and saves a structured report to data/daily/YYYY-MM-DD_loss.json.
 
 Cron usage (end of UTC day):
   0 0 * * * cd /path/to/project && python3 app/analysis/daily_loss_report.py
@@ -19,8 +19,8 @@ from typing import Any
 
 _ANALYSIS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "position_analysis"
 _ANALYSIS_FILE = _ANALYSIS_DIR / "position_analysis_data.json"
-_PERF_DIR = Path(__file__).resolve().parent.parent.parent / "performance"
-_REPORT_DIR = Path(__file__).resolve().parent.parent.parent / "reports" / "loss_analysis" / "daily"
+_PERF_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "performance"
+_REPORT_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "daily"
 
 
 def _journal_display_to_dt(display: str) -> datetime | None:
@@ -62,7 +62,7 @@ def build_daily_loss_report(
     aggregate loss reasons and evidence, and optionally persist + notify.
 
     When ``total_trades`` / ``wins`` are not provided they are derived
-    from performance/*_statistics.json (if available).
+    from data/performance/*_statistics.json (if available).
     """
     target_date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc).date()
 
@@ -130,7 +130,7 @@ def build_daily_loss_report(
 
 
 def _count_trades_from_performance(target_date: datetime.date) -> tuple[int, int]:
-    """Read total_trade + win from performance/mm-yyyy_statistics.json for target_date."""
+    """Read total_trade + win from data/performance/mm-yyyy_statistics.json for target_date."""
     d = target_date.isoformat()
     yyyy, mm = d.split("-")[0], d.split("-")[1]
     path = _PERF_DIR / f"{mm}-{yyyy}_statistics.json"

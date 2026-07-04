@@ -29,7 +29,7 @@ def _repo_root() -> Path:
 
 
 def _reports_dir() -> Path:
-    d = _repo_root() / "position_history"
+    d = _repo_root() / "data" / "position_history"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -52,7 +52,7 @@ def _month_key_from_iso(time_iso: str) -> str:
 
 def _positions_history_journal_path_for_month(month: str) -> Path:
     """
-    ``YYYY-MM`` -> ``position_history/MM-YYYY-positions-history.json``.
+    ``YYYY-MM`` -> ``data/position_history/MM-YYYY-positions-history.json``.
 
     If the new file is missing but legacy ``open-positions-YYYY-MM.json`` exists, rename it once.
     """
@@ -313,7 +313,7 @@ def log_position_open(
     tp2_order_id: int | None = None,
     tp3_order_id: int | None = None,
 ) -> None:
-    """Append one ``status: Open`` row to ``position_history/MM-YYYY-positions-history.json`` (JSON array).
+    """Append one ``status: Open`` row to ``data/position_history/MM-YYYY-positions-history.json`` (JSON array).
 
     ``take_profit`` lists three TP rows. Each row includes ``tp{N}_partial_close`` (percent of position
     closed at that tier), ``tp{N}_hit`` (``false`` until updated on close), ``price``, and ``percent``.

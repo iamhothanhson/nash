@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from .config import TP_CLOSE_PCT
 from .models import OrderPlan
 
 try:
@@ -43,7 +44,6 @@ class OrderPlanner:
             return None
 
         direction = OrderPlanner._stringify(getattr(signal, "direction", kwargs.get("direction", "long")))
-        direction_key = str(direction).lower()
 
         sl_distance = abs(entry - stop_loss) / entry if entry > 0 else 0.0
         if sl_distance <= 0:
@@ -79,6 +79,10 @@ class OrderPlanner:
                 notional = available
                 quantity = notional / entry if entry > 0 else 0.0
 
+        tp1_qty = quantity * TP_CLOSE_PCT.get("tp_1", 0) / 100.0
+        tp2_qty = quantity * TP_CLOSE_PCT.get("tp_2", 0) / 100.0
+        tp3_qty = quantity * TP_CLOSE_PCT.get("tp_3", 0) / 100.0
+
         return OrderPlan(
             symbol=OrderPlanner._stringify(kwargs.get("symbol") or getattr(signal, "symbol", "UNKNOWN")),
             direction=direction,
@@ -88,6 +92,9 @@ class OrderPlanner:
             tp2=signal.tp2,
             tp3=signal.tp3,
             qty=quantity,
+            tp1_qty=tp1_qty,
+            tp2_qty=tp2_qty,
+            tp3_qty=tp3_qty,
             notional=notional,
             risk_amount=risk_amount,
             risk_percent=risk_percent,

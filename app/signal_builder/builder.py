@@ -10,12 +10,9 @@ from strategy.liquidity_sweep_reversal.sweep_revesal_config import (
     ATR_MULTIPLIER,
 )
 from indicators import calculate_atr
-from coins.loader import get_coin_config, scale_atr_stop_mult
 from config import settings
 from app.signal_builder.config import TP_CONFIG
 from app.signal_builder.take_profit import resolve_tp1_tp2_prices
-from config.strategy_config import GRADE_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
-from strategy.trend_following.types import TradeSignal, normalize_tf_confidence
 from setup_builder.builder import Setup
 from config.constants import BREAKOUT, TREND_FOLLOWING
 
@@ -107,12 +104,8 @@ class SignalBuilder:
         )
 
         risk_mult = float(GRADE_RISK_MULTIPLIERS.get(setup.grade, 1.0))
-        risk_mult *= float(SETUP_RISK_MULTIPLIERS[setup_type])
-        risk_mult = max(0.1, risk_mult)
 
         risk_per_trade = float(settings.RISK_PER_TRADE) * risk_mult
-
-        sig_conf, _ = normalize_tf_confidence(setup.confidence)
         r_multiple = abs(entry - sl) / max(entry, 1e-12)
 
         return TradeSignal(

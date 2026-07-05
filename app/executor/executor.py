@@ -69,6 +69,7 @@ class BinanceFuturesClient:
         params = dict(params or {})
         if signed:
             params["timestamp"] = int(time.time() * 1000)
+            params["recvWindow"] = settings.BINANCE_RECV_WINDOW_MS
             params["signature"] = self._sign(params)
         headers = {"X-MBX-APIKEY": self.api_key} if signed else {}
         resp = self._session.request(method, url, params=params, headers=headers, timeout=10)
@@ -162,9 +163,6 @@ class Executor:
 
     _client: BinanceFuturesClient | None = None
 
-    TP1_FRAC = 0.50
-    TP2_FRAC = 0.30
-
     # ------------------------------------------------------------------
 
     @classmethod
@@ -222,7 +220,7 @@ class Executor:
 
         # ---- TP1 (TAKE_PROFIT_LIMIT) ----
         tp1_price = client.normalize_price(sym, plan.tp1)
-        tp1_qty = client.normalize_qty(sym, filled_qty * cls.TP1_FRAC)
+        tp1_qty = client.normalize_qty(sym, filled_qty * settings.EXECUTOR_TP1_FRAC)
         if tp1_qty > 0:
             log(f"[EXECUTOR] {sym} | TP1 {opp} price={tp1_price} qty={tp1_qty}")
             client.place_order({
@@ -232,23 +230,6 @@ class Executor:
                 "price": tp1_price,
                 "stopPrice": tp1_price,
                 "quantity": tp1_qty,
-                "timeInForce": "GTC",
-                "workingType": "MARK_PRICE",
-                **({"positionSide": ps} if ps else {}),
-            })
-
-        # ---- TP2 (TAKE_PROFIT_LIMIT) ----
-        tp2_price = client.normalize_price(sym, plan.tp2)
-        tp2_qty = client.normalize_qty(sym, filled_qty * cls.TP2_FRAC)
-        if tp2_qty > 0:
-            log(f"[EXECUTOR] {sym} | TP2 {opp} price={tp2_price} qty={tp2_qty}")
-            client.place_order({
-                "symbol": sym,
-                "side": opp,
-                "type": "TAKE_PROFIT_LIMIT",
-                "price": tp2_price,
-                "stopPrice": tp2_price,
-                "quantity": tp2_qty,
                 "timeInForce": "GTC",
                 "workingType": "MARK_PRICE",
                 **({"positionSide": ps} if ps else {}),

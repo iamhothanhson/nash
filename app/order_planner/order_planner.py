@@ -1,9 +1,28 @@
 from __future__ import annotations
 from typing import Any
+
+from config import settings
 from .config import TP_CLOSE_PCT
 from .models import OrderPlan
 
+try:
+    from exchange.client import BinanceFuturesClient
+except ImportError:
+    BinanceFuturesClient = None  # type: ignore[assignment,misc]
+
+
 class OrderPlanner:
+
+    @staticmethod
+    def _available_balance() -> float:
+        if settings.MODE in ("live", "demo") and BinanceFuturesClient is not None:
+            try:
+                client = BinanceFuturesClient()
+                account = client.get_account()
+                return float(account.get("availableBalance", 0))
+            except Exception:
+                pass
+        return 0.0
 
     @staticmethod
     def build_order_plan(signal: Any, risk: Any | None = None, **kwargs: Any) -> OrderPlan | None:
@@ -30,6 +49,16 @@ class OrderPlanner:
         if quantity <= 0 or position_notional <= 0:
             quantity = position_notional / entry if entry > 0 and position_notional > 0 else 0.0
             if quantity <= 0:
+                return None
+
+        # ---- balance check: cap or reject ----
+        available = OrderPlanner._available_balance()
+        required_margin = position_notional / float(settings.LEVERAGE)
+        if available > 0 and required_margin > available:
+            ratio = available / required_margin
+            position_notional = position_notional * ratio
+            quantity = quantity * ratio
+            if position_notional < float(getattr(settings, "MIN_POSITION_NOTIONAL", 5.0)) or quantity <= 0:
                 return None
 
         tp1_qty = quantity * TP_CLOSE_PCT.get("tp_1", 0) / 100.0

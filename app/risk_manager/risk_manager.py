@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from config.risk import GRADE_RISK_MULTIPLIERS
 from config import settings
 from exchange.account_service import AccountState
 
@@ -38,9 +39,10 @@ class RiskManager:
         balance = account.futures_account_balance
         risk_per_trade = float(
             getattr(signal, "signal_risk_per_trade", None)
-            or settings.RISK_PER_TRADE
         )
-        risk_amount = balance * risk_per_trade
+        grade = str(getattr(signal, "setup_grade", "")).strip()
+        grade_mult = GRADE_RISK_MULTIPLIERS.get(grade, 1.0)
+        risk_amount = balance * risk_per_trade * grade_mult
 
         position_notional = risk_amount / sl_distance
 
@@ -48,7 +50,7 @@ class RiskManager:
         if max_notional is not None and position_notional > float(max_notional):
             position_notional = float(max_notional)
 
-        min_notional = float(getattr(settings, "MIN_POSITION_NOTIONAL", 5.0))
+        min_notional = float(getattr(settings, "MIN_POSITION_NOTIONAL", 25))
         if position_notional < min_notional:
             return cls._reject(
                 f"Position notional {position_notional:.2f} below minimum {min_notional:.2f}"

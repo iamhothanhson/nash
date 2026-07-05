@@ -1,4 +1,4 @@
-from config.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK
+from config.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK, LIQUIDITY_SWEEP_REVERSAL
 
 MAX_RISK_MULTIPLIERS = {
     BREAKOUT: {
@@ -13,7 +13,7 @@ MAX_RISK_MULTIPLIERS = {
         "A+": 1.50,
         "A": 1.00,
     },
-    "liquidity_sweep_reversal": {
+    LIQUIDITY_SWEEP_REVERSAL: {
         "A+": 1.30,
         "A": 1.30,
     },
@@ -22,8 +22,8 @@ MAX_RISK_MULTIPLIERS = {
 SETUP_RISK_MULTIPLIERS = {
     BREAKOUT: 1.5,
     BREAKOUT_RETEST: 1.0,
-    "trend_pullback": 1.3,
-    "liquidity_sweep_reversal": 1.3,
+    PULLBACK: 1.3,
+    LIQUIDITY_SWEEP_REVERSAL: 1.3,
 }
 
 GRADE_RISK_MULTIPLIERS = {

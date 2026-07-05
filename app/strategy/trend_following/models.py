@@ -1,11 +1,14 @@
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+
 from app.setup_builder.models import SetupType
-from app.setup_builder.models import Side
+from config.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK
 
 @dataclass(frozen=True)
 class TradeSignal:
-    direction: Side
+    direction: Direction
     entry: float
     stop_loss: float
     tp1: float
@@ -14,11 +17,11 @@ class TradeSignal:
     setup_score: int
     signal_risk_per_trade: float
     setup_type: SetupType
-    setup_grade: str
-    strategy_family: StrategyFamily 
+    setup_grade: SetupGrade
+    strategy_family: StrategyFamily
     r_multiple: float
     confirmation_mode: str
-    market_structure: str = "None"
+    market_structure: str = "Range"
     market_regime_detail: dict | None = None
     confidence: float = 0.0
     rsi: float | None = None
@@ -26,5 +29,3 @@ class TradeSignal:
     volatility: float | None = None
     ema_slope: float | None = None
     trend_phase: str | None = None
-    tp1_r: float = 0.0
-    tp2_r: float = 0.0

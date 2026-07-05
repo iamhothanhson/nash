@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from market_analyzer.market_state import MarketState
 from config.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK, LIQUIDITY_SWEEP
@@ -28,7 +28,7 @@ class Setup:
     grade: str
     score: float
     market_state: MarketState
-    metrics: SetupMetrics
+    features: dict[str, Any]
     anchor: float = 0.0
     confidence: float = 0.0
     trade_allowed: bool = False

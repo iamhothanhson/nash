@@ -1,28 +1,6 @@
 from __future__ import annotations
 
 FET_CONFIG = {
-    "min_risk_reward_multiple": 1.0,
-    "enforce_min_risk_reward_multiple": False,
-    "min_setup_score": 8,
-    "min_setup_score_a_plus": 11,
-    "trend_min_setup_score": 7,
-    "trend_score_bonus": 3,
-    "trend_pullback_min_setup_score": 7,
-    "trend_pullback_min_setup_score_a_plus": 10,
-    "trend_pullback_reclaim_body_ratio": 0.15,
-    "trend_pullback_max_ema_dev": 0.012,
-    "trend_pullback_ema_slope_min": 0.00035,
-    "trend_pullback_long_rsi_min": 46.0,
-    "trend_pullback_short_rsi_max": 54.0,
-    "allowed_grades": ["A+", "A"],
-    "confirmation_modes": ["confirmed", "strong"],
-    "min_body": 0.001,
-    "partial_close": [0.50, 0.30, 0.20],
     "max_opened_positions": 1,
-    "max_breakout_retest_position": 1,
-    "volatility_threshold": 0.004,
-    "bars_since_last_close": 6,
     "price_rounding_decimal": 4,
-    "atr_multiplier": 1.0,
-    "risk_multiplier": 1.0,
 }

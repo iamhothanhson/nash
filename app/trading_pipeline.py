@@ -9,6 +9,7 @@ from risk_manager.risk_manager import RiskManager
 from setup_builder.builder import SetupBuilder
 from signal_builder.builder import SignalBuilder
 from setup_builder.models import SetupType, Side
+from executor.executor import Executor
 from strategy.liquidity_sweep_reversal.detector import LiquiditySweepDetector
 from strategy.trend_following.breakout.detector import BreakoutDetector
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector

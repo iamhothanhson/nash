@@ -3,6 +3,10 @@ from __future__ import annotations
 import os
 import sys
 
+from app.config import SYMBOLS
+from app.marketplace import BinanceMarketplace
+from app.trading_pipeline import TradingPipeline
+
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(APP_DIR)
 for path in (APP_DIR, ROOT_DIR):
@@ -23,9 +27,18 @@ app.include_router(api_router, prefix="/api/v1")
 
 
 def main() -> None:
-    """Run uvicorn server programmatically when app/main.py is executed directly."""
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    marketplace = BinanceMarketplace()
+    pipeline = TradingPipeline(
+        marketplace=marketplace,
+    )
 
+    for symbol in SYMBOLS:
+        result = pipeline.run_symbol(symbol)
+        print(f"{symbol}: {result.get('status') if isinstance(result, dict) else result}")
+        if isinstance(result, dict) and result.get("signal"):
+            sig = result["signal"]
+            print(f"  {sig['direction']}  entry={sig['entry']:.4f}  score={sig['score']}  grade={sig['grade']}")
 
 if __name__ == "__main__":
     main()
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

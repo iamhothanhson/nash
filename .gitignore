@@ -12,9 +12,10 @@ venv/
 data/position_history/*
 data/runtime_data/*
 data/performance/*
-artifacts/*
-!artifacts/backtest_baseline.json
-!artifacts/backtest_symbol_baseline.json
+data/baseline/*
+!data/baseline/backtest_baseline.json
+!data/baseline/backtest_symbol_baseline.json
+reports/backtest/*
 data/loss_position/*
 data/daily/*
 data/position_analysis/position_analysis_data.json

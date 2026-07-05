@@ -55,7 +55,7 @@ def main() -> int:
     parser.add_argument("--roi", required=True, help="ROI label to include in output filename")
     args = parser.parse_args()
 
-    project_root = Path(__file__).resolve().parent.parent
+    project_root = Path(__file__).resolve().parent.parent.parent
     env_path = project_root / ".env"
     if not env_path.exists():
         raise FileNotFoundError(f".env file not found at {env_path}")

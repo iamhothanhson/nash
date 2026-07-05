@@ -2,7 +2,7 @@
 
 # Smoke-test every live/demo Telegram alert (requires .env ALERTS_* + Telegram credentials).
 send-telegram:
-	PYTHONPATH=. python3 commands/send_telegram.py
+	PYTHONPATH=. python3 app/commands/send_telegram.py
 
 test-unit:
 	PYTHONPATH=. python3 -m pytest -m unit

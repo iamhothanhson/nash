@@ -319,7 +319,7 @@ def _build_exit_metrics_artifact_payload(result: dict[str, Any], *, sim_days: in
 
 
 def _write_backtest_exit_metrics_artifact(result: dict[str, Any], *, sim_days: int) -> None:
-    root = Path(__file__).resolve().parent.parent.parent / "artifacts"
+    root = Path(__file__).resolve().parent.parent.parent / "data" / "baseline"
     root.mkdir(parents=True, exist_ok=True)
     target = root / "backtest_exit_metrics.json"
     payload = _build_exit_metrics_artifact_payload(result, sim_days=int(sim_days))
@@ -327,7 +327,7 @@ def _write_backtest_exit_metrics_artifact(result: dict[str, Any], *, sim_days: i
 
 
 def _write_backtest_exit_baseline_artifact(result: dict[str, Any], *, sim_days: int) -> None:
-    root = Path(__file__).resolve().parent.parent.parent / "artifacts"
+    root = Path(__file__).resolve().parent.parent.parent / "data" / "baseline"
     root.mkdir(parents=True, exist_ok=True)
     target = root / "backtest_exit_baseline.json"
     payload = _build_exit_metrics_artifact_payload(result, sim_days=int(sim_days))
@@ -2803,7 +2803,7 @@ def _backtest_symbol_day_window_payload(result: dict[str, Any]) -> dict[str, Any
 
 
 def _artifacts_dir() -> Path:
-    root = Path(__file__).resolve().parent.parent.parent / "artifacts"
+    root = Path(__file__).resolve().parent.parent.parent / "data" / "baseline"
     root.mkdir(parents=True, exist_ok=True)
     return root
 
@@ -2835,8 +2835,8 @@ def _update_backtest_symbol_artifact(
     baseline: bool = False,
 ) -> None:
     """
-    Persist symbol-filtered portfolio stats to artifacts/backtest_symbol.json
-    (or backtest_symbol_baseline.json when ``baseline=True``).
+    Persist symbol-filtered portfolio stats to data/baseline/backtest_symbol.json
+    (or data/baseline/backtest_symbol_baseline.json when ``baseline=True``).
 
     Structure: { "7": { "portfolio_symbols": "TAO, RENDER", "RENDER": { ... } } }
     """
@@ -2895,13 +2895,13 @@ def _baseline_config_from_settings() -> dict[str, float | int]:
 
 def _update_metrics_baseline_artifact(*, symbols: list[str]) -> None:
     """
-    Sync artifacts/backtest_baseline.json baseline fields from artifacts/backtest_result.json
+    Sync data/baseline/backtest_baseline.json baseline fields from data/baseline/backtest_result.json
     by matching metrics[].period_days to backtest_result day keys.
 
     Copies portfolio KPIs plus per-strategy blocks ``liquidity_reversal`` and ``trend_following``
     when present on the result window (``liquidity_reversal`` omits ``sweep_trades`` for baseline).
     """
-    root = Path(__file__).resolve().parent.parent.parent / "artifacts"
+    root = Path(__file__).resolve().parent.parent.parent / "data" / "baseline"
     result_path = root / "backtest_result.json"
     baseline_path = root / "backtest_baseline.json"
     if not result_path.exists() or not baseline_path.exists():
@@ -3031,8 +3031,8 @@ def main() -> int:
         default=None,
         dest="symbol_baseline",
         help=(
-            "Like --symbol but writes artifacts/backtest_symbol_baseline.json instead of "
-            "backtest_symbol.json (no regular symbol artifact written)."
+            "Like --symbol but writes data/baseline/backtest_symbol_baseline.json instead of "
+            "data/baseline/backtest_symbol.json (no regular symbol artifact written)."
         ),
     )
     parser.add_argument(
@@ -3075,10 +3075,10 @@ def main() -> int:
         "--baseline",
         action="store_true",
         help=(
-            "Update artifacts/backtest_baseline.json from artifacts/backtest_result.json "
+            "Update data/baseline/backtest_baseline.json from data/baseline/backtest_result.json "
             "(portfolio KPIs + liquidity_reversal / trend_following per period_days). "
             "With --symbol, also writes the same symbol window to "
-            "artifacts/backtest_symbol_baseline.json"
+            "data/baseline/backtest_symbol_baseline.json"
         ),
     )
     parser.add_argument(
@@ -3105,13 +3105,13 @@ def main() -> int:
         "--exit-metrics",
         action="store_true",
         dest="exit_metrics",
-        help="Write artifacts/backtest_exit_metrics.json (time exit / SL / TP breakdown; entry/tp1/tp2 time-exit buckets)",
+        help="Write data/baseline/backtest_exit_metrics.json (time exit / SL / TP breakdown; entry/tp1/tp2 time-exit buckets)",
     )
     parser.add_argument(
         "--exit-baseline",
         action="store_true",
         dest="exit_baseline",
-        help="Write artifacts/backtest_exit_baseline.json (same schema as --exit-metrics, but does not write exit_metrics)",
+        help="Write data/baseline/backtest_exit_baseline.json (same schema as --exit-metrics, but does not write exit_metrics)",
     )
     parser.add_argument(
         "--collect",

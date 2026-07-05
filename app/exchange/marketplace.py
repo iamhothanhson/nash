@@ -6,28 +6,13 @@ from typing import Any
 
 import pandas as pd
 
-
-class BinanceClient:
-    def get_klines(self, *args: Any, **kwargs: Any) -> list[list[Any]]:
-        return []
-
-    def get_price(self, *args: Any, **kwargs: Any) -> float:
-        return 0.0
-
-    def get_symbol_info(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        return {}
-
-    def get_account(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        return {}
-
-    def get_positions(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return []
+from app.exchange.client import BinanceFuturesClient
 
 
 class BinanceMarketplace:
 
-    def __init__(self, client: BinanceClient | None = None):
-        self.client = client or BinanceClient()
+    def __init__(self, client: BinanceFuturesClient | None = None):
+        self.client = client or BinanceFuturesClient()
         self.history_dir = Path(__file__).resolve().parents[2] / "data" / "history_data"
 
     def get_market_data(

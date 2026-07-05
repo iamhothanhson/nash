@@ -37,7 +37,7 @@ from config.backtest_config import LOSS_FILTER
 from loss_filter.loss_filter import breakout_filter, sweep_filter
 from intelligence.ai_filter import ai_gate_score_tier, ai_gate_trade_metrics
 from intelligence.ai_router import evaluate_trade as evaluate_ai_trade
-from marketplace.fetcher import fetch_market_data_range, prefetch_history_symbols, _uses_history_ohlcv
+from exchange.fetcher import fetch_market_data_range, prefetch_history_symbols, _uses_history_ohlcv
 from monitoring.logger import (
     flush_backtest_log_buffer,
     log,

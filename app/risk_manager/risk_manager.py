@@ -1,8 +1,10 @@
-# risk_manager.py
-
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
+
+from config import settings
+from exchange.account_service import AccountState
 
 
 @dataclass(frozen=True, slots=True)
@@ -15,43 +17,42 @@ class RiskResult:
 
 
 class RiskManager:
-    def __init__(
-        self,
-        *,
-        balance: float,
-        max_position_notional: float | None = None,
-        min_position_notional: float = 5.0,
-    ) -> None:
-        self.balance = float(balance)
-        self.max_position_notional = max_position_notional
-        self.min_position_notional = float(min_position_notional)
-
+    @classmethod
     def calculate(
-        self,
-        *,
-        entry: float,
-        stop_loss: float,
-        risk_per_trade: float,
+        cls,
+        signal: Any,
+        account: AccountState,
     ) -> RiskResult:
-        if entry <= 0:
-            return self._reject("Invalid entry price")
+        entry = float(getattr(signal, "entry", 0.0))
+        stop_loss = float(getattr(signal, "stop_loss", 0.0))
 
+        if entry <= 0:
+            return cls._reject("Invalid entry price")
         if stop_loss <= 0:
-            return self._reject("Invalid stop loss")
+            return cls._reject("Invalid stop loss")
 
         sl_distance = abs(entry - stop_loss) / entry
-
         if sl_distance <= 0:
-            return self._reject("Invalid SL distance")
+            return cls._reject("Invalid SL distance")
 
-        risk_amount = self.balance * risk_per_trade
+        balance = account.futures_account_balance
+        risk_per_trade = float(
+            getattr(signal, "signal_risk_per_trade", None)
+            or settings.RISK_PER_TRADE
+        )
+        risk_amount = balance * risk_per_trade
+
         position_notional = risk_amount / sl_distance
 
-        if self.max_position_notional is not None:
-            position_notional = min(position_notional, self.max_position_notional)
+        max_notional = getattr(settings, "MAX_POSITION_NOTIONAL", None)
+        if max_notional is not None and position_notional > float(max_notional):
+            position_notional = float(max_notional)
 
-        if position_notional < self.min_position_notional:
-            return self._reject("Position notional below minimum")
+        min_notional = float(getattr(settings, "MIN_POSITION_NOTIONAL", 5.0))
+        if position_notional < min_notional:
+            return cls._reject(
+                f"Position notional {position_notional:.2f} below minimum {min_notional:.2f}"
+            )
 
         quantity = position_notional / entry
 
@@ -63,8 +64,9 @@ class RiskManager:
             reason="OK",
         )
 
+    @classmethod
     def validate_signal_risk(
-        self,
+        cls,
         *,
         entry: float,
         stop_loss: float,
@@ -72,12 +74,11 @@ class RiskManager:
     ) -> bool:
         if entry <= 0 or stop_loss <= 0:
             return False
-
         sl_distance = abs(entry - stop_loss) / entry
-
         return 0 < sl_distance <= max_sl_distance
 
-    def _reject(self, reason: str) -> RiskResult:
+    @classmethod
+    def _reject(cls, reason: str) -> RiskResult:
         return RiskResult(
             allowed=False,
             risk_amount=0.0,

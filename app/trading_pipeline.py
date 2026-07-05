@@ -2,21 +2,22 @@ from __future__ import annotations
 
 from typing import Any
 
+from executor.executor import Executor
 from indicators.indicator_builder import IndicatorBuilder
 from market_analyzer.market_analyzer import MarketAnalyzer
+from exchange.account_service import AccountService
 from order_planner.order_planner import OrderPlanner
 from risk_manager.risk_manager import RiskManager
 from setup_builder.builder import SetupBuilder
 from signal_builder.builder import SignalBuilder
-from setup_builder.models import SetupType, Side
-from executor.executor import Executor
 from strategy.liquidity_sweep_reversal.detector import LiquiditySweepDetector
 from strategy.trend_following.breakout.detector import BreakoutDetector
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
 from strategy.trend_following.pullback.detector import PullbackDetector
 class TradingPipeline:
-    def __init__(self, marketplace: Any) -> None:
+    def __init__(self, marketplace: Any, account_service: AccountService | None = None) -> None:
         self.marketplace = marketplace
+        self.account_service = account_service or AccountService()
 
         self.detectors = [
             BreakoutDetector.breakout_long,
@@ -54,18 +55,18 @@ class TradingPipeline:
         return candidates
 
     def run_symbol(self, symbol: str) -> Any | None:
-        # 1. Marketplace -> OHLCV data
+        # Marketplace -> OHLCV data
         market_data = self.marketplace.get_market_data(symbol)
 
         if market_data is None:
             return None
 
-        # 2. Indicators
+        # Indicators
         indicators = IndicatorBuilder.build(
             market_data,
         )
 
-        # 3. Market State
+        # Market State
         market_analyzer = MarketAnalyzer()
         market_state = market_analyzer.build_market_state(
             symbol=symbol,
@@ -73,13 +74,13 @@ class TradingPipeline:
             indicators=indicators,
         )
 
-        # 5. Strategy Detectors -> SetupCandidate
+        # Strategy Detectors -> SetupCandidate
         candidates = self._detect_setups(market_state)
 
         if not candidates:
             return None
 
-        # 6. Setup Builder -> Setup
+        # Setup Builder
         if not candidates:
             return None
 
@@ -93,7 +94,7 @@ class TradingPipeline:
         if setup is None:
             return None
 
-        # 7. Signal Builder -> Signal
+        # Signal Builder -> Signal
         signal = SignalBuilder.build(
             setup=setup,
             market_state=market_state,
@@ -102,12 +103,14 @@ class TradingPipeline:
         if signal is None:
             return None
 
-        # 8. Risk Manager -> OrderPlan
+        # Risk Manager
+        account = self.account_service.get_account_state()
         risk = RiskManager.calculate(
-            signal=signal
+            signal=signal,
+            account=account
         )
 
-        # 9. Risk Manager -> OrderPlan
+        # OrderPlan
         order_plan = OrderPlanner.build_order_plan(
             signal=signal,
             risk=risk,
@@ -116,5 +119,5 @@ class TradingPipeline:
         if order_plan is None:
             return None
 
-        # 10. Execution
+        # Execution
         return Executor.execute(order_plan)

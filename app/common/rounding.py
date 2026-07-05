@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 
+def round_step(value: float, step: float) -> float:
+    if step <= 0:
+        return value
+    return round(round(value / step) * step, 8)
+
+
 def round_price(value: float, tick_size: float = 0.01) -> float:
     tick = float(tick_size) if float(tick_size) > 0 else 0.01
     return round(round(float(value) / tick) * tick, 8)

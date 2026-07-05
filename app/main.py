@@ -4,7 +4,7 @@ import os
 import sys
 
 from app.config import SYMBOLS
-from app.marketplace import BinanceMarketplace
+from app.exchange import BinanceMarketplace
 from app.trading_pipeline import TradingPipeline
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))

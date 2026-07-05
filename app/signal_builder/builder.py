@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from app.signal_builder.models import TradeSignal
 from strategy.trend_following.config import (
     BREAKOUT_MIN_SL_DISTANCE,
     MAX_SL_DISTANCE,

@@ -3,15 +3,15 @@ from __future__ import annotations
 import os
 import sys
 
-from app.config import SYMBOLS
-from app.exchange import BinanceMarketplace
-from app.trading_pipeline import TradingPipeline
-
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(APP_DIR)
 for path in (APP_DIR, ROOT_DIR):
     if path not in sys.path:
         sys.path.insert(0, path)
+
+from app.config import SYMBOLS
+from app.exchange import BinanceMarketplace
+from app.trading_pipeline import TradingPipeline
 
 import uvicorn
 from fastapi import FastAPI

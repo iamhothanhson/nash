@@ -13,7 +13,7 @@ if str(APP_PATH) not in sys.path:
     sys.path.insert(0, str(APP_PATH))
 
 from config import settings
-from config.strategy_config import (
+from risk_manager.config import (
     GRADE_RISK_MULTIPLIERS,
     MAX_RISK_MULTIPLIERS,
     SETUP_RISK_MULTIPLIERS,
@@ -43,8 +43,8 @@ GRADE_KEY_MAP = {
 ROWS = [
     ("Breakout",        "A+",   GRADE_RISK_MULTIPLIERS["A+"], SETUP_RISK_MULTIPLIERS["breakout"]),
     ("Breakout",        "A",    GRADE_RISK_MULTIPLIERS["A"],   SETUP_RISK_MULTIPLIERS["breakout"]),
-    ("Pullback",        "A+",   GRADE_RISK_MULTIPLIERS["A+"], SETUP_RISK_MULTIPLIERS["trend_pullback"]),
-    ("Pullback",        "A",    GRADE_RISK_MULTIPLIERS["A"],   SETUP_RISK_MULTIPLIERS["trend_pullback"]),
+    ("Pullback",        "A+",   GRADE_RISK_MULTIPLIERS["A+"], SETUP_RISK_MULTIPLIERS["pullback"]),
+    ("Pullback",        "A",    GRADE_RISK_MULTIPLIERS["A"],   SETUP_RISK_MULTIPLIERS["pullback"]),
     ("Breakout Retest", "A+",   GRADE_RISK_MULTIPLIERS["A+"], SETUP_RISK_MULTIPLIERS["breakout_retest"]),
     ("Breakout Retest", "A",    GRADE_RISK_MULTIPLIERS["A"],   SETUP_RISK_MULTIPLIERS["breakout_retest"]),
     ("Liquidity Sweep", "A+/A", None,                          1.40),  # MarketRegime.risk_multiplier max

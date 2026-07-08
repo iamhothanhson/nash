@@ -19,6 +19,15 @@ class Side(str, Enum):
     LONG = "LONG"
     SHORT = "SHORT"
 
+
+class Direction(str, Enum):
+    LONG = "LONG"
+    SHORT = "SHORT"
+
+
+SetupGrade = str
+StrategyFamily = str
+
 @dataclass
 class Setup:
     symbol: str

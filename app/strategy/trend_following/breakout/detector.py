@@ -8,7 +8,7 @@ from strategy.trend_following.config import (
     BREAKOUT_SHORT_RSI_MAX,
 )
 from config.constants import BREAKOUT
-from strategy.trend_following.types import SetupCandidate
+from strategy.models import SetupCandidate
 
 
 class BreakoutDetector:

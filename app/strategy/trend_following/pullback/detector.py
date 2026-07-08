@@ -9,7 +9,7 @@ from strategy.trend_following.config import (
     TREND_PULLBACK_IMPULSE_PCT_MIN,
 )
 from config.constants import PULLBACK
-from strategy.trend_following.types import SetupCandidate
+from strategy.models import SetupCandidate
 
 
 def _cfg_float(cfg: dict | None, key: str, default: float) -> float:

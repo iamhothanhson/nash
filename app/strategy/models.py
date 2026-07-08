@@ -17,13 +17,3 @@ class SetupCandidate:
     confidence: float = 0.0
     debug_reason: str | None = None
 
-
-@dataclass
-class TrendBarContext:
-    phase: str
-    exhaustion_risk: float
-    compression_quality: float
-    atr_spike_ratio: float
-    impulse_streak: int
-    extended_trend: bool
-    compression_gate_ok: bool

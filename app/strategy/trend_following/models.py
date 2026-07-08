@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.setup_builder.models import SetupType
+from app.setup_builder.models import Direction, SetupGrade, SetupType, StrategyFamily
 from config.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK
 
 @dataclass(frozen=True)

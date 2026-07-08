@@ -11,6 +11,10 @@ except ImportError:
     BinanceFuturesClient = None  # type: ignore[assignment,misc]
 
 
+def risk_controls_allow(*_args: Any, **_kwargs: Any) -> tuple[bool, list[str]]:
+    return True, []
+
+
 class OrderPlanner:
 
     @staticmethod

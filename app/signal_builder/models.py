@@ -1,7 +1,6 @@
 
 from dataclasses import dataclass
-from app.setup_builder.models import SetupType
-from app.setup_builder.models import Side
+from app.setup_builder.models import SetupType, Side, StrategyFamily
 
 @dataclass(frozen=True)
 class TradeSignal:

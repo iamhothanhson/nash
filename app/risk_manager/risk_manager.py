@@ -3,9 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from config.risk import GRADE_RISK_MULTIPLIERS
+from risk_manager.config import GRADE_RISK_MULTIPLIERS, MARKET_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
 from config import settings
-from exchange.account_service import AccountState
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,7 +21,7 @@ class RiskManager:
     def calculate(
         cls,
         signal: Any,
-        account: AccountState,
+        account: Any,
     ) -> RiskResult:
         entry = float(getattr(signal, "entry", 0.0))
         stop_loss = float(getattr(signal, "stop_loss", 0.0))
@@ -37,12 +36,12 @@ class RiskManager:
             return cls._reject("Invalid SL distance")
 
         balance = account.futures_account_balance
-        risk_per_trade = float(
-            getattr(signal, "signal_risk_per_trade", None)
-        )
+        risk_per_trade = float(getattr(signal, "signal_risk_per_trade", 0.0))
+        setup_type = str(getattr(signal, "setup_type", "")).strip()
         grade = str(getattr(signal, "setup_grade", "")).strip()
-        grade_mult = GRADE_RISK_MULTIPLIERS.get(grade, 1.0)
-        risk_amount = balance * risk_per_trade * grade_mult
+        market_regime = str(getattr(signal, "market_regime", "")).strip()
+        mult = cls.compute_risk_multiplier(setup_type, grade, market_regime)
+        risk_amount = balance * risk_per_trade * mult
 
         position_notional = risk_amount / sl_distance
 
@@ -78,6 +77,17 @@ class RiskManager:
             return False
         sl_distance = abs(entry - stop_loss) / entry
         return 0 < sl_distance <= max_sl_distance
+
+    @staticmethod
+    def compute_risk_multiplier(
+        setup_type: str,
+        grade: str,
+        market_regime: str,
+    ) -> float:
+        setup_mult = SETUP_RISK_MULTIPLIERS.get(setup_type, 1.0)
+        grade_mult = GRADE_RISK_MULTIPLIERS.get(grade, 1.0)
+        market_mult = MARKET_RISK_MULTIPLIERS.get(market_regime, 1.0)
+        return setup_mult * grade_mult * market_mult
 
     @classmethod
     def _reject(cls, reason: str) -> RiskResult:

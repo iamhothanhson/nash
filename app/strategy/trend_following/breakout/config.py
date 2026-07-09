@@ -1,7 +1,6 @@
 BREAKOUT_LONG = {
     "close_above_recent_high": True,
     "min_strength": 0.004,
-    "use_dynamic_strength": True,
     "min_strength_atr_factor": 0.3,
     "min_volume_ratio": 1.25,
     "min_ema_slope": 0.001,
@@ -19,7 +18,6 @@ BREAKOUT_LONG = {
 BREAKOUT_SHORT = {
     "close_below_recent_low": True,
     "min_strength": 0.004,
-    "use_dynamic_strength": True,
     "min_strength_atr_factor": 0.3,
     "min_volume_ratio": 1.25,
     "max_ema_slope": -0.001,

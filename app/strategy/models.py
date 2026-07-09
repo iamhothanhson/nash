@@ -10,10 +10,8 @@ class SetupCandidate:
     setup_type: str
     direction: str
     anchor: float
-    key_level_points: int
-    confirmation_points: int
     trigger_type: str
     features: dict
-    confidence: float = 0.0
-    debug_reason: str | None = None
+    detected_at: int
+    timeframe: str
 

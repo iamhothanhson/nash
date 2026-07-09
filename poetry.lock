@@ -45,6 +45,20 @@ typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 trio = ["trio (>=0.32.0)"]
 
 [[package]]
+name = "backtrader"
+version = "1.9.78.123"
+description = "BackTesting Engine"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "backtrader-1.9.78.123-py2.py3-none-any.whl", hash = "sha256:9a07a516b0de9155539a35c56e9404d8711dd7020b3d37b30495e83e1b9d5dfd"},
+]
+
+[package.extras]
+plotting = ["matplotlib"]
+
+[[package]]
 name = "certifi"
 version = "2026.6.17"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -1378,4 +1392,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.8.0)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "f82f7f6564c124ea340fb07bb19bb205e2027cf764fd1e81d78ec1eb8ee12d9e"
+content-hash = "dd9450d7729b60a88c9331727bc88e3bd592b6fec17af7540d234a098c7f7625"

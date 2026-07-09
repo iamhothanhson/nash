@@ -4,14 +4,6 @@ from __future__ import annotations
 
 MAX_SL_DISTANCE: float = 0.02
 
-# Breakout entry filters
-BREAKOUT_EMA_SLOPE_MIN: float = 0.001
-BREAKOUT_LONG_RSI_MIN: float = 55.0
-BREAKOUT_SHORT_RSI_MAX: float = 45.0
-BREAKOUT_MIN_STRENGTH: float = 0.0040
-BREAKOUT_MIN_VOL_RATIO: float = 1.25
-BREAKOUT_MIN_SL_DISTANCE: float = 0.003
-
 # Breakout retest entry filters
 TREND_BREAKOUT_RETEST_BLOCK_SYMBOLS: tuple[str, ...] = ("FETUSDT", "RENDERUSDT")
 TREND_BREAKOUT_RETEST_MAX_LEVEL_DEV: float = 0.0080

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from app.signal_builder.models import TradeSignal
 from strategy.trend_following.config import MAX_SL_DISTANCE, TREND_BREAKOUT_STOP_ATR_MULT
-from strategy.trend_following.breakout.config import BREAKOUT_BASE
+from strategy.trend_following.breakout.config import BREAKOUT_LONG
 from strategy.liquidity_sweep_reversal.sweep_revesal_config import (
     ATR_PERIOD,
     ATR_MULTIPLIER,
@@ -48,13 +48,13 @@ class SignalBuilder:
             sl = setup.anchor + buf
             dist = (sl - entry) / entry
 
-        if setup_type == BREAKOUT and dist < BREAKOUT_BASE["min_sl_distance"]:
+        if setup_type == BREAKOUT and dist < BREAKOUT_LONG["min_sl_distance"]:
             if direction == "LONG":
-                sl = entry * (1.0 - BREAKOUT_BASE["min_sl_distance"])
+                sl = entry * (1.0 - BREAKOUT_LONG["min_sl_distance"])
             else:
-                sl = entry * (1.0 + BREAKOUT_BASE["min_sl_distance"])
+                sl = entry * (1.0 + BREAKOUT_LONG["min_sl_distance"])
 
-            dist = BREAKOUT_BASE["min_sl_distance"]
+            dist = BREAKOUT_LONG["min_sl_distance"]
 
         if dist <= 0 or dist > MAX_SL_DISTANCE:
             return None

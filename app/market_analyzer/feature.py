@@ -28,6 +28,22 @@ class BreakoutFeatures:
     # Volume
     volume_ratio: float = 0.0
 
+    # Candle quality
+    body_ratio: float = 0.0
+    close_to_high_pct: float = 0.0
+    close_to_low_pct: float = 0.0
+
+    # EMA
+    ema_slope: float = 0.0
+    ema_bullish_alignment: bool = False
+    ema_bearish_alignment: bool = False
+
+    # RSI
+    rsi: float = 0.0
+
+    # ATR
+    atr_percent: float = 0.0
+
 
 @dataclass(frozen=True)
 class PullbackFeatures:

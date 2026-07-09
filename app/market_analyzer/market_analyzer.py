@@ -79,6 +79,7 @@ class MarketAnalyzer:
         market_state = MarketState(
             symbol=symbol,
             timestamp=timestamp,
+            timeframe="15m",
             trend_direction=trend_dir,
             trend_aligned=trend_aligned,
             regime=regime,

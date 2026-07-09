@@ -34,6 +34,7 @@ class MarketStructure(str, Enum):
 class MarketState:
     symbol: str
     timestamp: int
+    timeframe: str
     trend_direction: TrendDirection
     trend_aligned: bool
     regime: MarketRegime

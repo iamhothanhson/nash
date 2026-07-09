@@ -8,7 +8,7 @@ from strategy.trend_following.config import (
     TREND_BREAKOUT_RETEST_MIN_VOL_RATIO,
     TREND_BREAKOUT_RETEST_SHORT_RSI_MAX,
 )
-from strategy.trend_following.breakout.config import BREAKOUT_BASE
+from strategy.trend_following.breakout.config import BREAKOUT_LONG
 from config.constants import BREAKOUT_RETEST
 from strategy.models import SetupCandidate
 
@@ -42,7 +42,7 @@ class BreakoutRetestDetector:
         reclaim_ok = rf.distance_from_breakout_level_pct >= min_reclaim
 
         if (
-            ema_slope > (BREAKOUT_BASE["ema_slope_min"] * 0.0)
+            ema_slope > (BREAKOUT_LONG["min_ema_slope"] * 0.0)
             and rsi > TREND_BREAKOUT_RETEST_LONG_RSI_MIN
             and rf.body_ratio >= float(TREND_BREAKOUT_RETEST_MIN_BODY_RATIO)
             and rf.close_strength >= 0.40
@@ -94,7 +94,7 @@ class BreakoutRetestDetector:
         reclaim_ok = rf.distance_from_breakout_level_pct >= min_reclaim
 
         if (
-            ema_slope < -(BREAKOUT_BASE["ema_slope_min"] * 0.0)
+            ema_slope < -(BREAKOUT_LONG["min_ema_slope"] * 0.0)
             and rsi < TREND_BREAKOUT_RETEST_SHORT_RSI_MAX
             and rf.body_ratio >= float(TREND_BREAKOUT_RETEST_MIN_BODY_RATIO)
             and rf.close_strength >= 0.40

@@ -26,21 +26,22 @@ def _safe_bool(v, default: bool = False) -> bool:
         return default
 
 
-def compute_breakout_features(data_15m: pd.DataFrame | None) -> BreakoutFeatures:
+def compute_breakout_features(data_15m: pd.DataFrame | None, indicators: dict | None = None) -> BreakoutFeatures:
     if data_15m is None or len(data_15m) < 20:
         return BreakoutFeatures()
 
     try:
         close = data_15m["close"].astype(float)
+        open_ = data_15m["open"].astype(float)
         high = data_15m["high"].astype(float)
         low = data_15m["low"].astype(float)
         vol = data_15m["volume"].astype(float)
 
+        price = float(close.iloc[-1])
         recent_high_7 = float(high.iloc[-7:-1].max())
         recent_low_7 = float(low.iloc[-7:-1].min())
         recent_high_20 = float(high.iloc[-20:].max())
         recent_low_20 = float(low.iloc[-20:].min())
-        price = float(close.iloc[-1])
 
         breakout_up = price > recent_high_7
         breakout_down = price < recent_low_7
@@ -49,6 +50,21 @@ def compute_breakout_features(data_15m: pd.DataFrame | None) -> BreakoutFeatures
 
         strength_up = (price - recent_high_7) / max(price, 1e-12) if breakout_up else 0.0
         strength_down = (recent_low_7 - price) / max(price, 1e-12) if breakout_down else 0.0
+
+        candle_rng = max(float(high.iloc[-1]) - float(low.iloc[-1]), 1e-12)
+        body_ratio = abs(price - float(open_.iloc[-1])) / candle_rng
+        close_to_high_pct = (float(high.iloc[-1]) - price) / candle_rng
+        close_to_low_pct = (price - float(low.iloc[-1])) / candle_rng
+
+        ind = indicators or {}
+        ema_slope = float(ind.get("ema20_slope_15m", 0.0))
+        rsi = float(ind.get("rsi_15m", 50.0))
+        atr_percent = float(ind.get("atr_percent", 0.0))
+
+        ema20 = calculate_ema(data_15m, 20)
+        ema_val = float(ema20.iloc[-1])
+        ema_bullish_alignment = price > ema_val
+        ema_bearish_alignment = price < ema_val
 
         return BreakoutFeatures(
             recent_high_7=recent_high_7,
@@ -64,6 +80,14 @@ def compute_breakout_features(data_15m: pd.DataFrame | None) -> BreakoutFeatures
             momentum_up=breakout_up and strength_up > 0.0,
             momentum_down=breakout_down and strength_down > 0.0,
             volume_ratio=volume_ratio,
+            body_ratio=body_ratio,
+            close_to_high_pct=close_to_high_pct,
+            close_to_low_pct=close_to_low_pct,
+            ema_slope=ema_slope,
+            ema_bullish_alignment=ema_bullish_alignment,
+            ema_bearish_alignment=ema_bearish_alignment,
+            rsi=rsi,
+            atr_percent=atr_percent,
         )
     except Exception:
         return BreakoutFeatures()
@@ -265,7 +289,7 @@ def build_features(
     indicators: dict | None = None,
 ) -> SetupFeatures:
     return SetupFeatures(
-        breakout=compute_breakout_features(data_15m),
+        breakout=compute_breakout_features(data_15m, indicators),
         pullback=compute_pullback_features(data_15m),
         retest=compute_retest_features(data_15m),
         sweep=compute_sweep_features(data_15m),

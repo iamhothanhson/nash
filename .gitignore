@@ -16,6 +16,7 @@ data/baseline/*
 !data/baseline/backtest_baseline.json
 !data/baseline/backtest_symbol_baseline.json
 reports/backtest/*
+app/backtesting/reports/
 data/loss_position/*
 data/daily/*
 data/position_analysis/position_analysis_data.json

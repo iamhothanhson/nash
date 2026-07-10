@@ -10,7 +10,7 @@ from order_planner.order_planner import OrderPlanner
 from risk_manager.risk_manager import RiskManager
 from setup_builder.builder import SetupBuilder
 from signal_builder.builder import SignalBuilder
-from strategy.liquidity_sweep_reversal.detector import LiquiditySweepDetector
+from config.settings import ENABLE_LIQUIDITY_SWEEP_REVERSAL
 from strategy.trend_following.breakout.detector import BreakoutDetector
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
 from strategy.trend_following.pullback.detector import PullbackDetector
@@ -26,9 +26,14 @@ class TradingPipeline:
             BreakoutRetestDetector.retest_short,
             PullbackDetector.pullback_long,
             PullbackDetector.pullback_short,
-            LiquiditySweepDetector.sweep_long,
-            LiquiditySweepDetector.sweep_short,
         ]
+
+        if ENABLE_LIQUIDITY_SWEEP_REVERSAL:
+            from strategy.liquidity_sweep_reversal.detector import LiquiditySweepDetector
+            self.detectors.extend([
+                LiquiditySweepDetector.sweep_long,
+                LiquiditySweepDetector.sweep_short,
+            ])
 
     def run(self, symbols: list[str]) -> dict[str, Any]:
         results: dict[str, Any] = {}

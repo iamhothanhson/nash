@@ -57,9 +57,10 @@ def compute_breakout_features(data_15m: pd.DataFrame | None, indicators: dict | 
         close_to_low_pct = (price - float(low.iloc[-1])) / candle_rng
 
         ind = indicators or {}
-        ema_slope = float(ind.get("ema20_slope_15m", 0.0))
-        rsi = float(ind.get("rsi_15m", 50.0))
-        atr_percent = float(ind.get("atr_percent", 0.0))
+        ema_slope = _safe_float(ind.get("ema20_slope_15m", 0.0))
+        rsi_raw = ind.get("rsi_15m", 50.0)
+        rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
+        atr_percent = _safe_float(ind.get("atr_percent", 0.0))
 
         ema20 = calculate_ema(data_15m, 20)
         ema_val = float(ema20.iloc[-1])

@@ -1,112 +1,83 @@
 from __future__ import annotations
 
-import argparse
 import sys
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
+from typing import Any, Iterable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import backtrader as bt
 import pandas as pd
-from config.settings import INITIAL_CAPITAL
 
+from backtesting.executor import BacktestExecutor
+from backtesting.marketplace import HistoricalMarketplace
+from backtesting.portfolio import BacktestPortfolio
 from indicators.indicator_builder import IndicatorBuilder
 from market_analyzer.market_analyzer import MarketAnalyzer
-from market_analyzer.market_state import (
-    MarketState,
-)
+from setup_builder.builder import SetupBuilder
+from config.settings import ENABLE_LIQUIDITY_SWEEP_REVERSAL
 from strategy.trend_following.breakout.config import BREAKOUT_LONG, BREAKOUT_SHORT
 from strategy.trend_following.breakout.detector import BreakoutDetector
-from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
+from strategy.trend_following.breakout_retest.detector import (
+    BreakoutRetestDetector,
+)
 from strategy.trend_following.pullback.detector import PullbackDetector
-from setup_builder.builder import SetupBuilder
 
 
 HISTORY_DIR = Path(__file__).resolve().parent / "history_data"
-
-_STRATEGY_LABELS = {
-    "breakout": "Breakout",
-    "breakout_retest": "Breakout Retest",
-    "pullback": "Pullback",
-    "liquidity_sweep": "Liquidity Reversal",
-}
+LOOKBACK = 200
 
 
-def load_bt_data(
-    symbol: str,
-    interval: str = "15m",
-    limit: int = 500,
-) -> pd.DataFrame:
-    csv_path = HISTORY_DIR / f"{symbol}_{interval}.csv"
-    if csv_path.exists():
+def load_history_marketplace() -> HistoricalMarketplace:
+    data: dict[str, dict[str, pd.DataFrame]] = {}
+
+    for csv_path in sorted(HISTORY_DIR.glob("*.csv")):
+        parts = csv_path.stem.split("_")
+        symbol = parts[0] if parts[0].endswith("USDT") else parts[0] + "USDT"
+        interval = parts[1] if len(parts) > 1 else "15m"
+        interval_map = {"5m": "5m", "15m": "15m", "1h": "1h"}
+        interval = interval_map.get(interval, "15m")
+
         raw = pd.read_csv(csv_path)
-    else:
-        import requests
-        params = {"symbol": symbol, "interval": interval, "limit": limit}
-        resp = requests.get(
-            "https://fapi.binance.com/fapi/v1/klines",
-            params=params,
-            timeout=30,
-        )
-        resp.raise_for_status()
-        candles = resp.json()
-        if not candles:
-            raise ValueError(f"No data for {symbol} {interval}")
-        raw = pd.DataFrame(
-            candles,
-            columns=[
-                "open_time", "open", "high", "low", "close", "volume",
-                "close_time", "quote_asset_volume", "number_of_trades",
-                "taker_buy_base_volume", "taker_buy_quote_volume", "ignore",
-            ],
-        )
+        if "time" in raw.columns:
+            raw["datetime"] = pd.to_datetime(raw["time"], unit="ms")
+        elif "open_time" in raw.columns:
+            raw["datetime"] = pd.to_datetime(raw["open_time"], unit="ms")
+        else:
+            raw["datetime"] = pd.date_range(
+                end=datetime.now(), periods=len(raw), freq=interval.replace("m", "min")
+            )
+
+        raw.set_index("datetime", inplace=True)
+        raw.index.name = "datetime"
         for col in ["open", "high", "low", "close", "volume"]:
             raw[col] = pd.to_numeric(raw[col], errors="coerce")
+        df = raw[["open", "high", "low", "close", "volume"]]
 
-    if "time" in raw.columns:
-        raw["datetime"] = pd.to_datetime(raw["time"], unit="ms")
-        raw.drop(columns=["time"], inplace=True)
-    elif "open_time" in raw.columns:
-        raw["datetime"] = pd.to_datetime(raw["open_time"], unit="ms")
-        raw.drop(columns=["open_time"], inplace=True)
-    else:
-        raw["datetime"] = pd.date_range(
-            end=datetime.now(), periods=len(raw),
-            freq=interval.replace("m", "min"),
-        )
+        data.setdefault(symbol, {})[interval] = df
 
-    raw.set_index("datetime", inplace=True)
-    raw.index.name = "datetime"
-    return raw[["open", "high", "low", "close", "volume"]]
+    return HistoricalMarketplace(data)
 
 
-class MultiStrategyBT(bt.Strategy):
-    params = (
-        ("risk_per_trade", 0.01),
-        ("sl_atr_mult", 1.5),
-        ("min_history", 60),
-        ("max_hold_bars", 24),
-    )
-
-    def __init__(self):
+class BacktestTradingPipeline:
+    def __init__(
+        self,
+        marketplace: HistoricalMarketplace,
+        portfolio: BacktestPortfolio,
+        executor: BacktestExecutor,
+        lookback: int = 200,
+    ) -> None:
+        self.lookback = lookback
+        self.marketplace = marketplace
+        self.portfolio = portfolio
+        self.executor = executor
+        self.market_analyzer = MarketAnalyzer()
         self.breakout_detector = BreakoutDetector()
         self.retest_detector = BreakoutRetestDetector()
         self.pullback_detector = PullbackDetector()
         self.sweep_detector = None
-        try:
-            from strategy.liquidity_sweep_reversal.detector import LiquiditySweepDetector
-            self.sweep_detector = LiquiditySweepDetector()
-        except Exception:
-            pass
 
-        self.trade_log: list[dict] = []
-        self._entry_bar: int | None = None
-        self._current_tradeinfo: dict = {}
-
-    def _detect(self, ms) -> Any | None:
-        detectors = [
+        self.detectors = [
             self.breakout_detector.breakout_long_candidate,
             self.breakout_detector.breakout_short_candidate,
             self.retest_detector.detect_long,
@@ -114,270 +85,262 @@ class MultiStrategyBT(bt.Strategy):
             self.pullback_detector.detect_long,
             self.pullback_detector.detect_short,
         ]
-        if self.sweep_detector is not None:
-            detectors.extend([
-                self.sweep_detector.detect_long,
-                self.sweep_detector.detect_short,
-            ])
 
-        best = None
-        for detect in detectors:
-            try:
-                c = detect(ms)
-            except Exception:
-                c = None
-            if c is not None and (best is None or getattr(c, "confidence", 0.0) > getattr(best, "confidence", 0.0)):
-                best = c
-        return best
+        if ENABLE_LIQUIDITY_SWEEP_REVERSAL:
+            from strategy.liquidity_sweep_reversal.detector import (
+                LiquiditySweepDetector,
+            )
 
-    def _build_ohlcv(self, bars: int = 60) -> pd.DataFrame | None:
-        n = min(bars, len(self.data))
-        if n < 60:
+            sd = LiquiditySweepDetector()
+            self.sweep_detector = sd
+            self.detectors.extend([sd.detect_long, sd.detect_short])
+
+        # Pre-compute row lookups per symbol/timeframe for fast slicing
+        self._index_map: dict[str, dict[str, pd.Index]] = {}
+        for sym, tfs in marketplace.data.items():
+            self._index_map[sym] = {tf: df.index for tf, df in tfs.items()}
+
+    def _market_data_since(
+        self, symbol: str, up_to: Any
+    ) -> dict[str, pd.DataFrame] | None:
+        symbol_data = self.marketplace.data.get(symbol)
+        if symbol_data is None:
             return None
-        return pd.DataFrame(
-            {
-                "open": self.data.open.get(size=n),
-                "high": self.data.high.get(size=n),
-                "low": self.data.low.get(size=n),
-                "close": self.data.close.get(size=n),
-                "volume": self.data.volume.get(size=n),
-            },
-            index=pd.DatetimeIndex(self.data.datetime.array[-n:]),
-        )
+        result: dict[str, pd.DataFrame] = {}
+        for tf, df in symbol_data.items():
+            idx = df.index.get_loc(up_to) if up_to in df.index else -1
+            if idx < 0:
+                return None
+            start = max(0, idx - self.lookback + 1)
+            result[tf] = df.iloc[start:idx + 1]
+        return result
 
-    def _build_market_state(self) -> MarketState | None:
-        df = self._build_ohlcv()
-        if df is None:
-            return None
+    def run(
+        self,
+        symbols: list[str],
+        timestamps: Iterable[Any],
+    ) -> dict[str, Any]:
+        for timestamp in timestamps:
+            self._process_timestamp(symbols=symbols, timestamp=timestamp)
+        return self.portfolio.get_backtest_result()
 
-        symbol = self.data._name or ""
-        indicators = IndicatorBuilder.build(market_data={"15m": df})
-        analyzer = MarketAnalyzer()
-        return analyzer.build_market_state(
-            symbol=symbol,
-            data={"15m": df},
-            indicators=indicators,
-        )
-
-    def notify_trade(self, trade):
-        if not trade.isclosed:
-            return
-        pnl = trade.pnlcomm
-        size = self._current_tradeinfo.get("_size", trade.size)
-        if not size:
-            return
-        entry_price = trade.price
-        exit_price = entry_price + pnl / size
-        margin = size * entry_price
-
-        info = self._current_tradeinfo
-        self.trade_log.append({
-            "strategy": info.get("strategy", "unknown"),
-            "direction": info.get("direction", "LONG"),
-            "grade": info.get("grade", "Skip"),
-            "entry": entry_price,
-            "exit": exit_price,
-            "size": size,
-            "margin": margin,
-            "pnl": pnl,
-            "roi_pct": (pnl / margin * 100) if margin > 0 else 0.0,
-            "bars": trade.barlen,
-        })
-
-    def _manage_position(self, ms: MarketState):
-        if not self.position:
-            return
-
-        if self._entry_bar is not None and len(self.data) - self._entry_bar >= self.p.max_hold_bars:
-            self.close()
-            return
-
-    def next(self):
-        if len(self.data) < self.p.min_history:
-            return
-
-        ms = self._build_market_state()
-        if ms is None or ms.features is None:
-            return
-
-        if self.position:
-            self._manage_position(ms)
-            return
-
-        best = self._detect(ms)
-        if best is None:
-            return
-
-        setup = SetupBuilder.build(
-            candidate=best,
-            market_state=ms,
-        )
-        if setup is None or setup.grade == "Skip":
-            return
-
-        cfg = BREAKOUT_LONG if best.direction == "LONG" else BREAKOUT_SHORT
-        close = self.data.close[0]
-        atr_pct = float(ms.indicators.get("atr_percent", 0.0))
-
-        sl_distance = max(
-            cfg.get("min_sl_distance", 0.003),
-            atr_pct * self.p.sl_atr_mult,
-        )
-        sl_price = close - sl_distance if best.direction == "LONG" else close + sl_distance
-
-        value_per_risk = self.broker.getvalue() * self.p.risk_per_trade
-        size = value_per_risk / close
-
-        self._current_tradeinfo = {
-            "strategy": best.setup_type,
-            "direction": best.direction,
-            "grade": setup.grade,
-            "_size": size,
-        }
-        if best.direction == "LONG":
-            o = self.buy(size=size, sl=sl_price)
-        else:
-            o = self.sell(size=size, sl=sl_price)
-        if o:
-            self._entry_bar = len(self.data)
-
-
-def run_backtest(
-    symbol: str = "TAOUSDT",
-    interval: str = "15m",
-    since: str | None = None,
-    until: str | None = None,
-    cash: float = 10000.0,
-    days: int | None = None,
-) -> None:
-    start_time = time.time()
-    df = load_bt_data(symbol, interval)
-
-    if days is not None:
-        end = pd.Timestamp(until) if until else df.index[-1]
-        since = (end - timedelta(days=days)).strftime("%Y-%m-%d")
-        until = end.strftime("%Y-%m-%d")
-    else:
-        since = since or "2026-03-01"
-        until = until or "2026-05-10"
-
-    df = df[since:until]
-    if df.empty:
-        print(f"No data for {symbol} {interval} in [{since}, {until}]")
-        return
-
-    data = bt.feeds.PandasData(dataname=df)
-
-    cerebro = bt.Cerebro(stdstats=False)
-    cerebro.adddata(data, name=symbol)
-    cerebro.addstrategy(MultiStrategyBT)
-    cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")
-    cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name="trades")
-    cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
-    cerebro.broker.setcash(cash)
-    cerebro.broker.setcommission(commission=0.0004)
-
-    results = cerebro.run()
-    strat = results[0]
-    elapsed = time.time() - start_time
-
-    ta = strat.analyzers.trades.get_analysis()
-    dd = strat.analyzers.drawdown.get_analysis()
-    trade_log = strat.trade_log
-
-    final_value = cerebro.broker.getvalue()
-    net_profit = final_value - cash
-    roi_pct = (net_profit / cash) * 100
-
-    total_trades = ta.get("total", {}).get("closed", 0)
-    won = ta.get("won", {}).get("total", 0)
-    lost = ta.get("lost", {}).get("total", 0)
-    won_pnl = ta.get("won", {}).get("pnl", {}).get("total", 0)
-    lost_pnl = abs(ta.get("lost", {}).get("pnl", {}).get("total", 0))
-    profit_factor = won_pnl / lost_pnl if lost_pnl else float("inf")
-    win_rate = (won / total_trades * 100) if total_trades else 0.0
-    max_dd = dd.get("max", {}).get("drawdown", 0.0)
-
-    trading_days = max((df.index[-1] - df.index[0]).days, 1)
-    trades_per_day = total_trades / trading_days
-
-    grade_counts = {"A+": 0, "A": 0}
-    for t in trade_log:
-        g = t.get("grade", "Skip")
-        if g == "A+" or g == "A":
-            grade_counts[g] += 1
-
-    strat_groups: dict[str, list[dict]] = {}
-    for t in trade_log:
-        key = t["strategy"]
-        strat_groups.setdefault(key, []).append(t)
-
-    print()
-    print(f"  MODE: backtest | DATA SOURCE: history")
-    print(f"  Coins: {symbol.replace('USDT', '').upper()}")
-    print(f"  Initial Balance: {cash:.2f}")
-    print(f"  Net Profit: {net_profit:+.2f}")
-    print(f"  ROI: {roi_pct:+.2f}%")
-    print(f"  Total Trades: {total_trades}")
-    print(f"  Trades per Day: {trades_per_day:.2f}")
-    print(f"  Win Rate: {win_rate:.2f}%")
-    print(f"  Profit Factor: {profit_factor:.2f}")
-    print(f"  Max Drawdown: {max_dd:.2f}%")
-    print(f"  A+ Trades: {grade_counts['A+']}")
-    print(f"  A Trades: {grade_counts['A']}")
-
-    trend_sub = {"pullback": [], "breakout": [], "breakout_retest": []}
-    for key, trades in sorted(strat_groups.items()):
-        label = _STRATEGY_LABELS.get(key, key)
-        count = len(trades)
-        avg_margin = sum(t["margin"] for t in trades) / count
-        total_pnl = sum(t["pnl"] for t in trades)
-        group_roi = (total_pnl / cash) * 100
-        avg_margin_val = avg_margin
-
-        if key in trend_sub:
-            trend_sub[key] = trades
-
-    lsr_trades = strat_groups.get("liquidity_sweep", [])
-    if lsr_trades:
-        c = len(lsr_trades)
-        am = sum(t["margin"] for t in lsr_trades) / c
-        tp = sum(t["pnl"] for t in lsr_trades)
-        r = (tp / cash) * 100
-        print(f"  Liquidity Reversal: {c} trades, Avg Margin: {am:.2f} USDT, ROI: {r:+.2f}%, Net Profit: {tp:+.2f} USDT")
-
-    tf_trades = trend_sub["pullback"] + trend_sub["breakout"] + trend_sub["breakout_retest"]
-    if tf_trades:
-        print(f"  Trend Following: {len(tf_trades)} trades:")
-        for skey, slabel in [("pullback", "Pullback"), ("breakout", "Breakout"), ("breakout_retest", "Breakout Retest")]:
-            st = trend_sub[skey]
-            if not st:
+    def _process_timestamp(self, symbols: list[str], timestamp: Any) -> None:
+        for symbol in symbols:
+            candle = self.marketplace.get_candle(symbol=symbol, timestamp=timestamp)
+            if candle is None:
                 continue
-            c = len(st)
-            am = sum(t["margin"] for t in st) / c
-            tp = sum(t["pnl"] for t in st)
-            r = (tp / cash) * 100
-            print(f"    - {slabel}: {c} trades, Avg Margin: {am:.2f} USDT, ROI: {r:+.2f}%, Net Profit: {tp:+.2f} USDT")
+            self.executor.update_positions(
+                symbol=symbol,
+                candle=candle,
+                timestamp=timestamp,
+                portfolio=self.portfolio,
+            )
 
-    print(f"  Running Time: {int(elapsed // 60)}:{int(elapsed % 60):02d} s")
-    print()
+        for symbol in symbols:
+            self.run_symbol(symbol=symbol, timestamp=timestamp)
+
+        self.portfolio.record_equity(timestamp)
+
+    def run_symbol(self, symbol: str, timestamp: Any) -> Any | None:
+        if not self.portfolio.can_open_position(symbol):
+            return None
+
+        market_data = self._market_data_since(symbol, up_to=timestamp)
+        if market_data is None:
+            return None
+        if not self._has_enough_history(market_data):
+            return None
+
+        indicators = IndicatorBuilder.build(market_data)
+
+        market_state = self.market_analyzer.build_market_state(
+            symbol=symbol, data=market_data, indicators=indicators,
+        )
+
+        candidates = self._detect_setups(market_state)
+        if not candidates:
+            return None
+
+        best = self._select_best_candidate(candidates)
+
+        setup = SetupBuilder.build(candidate=best, market_state=market_state)
+        if setup is None or setup.grade == "Skip":
+            return None
+
+        entry = float(
+            market_data.get("15m", list(market_data.values())[0]).iloc[-1]["close"]
+        )
+        signal = self._build_signal(setup, entry, market_state)
+        if signal is None:
+            return None
+
+        account = self.portfolio.get_account_state()
+        risk = self._calculate_risk(signal, account)
+        if risk is None:
+            return None
+
+        current_candle = self.marketplace.get_candle(
+            symbol=symbol, timestamp=timestamp,
+        )
+        if current_candle is None:
+            return None
+
+        order_plan = {
+            "symbol": symbol,
+            "direction": signal["direction"],
+            "entry": signal["entry"],
+            "stop_loss": signal["stop_loss"],
+            "tp1": signal["tp1"],
+            "tp2": signal["tp2"],
+            "tp3": signal.get("tp3", 0.0),
+            "qty": risk["quantity"],
+            "risk_amount": risk["risk_amount"],
+            "setup_type": signal.get("setup_type"),
+            "setup_score": setup.score,
+        }
+
+        return self.executor.execute(
+            order_plan=order_plan,
+            candle=current_candle,
+            timestamp=timestamp,
+            portfolio=self.portfolio,
+        )
+
+    def _build_signal(self, setup, entry: float, market_state) -> dict | None:
+        cfg = BREAKOUT_LONG if setup.side.upper() == "LONG" else BREAKOUT_SHORT
+        direction = setup.side.upper()
+        atr_pct = float(
+            getattr(market_state, "indicators", {}).get("atr_percent", 0.0)
+        )
+        anchor = float(getattr(setup, "anchor", entry))
+        atr_v = atr_pct * entry
+
+        stop_atr_mult = 1.5
+        buf = atr_v * stop_atr_mult
+
+        if direction == "LONG":
+            sl = anchor - buf
+            dist = (entry - sl) / entry
+        else:
+            sl = anchor + buf
+            dist = (sl - entry) / entry
+
+        min_sl = cfg.get("min_sl_distance", 0.003)
+        if dist < min_sl:
+            if direction == "LONG":
+                sl = entry * (1.0 - min_sl)
+            else:
+                sl = entry * (1.0 + min_sl)
+            dist = min_sl
+
+        if dist <= 0 or dist > 0.1:
+            return None
+
+        tp1_r = 1.0
+        tp2_r = 1.5
+        tp3_r = 2.0
+        if direction == "LONG":
+            tp1 = entry + dist * tp1_r * entry
+            tp2 = entry + dist * tp2_r * entry
+            tp3 = entry + dist * tp3_r * entry
+        else:
+            tp1 = entry - dist * tp1_r * entry
+            tp2 = entry - dist * tp2_r * entry
+            tp3 = entry - dist * tp3_r * entry
+
+        return {
+            "direction": direction,
+            "entry": entry,
+            "stop_loss": sl,
+            "tp1": tp1,
+            "tp2": tp2,
+            "tp3": tp3,
+            "r_multiple": dist,
+            "setup_grade": setup.grade,
+            "setup_type": setup.setup_type,
+        }
+
+    def _calculate_risk(self, signal: dict, account_state) -> dict | None:
+        entry = signal["entry"]
+        sl = signal["stop_loss"]
+        sl_distance = abs(entry - sl) / entry
+        if sl_distance <= 0:
+            return None
+
+        available = float(getattr(account_state, "available_balance", 0))
+        if available <= 0:
+            return None
+
+        risk_amount = available * 0.01
+        position_notional = risk_amount / sl_distance
+        quantity = position_notional / entry
+
+        return {
+            "allowed": True,
+            "risk_amount": risk_amount,
+            "position_notional": position_notional,
+            "quantity": quantity,
+        }
+
+    def _detect_setups(self, market_state: Any) -> list[Any]:
+        candidates: list[Any] = []
+        for detector in self.detectors:
+            try:
+                candidate = detector(market_state)
+            except (TypeError, ValueError, KeyError):
+                candidate = None
+            if candidate is not None:
+                candidates.append(candidate)
+        return candidates
+
+    @staticmethod
+    def _select_best_candidate(candidates: list[Any]) -> Any:
+        return max(
+            candidates,
+            key=lambda c: (
+                float(getattr(c, "confidence", 0.0)),
+                float(getattr(c, "score", 0.0)),
+            ),
+        )
+
+    @staticmethod
+    def _has_enough_history(
+        market_data: dict[str, Any], minimum_bars: int = 60
+    ) -> bool:
+        for df in market_data.values():
+            if len(df) < minimum_bars:
+                return False
+        return True
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run multi-strategy backtest with backtrader")
-    parser.add_argument("--symbol", default="TAOUSDT", help="Trading pair (default: TAOUSDT)")
-    parser.add_argument("--interval", default="15m", choices=["5m", "15m", "1h"], help="Chart interval (default: 15m)")
-    parser.add_argument("--days", type=int, default=None, help="Number of days to backtest (overrides --since)")
-    parser.add_argument("--since", default=None, help="Start date (YYYY-MM-DD, default: 2026-03-01)")
-    parser.add_argument("--until", default=None, help="End date (YYYY-MM-DD, default: 2026-05-10)")
-    parser.add_argument("--cash", type=float, default=float(INITIAL_CAPITAL), help=f"Initial capital (default: {INITIAL_CAPITAL})")
-    args = parser.parse_args()
+    mp = load_history_marketplace()
+    portfolio = BacktestPortfolio(initial_balance=10000.0)
+    executor = BacktestExecutor()
 
-    run_backtest(
-        symbol=args.symbol,
-        interval=args.interval,
-        since=args.since,
-        until=args.until,
-        cash=args.cash,
-        days=args.days,
-    )
+    symbols = ["TAOUSDT"]
+    timestamps = mp.data["TAOUSDT"]["15m"].index[200:]
+
+    pipeline = BacktestTradingPipeline(marketplace=mp, portfolio=portfolio, executor=executor)
+    result = pipeline.run(symbols=symbols, timestamps=timestamps)
+
+    trades = result["trades"]
+    equity = result["equity_curve"]
+
+    print(f"\n  Total Trades: {len(trades)}")
+    print(f"  Final Balance: {result['final_balance']:.2f}")
+    winners = [t for t in trades if t.net_pnl > 0]
+    losers = [t for t in trades if t.net_pnl <= 0]
+    print(f"  Win Rate: {len(winners) / max(len(trades), 1) * 100:.1f}%")
+    if losers:
+        pf = sum(t.net_pnl for t in winners) / abs(sum(t.net_pnl for t in losers)) if losers else float("inf")
+        print(f"  Profit Factor: {pf:.2f}")
+    if equity:
+        peak = max(e.equity for e in equity)
+        trough = min(e.equity for e in equity)
+        dd = (peak - trough) / peak * 100 if peak else 0
+        print(f"  Max Drawdown: {dd:.2f}%")
+    print(f"  Trades count: {len(trades)}")
+    for t in trades:
+        print(f"    {t.direction:5s} entry={t.entry_price:.2f} exit={t.exit_price:.2f} pnl={t.net_pnl:.2f} reason={t.exit_reason}")
+    print()

@@ -1,18 +1,13 @@
 from __future__ import annotations
 
-import os
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-from app.exchange.client import BinanceFuturesClient
 
-
-class BinanceMarketplace:
-
-    def __init__(self, client: BinanceFuturesClient | None = None):
-        self.client = client or BinanceFuturesClient()
+class HistoricalMarketplace:
+    def __init__(self):
+        self.history_dir = Path(__file__).resolve().parents[2] / "data" / "history_data"
 
     def get_market_data(
         self,
@@ -85,15 +80,3 @@ class BinanceMarketplace:
                 "volume",
             ]
         ]
-
-    def get_last_price(self, symbol: str) -> float:
-        return float(self.client.get_price(symbol))
-
-    def get_exchange_info(self, symbol: str) -> dict[str, Any]:
-        return self.client.get_symbol_info(symbol)
-
-    def get_account(self) -> dict[str, Any]:
-        return self.client.get_account()
-
-    def get_positions(self) -> list[dict[str, Any]]:
-        return self.client.get_positions()

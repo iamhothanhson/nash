@@ -13,25 +13,15 @@ import pandas as pd
 from config.settings import INITIAL_CAPITAL
 
 from indicators.indicator_builder import IndicatorBuilder
-from market_analyzer.feature_builder import build_features
-from market_analyzer.market_analyzer import (
-    _trend_direction,
-    _classify_regime,
-    _regime_confidence,
-    _map_regime,
-)
+from market_analyzer.market_analyzer import MarketAnalyzer
 from market_analyzer.market_state import (
     MarketState,
-    TrendDirection,
-    MarketRegime,
-    MarketStructure,
 )
-from market_analyzer.market_structure import detect_market_structure
-from market_analyzer.market_trend import calculate_adx
 from strategy.trend_following.breakout.config import BREAKOUT_LONG, BREAKOUT_SHORT
 from strategy.trend_following.breakout.detector import BreakoutDetector
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
 from strategy.trend_following.pullback.detector import PullbackDetector
+from setup_builder.builder import SetupBuilder
 
 
 HISTORY_DIR = Path(__file__).resolve().parent / "history_data"
@@ -162,53 +152,11 @@ class MultiStrategyBT(bt.Strategy):
 
         symbol = self.data._name or ""
         indicators = IndicatorBuilder.build(market_data={"15m": df})
-        features = build_features(data_15m=df, indicators=indicators)
-
-        ema_slp = float(indicators.get("ema20_slope_15m", 0.0))
-        vol_r = indicators.get("volume_ratio", 1.0)
-        atr_pctl = indicators.get("atr_percentile", 50)
-        adx_v = (
-            float(calculate_adx(df, 14).iloc[-1])
-            if len(df) >= 14
-            else 0.0
-        )
-        ms_15m = detect_market_structure(df["high"], df["low"])
-
-        trend_dir_str = _trend_direction(ema_slp)
-        trend_dir = (
-            TrendDirection.BULLISH
-            if trend_dir_str.lower() == "bullish"
-            else TrendDirection.BEARISH
-            if trend_dir_str.lower() == "bearish"
-            else TrendDirection.NEUTRAL
-        )
-        regime_str = _classify_regime(adx_v, atr_pctl, ema_slp, trend_dir_str, ms_15m)
-        regime = _map_regime(regime_str)
-
-        is_trending = regime in (
-            MarketRegime.STRONG_BULLISH,
-            MarketRegime.BULLISH,
-            MarketRegime.BEARISH,
-            MarketRegime.STRONG_BEARISH,
-        )
-
-        return MarketState(
+        analyzer = MarketAnalyzer()
+        return analyzer.build_market_state(
             symbol=symbol,
-            timestamp=int(pd.Timestamp(df.index[-1]).timestamp() * 1000),
-            timeframe="15m",
-            trend_direction=trend_dir,
-            trend_aligned=True,
-            regime=regime,
-            structure=MarketStructure.UNKNOWN,
-            regime_confidence=float(
-                _regime_confidence(adx_v, ema_slp, vol_r, ms_15m, trend_dir_str)
-            ),
-            is_trending=is_trending,
-            is_ranging=regime == MarketRegime.RANGE,
-            is_high_volatility=regime == MarketRegime.HIGH_VOLATILITY_CHOP,
+            data={"15m": df},
             indicators=indicators,
-            features=features,
-            data_15m=df,
         )
 
     def notify_trade(self, trade):
@@ -226,6 +174,7 @@ class MultiStrategyBT(bt.Strategy):
         self.trade_log.append({
             "strategy": info.get("strategy", "unknown"),
             "direction": info.get("direction", "LONG"),
+            "grade": info.get("grade", "Skip"),
             "entry": entry_price,
             "exit": exit_price,
             "size": size,
@@ -259,6 +208,13 @@ class MultiStrategyBT(bt.Strategy):
         if best is None:
             return
 
+        setup = SetupBuilder.build(
+            candidate=best,
+            market_state=ms,
+        )
+        if setup is None or setup.grade == "Skip":
+            return
+
         cfg = BREAKOUT_LONG if best.direction == "LONG" else BREAKOUT_SHORT
         close = self.data.close[0]
         atr_pct = float(ms.indicators.get("atr_percent", 0.0))
@@ -272,7 +228,12 @@ class MultiStrategyBT(bt.Strategy):
         value_per_risk = self.broker.getvalue() * self.p.risk_per_trade
         size = value_per_risk / close
 
-        self._current_tradeinfo = {"strategy": best.setup_type, "direction": best.direction, "_size": size}
+        self._current_tradeinfo = {
+            "strategy": best.setup_type,
+            "direction": best.direction,
+            "grade": setup.grade,
+            "_size": size,
+        }
         if best.direction == "LONG":
             o = self.buy(size=size, sl=sl_price)
         else:
@@ -342,11 +303,9 @@ def run_backtest(
 
     grade_counts = {"A+": 0, "A": 0}
     for t in trade_log:
-        pnl_ratio = t["pnl"] / t["margin"] if t["margin"] > 0 else 0
-        if pnl_ratio >= 0.05:
-            grade_counts["A+"] += 1
-        elif pnl_ratio >= 0.02:
-            grade_counts["A"] += 1
+        g = t.get("grade", "Skip")
+        if g == "A+" or g == "A":
+            grade_counts[g] += 1
 
     strat_groups: dict[str, list[dict]] = {}
     for t in trade_log:

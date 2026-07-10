@@ -35,13 +35,14 @@ class RiskManager:
         if sl_distance <= 0:
             return cls._reject("Invalid SL distance")
 
-        balance = account.futures_account_balance
+        available_balance = account.available_balance
         risk_per_trade = float(getattr(signal, "signal_risk_per_trade", 0.0))
         setup_type = str(getattr(signal, "setup_type", "")).strip()
         grade = str(getattr(signal, "setup_grade", "")).strip()
         market_regime = str(getattr(signal, "market_regime", "")).strip()
+        
         mult = cls.compute_risk_multiplier(setup_type, grade, market_regime)
-        risk_amount = balance * risk_per_trade * mult
+        risk_amount = available_balance * risk_per_trade * mult
 
         position_notional = risk_amount / sl_distance
 

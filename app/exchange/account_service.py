@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 
 from exchange.client import BinanceFuturesClient
 
 
 @dataclass(frozen=True, slots=True)
 class AccountState:
-    futures_account_balance: float   # used for risk sizing
-    available_balance: float         # used to check if trade can open
-    total_margin_used: float
-    unrealized_pnl: float
-
+    wallet_balance: Decimal
+    available_balance: Decimal
+    margin_balance: Decimal
+    unrealized_pnl: Decimal
 
 class AccountService:
 
@@ -26,14 +26,15 @@ class AccountService:
     def get_account_state(self) -> AccountState:
         account = self._get_client().get_account()
 
-        futures_account_balance = float(account.get("totalWalletBalance", 0))
+        wallet_balance = float(account.get("totalWalletBalance", 0))
         available_balance = float(account.get("availableBalance", 0))
-        total_margin_used = float(account.get("totalInitialMargin", 0))
         unrealized_pnl = float(account.get("totalUnrealizedProfit", 0))
 
+        margin_balance = wallet_balance + unrealized_pnl
+
         return AccountState(
-            futures_account_balance=futures_account_balance,
+            wallet_balance=wallet_balance,
             available_balance=available_balance,
-            total_margin_used=total_margin_used,
+            margin_balance=margin_balance,
             unrealized_pnl=unrealized_pnl,
         )

@@ -1,12 +1,11 @@
 
-# Backtesting CLI
+# Backtesting
 python3 app/backtesting/backtest.py
 --all
---symbol RENDER # Full portfolio run; detailed report + data/baseline/backtest_symbol.json
---symbol RENDER --only # Simulate RENDER only, no portfolio competition
+--symbol RENDER backtest_symbol.json
 --portfolio
---days # 7-30-90
---fetch RENDER # Download RENDERUSDT CSVs (HISTORY_AUTO_FETCH=true), then backtest
+--days # 7,30,90
+--fetch RENDER
 --fetch all # Download all settings.SYMBOLS
 --log
 --baseline
@@ -17,3 +16,4 @@ python3 app/backtesting/backtest.py
 --exit-baseline
 # Wire to backtest_symbol_baseline.json
 --symbol-baseline
+--since 2026-04-01 --until 2026-05-01

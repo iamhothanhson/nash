@@ -1,0 +1,127 @@
+{
+  "7": {
+    "roi_percent": 44.39,
+    "total_trades": 42,
+    "trades_per_day": 6.0,
+    "win_rate_percent": 76.19,
+    "profit_factor": 2.11,
+    "max_drawdown_percent": 16.17,
+    "liquidity_reversal": {
+      "trades": 20,
+      "sweep_trades": 20,
+      "margin_usdt": 82.42,
+      "avg_margin_usdt": 4.12,
+      "roi_percent": 41.55,
+      "net_profit_usdt": 1.71
+    },
+    "trend_following": {
+      "trades": 23,
+      "margin_usdt": 122.94,
+      "avg_margin_usdt": 5.35,
+      "roi_percent": 51.02,
+      "net_profit_usdt": 2.73,
+      "pullback_trades": {
+        "trades": 3,
+        "margin_usdt": 15.87,
+        "avg_margin_usdt": 5.29,
+        "roi_percent": -0.2,
+        "net_profit_usdt": -0.01
+      },
+      "breakout_trades": {
+        "trades": 18,
+        "margin_usdt": 94.86,
+        "avg_margin_usdt": 5.27,
+        "roi_percent": 41.49,
+        "net_profit_usdt": 2.19
+      },
+      "breakout_retest_trades": {
+        "trades": 2,
+        "margin_usdt": 12.21,
+        "avg_margin_usdt": 6.11,
+        "roi_percent": 9.02,
+        "net_profit_usdt": 0.55
+      }
+    }
+  },
+  "30": {
+    "roi_percent": 308.88,
+    "total_trades": 174,
+    "trades_per_day": 5.8,
+    "win_rate_percent": 68.97,
+    "profit_factor": 1.74,
+    "max_drawdown_percent": 19.93,
+    "liquidity_reversal": {
+      "trades": 45,
+      "sweep_trades": 45,
+      "margin_usdt": 406.89,
+      "avg_margin_usdt": 9.04,
+      "roi_percent": 136.18,
+      "net_profit_usdt": 12.31
+    },
+    "trend_following": {
+      "trades": 129,
+      "margin_usdt": 1271.32,
+      "avg_margin_usdt": 9.86,
+      "roi_percent": 188.47,
+      "net_profit_usdt": 18.57,
+      "pullback_trades": {
+        "trades": 21,
+        "margin_usdt": 216.94,
+        "avg_margin_usdt": 10.33,
+        "roi_percent": 26.12,
+        "net_profit_usdt": 2.7
+      },
+      "breakout_trades": {
+        "trades": 97,
+        "margin_usdt": 969.51,
+        "avg_margin_usdt": 9.99,
+        "roi_percent": 110.31,
+        "net_profit_usdt": 11.03
+      },
+      "breakout_retest_trades": {
+        "trades": 11,
+        "margin_usdt": 84.87,
+        "avg_margin_usdt": 7.72,
+        "roi_percent": 62.87,
+        "net_profit_usdt": 4.85
+      }
+    }
+  },
+  "90": {
+    "roi_percent": 589.3,
+    "total_trades": 639,
+    "trades_per_day": 7.1,
+    "win_rate_percent": 71.99,
+    "profit_factor": 2.14,
+    "max_drawdown_percent": 7.03,
+    "liquidity_reversal": {
+      "trades": 352,
+      "sweep_trades": 352,
+      "margin_usdt": 9276.4,
+      "avg_margin_usdt": 26.35,
+      "roi_percent": 1055.09,
+      "net_profit_usdt": 278.05
+    },
+    "trend_following": {
+      "trades": 287,
+      "margin_usdt": 12061.11,
+      "avg_margin_usdt": 42.02,
+      "roi_percent": 740.64,
+      "net_profit_usdt": 311.25,
+      "pullback_trades": {
+        "trades": 173,
+        "margin_usdt": 7849.32,
+        "avg_margin_usdt": 45.37,
+        "roi_percent": 355.46,
+        "net_profit_usdt": 161.28
+      },
+      "breakout_trades": {
+        "trades": 114,
+        "margin_usdt": 4211.79,
+        "avg_margin_usdt": 36.95,
+        "roi_percent": 405.93,
+        "net_profit_usdt": 149.97
+      }
+    }
+  }
+}

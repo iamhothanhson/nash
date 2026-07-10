@@ -1,0 +1,60 @@
+{
+  "7": {
+    "portfolio_symbols": "TAO, RENDER, FET",
+    "TAO": {
+      "roi_percent": 78.28,
+      "total_trades": 15,
+      "trades_per_day": 2.14,
+      "win_rate_percent": 80.0,
+      "profit_factor": 8.57,
+      "max_drawdown_percent": 5.41,
+      "liquidity_reversal": {
+        "trades": 5,
+        "sweep_trades": 5,
+        "margin_usdt": 37.67,
+        "avg_margin_usdt": 7.53,
+        "roi_percent": 31.44,
+        "net_profit_usdt": 2.37
+      },
+      "trend_following": {
+        "trades": 10,
+        "margin_usdt": 83.74,
+        "avg_margin_usdt": 8.37,
+        "roi_percent": 65.19,
+        "net_profit_usdt": 5.46,
+        "pullback_trades": {
+          "trades": 0,
+          "margin_usdt": 0.0,
+          "avg_margin_usdt": 0.0,
+          "roi_percent": 0.0,
+          "net_profit_usdt": 0.0
+        },
+        "breakout_trades": {
+          "trades": 9,
+          "margin_usdt": 79.04,
+          "avg_margin_usdt": 8.78,
+          "roi_percent": 55.13,
+          "net_profit_usdt": 4.84
+        },
+        "breakout_retest_trades": {
+          "trades": 1,
+          "margin_usdt": 4.7,
+          "avg_margin_usdt": 4.7,
+          "roi_percent": 13.14,
+          "net_profit_usdt": 0.62
+        }
+      },
+      "setup_counts": {
+        "breakout": 9,
+        "breakout_retest": 1,
+        "liquidity_sweep": 5
+      },
+      "grade_counts": {
+        "A+": 10,
+        "A": 5
+      },
+      "net_profit_usdt": 7.83,
+      "initial_balance_usdt": 10.0
+    }
+  }
+}

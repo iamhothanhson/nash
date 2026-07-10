@@ -1,0 +1,53 @@
+{
+  "7": {
+    "total_trades": 47,
+    "time_exit": {
+      "total_count": 7,
+      "mfe_drawdown_exceeded": {
+        "total_count": 3,
+        "win": 3,
+        "loss": 0
+      },
+      "entry_time_exit": {
+        "total_count": 4,
+        "win": 0,
+        "loss": 4
+      },
+      "tp1_time_exit": {
+        "total_count": 0
+      },
+      "tp2_time_exit": {
+        "total_count": 3
+      },
+      "unspecified": {
+        "total_count": 4,
+        "win": 0,
+        "loss": 4
+      }
+    },
+    "stop_loss": {
+      "SL": {
+        "total_count": 3,
+        "win": 0,
+        "loss": 3
+      }
+    },
+    "target_profit": {
+      "Stop_At_TP1": {
+        "total_count": 10,
+        "win": 10,
+        "loss": 0
+      },
+      "Stop_At_TP2": {
+        "total_count": 11,
+        "win": 11,
+        "loss": 0
+      },
+      "Stop_At_TP3": {
+        "total_count": 19,
+        "win": 19,
+        "loss": 0
+      }
+    }
+  }
+}

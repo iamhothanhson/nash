@@ -1,7 +1,7 @@
 [project]
 name = "nash"
 version = "1.0.0"
-description = "Crypto Trading Bot with FastAPI"
+description = "Nash with FastAPI"
 authors = [{ name = "Ho Thanh Son", email = "hothson@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.10"

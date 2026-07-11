@@ -85,7 +85,7 @@ class TradingPipeline:
         if not candidates:
             return None
 
-        # Setup Builder
+        # Setup Builder -> Setup
         if not candidates:
             return None
 

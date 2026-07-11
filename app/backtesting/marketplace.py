@@ -1,82 +1,66 @@
 from __future__ import annotations
 
+from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
 
 class HistoricalMarketplace:
-    def __init__(self):
-        self.history_dir = Path(__file__).resolve().parents[2] / "data" / "history_data"
-
-    def get_market_data(
+    def __init__(
         self,
-        symbol: str,
-    ) -> dict[str, pd.DataFrame]:
-        return {
-            "5m": self._get_ohlcv(symbol, "5m"),
-            "15m": self._get_ohlcv(symbol, "15m"),
-            "1h": self._get_ohlcv(symbol, "1h"),
-        }
+        data: dict[str, dict[str, pd.DataFrame]] | None = None,
+    ):
+        self.data = data or {}
 
-    def _get_ohlcv(
-        self,
-        symbol: str,
-        timeframe: str,
-        limit: int = 300,
-    ) -> pd.DataFrame:
-        history_file = self.history_dir / f"{symbol}_{timeframe}.csv"
-        if history_file.exists():
-            df = pd.read_csv(history_file)
-            if {"open", "high", "low", "close", "volume"}.issubset(df.columns):
-                for col in ["open", "high", "low", "close", "volume"]:
-                    df[col] = pd.to_numeric(df[col], errors="coerce")
-                return df[["open", "high", "low", "close", "volume"]].dropna().reset_index(drop=True)
+    @classmethod
+    def from_csv_dir(cls, history_dir: str | Path) -> HistoricalMarketplace:
+        history_dir = Path(history_dir)
+        data: dict[str, dict[str, pd.DataFrame]] = {}
 
-        candles = self.client.get_klines(
-            symbol=symbol,
-            timeframe=timeframe,
-            limit=limit,
-        )
+        for csv_path in sorted(history_dir.glob("*.csv")):
+            parts = csv_path.stem.split("_")
+            symbol = parts[0] if parts[0].endswith("USDT") else parts[0] + "USDT"
+            interval = parts[1] if len(parts) > 1 else "15m"
+            interval_map = {"5m": "5m", "15m": "15m", "1h": "1h"}
+            interval = interval_map.get(interval, "15m")
 
-        if not candles:
-            return pd.DataFrame(columns=["open", "high", "low", "close", "volume"])
+            raw = pd.read_csv(csv_path)
+            if "time" in raw.columns:
+                raw["datetime"] = pd.to_datetime(raw["time"], unit="ms")
+            elif "open_time" in raw.columns:
+                raw["datetime"] = pd.to_datetime(raw["open_time"], unit="ms")
+            else:
+                raw["datetime"] = pd.date_range(
+                    end=datetime.now(), periods=len(raw), freq=interval.replace("m", "min")
+                )
 
-        df = pd.DataFrame(
-            candles,
-            columns=[
-                "open_time",
-                "open",
-                "high",
-                "low",
-                "close",
-                "volume",
-                "close_time",
-                "quote_asset_volume",
-                "number_of_trades",
-                "taker_buy_base_volume",
-                "taker_buy_quote_volume",
-                "ignore",
-            ],
-        )
+            raw.set_index("datetime", inplace=True)
+            raw.index.name = "datetime"
+            for col in ["open", "high", "low", "close", "volume"]:
+                raw[col] = pd.to_numeric(raw[col], errors="coerce")
+            df = raw[["open", "high", "low", "close", "volume"]]
 
-        numeric_columns = [
-            "open",
-            "high",
-            "low",
-            "close",
-            "volume",
-        ]
+            data.setdefault(symbol, {})[interval] = df
 
-        df[numeric_columns] = df[numeric_columns].astype(float)
+        return cls(data=data)
 
-        return df[
-            [
-                "open_time",
-                "open",
-                "high",
-                "low",
-                "close",
-                "volume",
-            ]
-        ]
+    def get_market_data(self, symbol: str) -> dict[str, pd.DataFrame]:
+        return self.data.get(symbol, {})
+
+    def get_candle(self, symbol: str, timestamp: Any) -> dict[str, Any] | None:
+        symbol_data = self.data.get(symbol)
+        if symbol_data is None:
+            return None
+        for df in symbol_data.values():
+            if timestamp in df.index:
+                row = df.loc[timestamp]
+                return {
+                    "open": row["open"],
+                    "high": row["high"],
+                    "low": row["low"],
+                    "close": row["close"],
+                    "volume": row["volume"],
+                }
+        return None

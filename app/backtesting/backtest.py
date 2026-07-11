@@ -3,7 +3,8 @@ from __future__ import annotations
 import os
 import sys
 
-APP_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKTESTING_DIR = os.path.dirname(os.path.abspath(__file__))
+APP_DIR = os.path.dirname(BACKTESTING_DIR)
 ROOT_DIR = os.path.dirname(APP_DIR)
 for path in (APP_DIR, ROOT_DIR):
     if path not in sys.path:

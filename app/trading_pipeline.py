@@ -20,8 +20,8 @@ class TradingPipeline:
         self.account_service = account_service or AccountService()
 
         self.detectors = [
-            BreakoutDetector.breakout_long,
-            BreakoutDetector.breakout_short,
+            BreakoutDetector.breakout_long_candidate,
+            BreakoutDetector.breakout_short_candidate,
             BreakoutRetestDetector.retest_long,
             BreakoutRetestDetector.retest_short,
             PullbackDetector.pullback_long,

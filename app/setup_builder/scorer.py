@@ -46,18 +46,6 @@ class PullbackScoreFeatures:
     distance_from_ema: float
 
 
-@dataclass(frozen=True, slots=True)
-class LiquiditySweepReversalScoreFeatures:
-    sweep_happened: bool
-    reclaim_level: bool
-    rejection_wick_ratio: float
-    volume_ratio: float
-    rsi_divergence: bool
-    direction: str
-    near_support_resistance: bool
-    market_overextended: bool = False
-
-
 class SetupScoring:
     MAX_SCORE = 100
 
@@ -71,57 +59,54 @@ class SetupScoring:
         factors =  candidate.features
 
         if setup_type == "breakout":
-            return cls._score_breakout(factors, direction)
+            return cls.score_breakout(factors)
 
         if setup_type == "pullback":
-            return cls._score_pullback(factors, direction)
-
-        if setup_type in {"liquidity_sweep", "sweep"}:
-            return cls._score_sweep(factors, direction)
+            return cls.score_pullback(factors)
 
         if setup_type in {"breakout_retest", "retest"}:
-            return cls._score_retest(factors, direction)
+            return cls.score_breakout_retest(factors)
 
         return 0.0
 
 
     @classmethod
-    def score_breakout(cls, f: BreakoutScoreFeatures) -> SetupScore:
+    def score_breakout(cls, factors: BreakoutScoreFeatures) -> SetupScore:
         score = 0
 
-        if f.close_above_level:
+        if factors.close_above_level:
             score += 25
 
-        if f.breakout_strength >= 0.006:
+        if factors.breakout_strength >= 0.006:
             score += 20
-        elif f.breakout_strength >= 0.004:
+        elif factors.breakout_strength >= 0.004:
             score += 12
 
-        if f.volume_ratio >= 1.5:
+        if factors.volume_ratio >= 1.5:
             score += 20
-        elif f.volume_ratio >= 1.25:
+        elif factors.volume_ratio >= 1.25:
             score += 12
 
-        if f.direction == "LONG":
-            if f.rsi >= 60:
+        if factors.direction == "LONG":
+            if factors.rsi >= 60:
                 score += 15
-            elif f.rsi >= 55:
+            elif factors.rsi >= 55:
                 score += 10
         else:
-            if f.rsi <= 40:
+            if factors.rsi <= 40:
                 score += 15
-            elif f.rsi <= 45:
+            elif factors.rsi <= 45:
                 score += 10
 
-        if f.direction == "LONG" and f.ema20_slope > 0:
+        if factors.direction == "LONG" and factors.ema20_slope > 0:
             score += 10
-        elif f.direction == "SHORT" and f.ema20_slope < 0:
+        elif factors.direction == "SHORT" and factors.ema20_slope < 0:
             score += 10
 
-        if f.atr_expansion:
+        if factors.atr_expansion:
             score += 5
 
-        if f.market_trend_ok:
+        if factors.market_trend_ok:
             score += 5
 
         return SetupScore(
@@ -130,41 +115,41 @@ class SetupScoring:
         )
 
     @classmethod
-    def score_breakout_retest(cls, f: BreakoutRetestScoreFeatures) -> SetupScore:
+    def score_breakout_retest(cls, factors: BreakoutRetestScoreFeatures) -> SetupScore:
         score = 0
 
-        if f.breakout_was_valid:
+        if factors.breakout_was_valid:
             score += 20
 
-        if f.retest_touch:
+        if factors.retest_touch:
             score += 20
 
-        if f.retest_distance_atr <= 0.2:
+        if factors.retest_distance_atr <= 0.2:
             score += 15
-        elif f.retest_distance_atr <= 0.35:
+        elif factors.retest_distance_atr <= 0.35:
             score += 8
 
-        if f.rejection_candle:
+        if factors.rejection_candle:
             score += 20
 
-        if f.volume_ratio >= 1.25:
+        if factors.volume_ratio >= 1.25:
             score += 10
-        elif f.volume_ratio >= 1.0:
+        elif factors.volume_ratio >= 1.0:
             score += 5
 
-        if f.direction == "LONG":
-            if f.rsi >= 55:
+        if factors.direction == "LONG":
+            if factors.rsi >= 55:
                 score += 10
         else:
-            if f.rsi <= 45:
+            if factors.rsi <= 45:
                 score += 10
 
-        if f.direction == "LONG" and f.ema20_slope > 0:
+        if factors.direction == "LONG" and factors.ema20_slope > 0:
             score += 5
-        elif f.direction == "SHORT" and f.ema20_slope < 0:
+        elif factors.direction == "SHORT" and factors.ema20_slope < 0:
             score += 5
 
-        if f.market_trend_ok:
+        if factors.market_trend_ok:
             score += 5
 
         return SetupScore(
@@ -173,79 +158,41 @@ class SetupScoring:
         )
 
     @classmethod
-    def score_pullback(cls, f: PullbackScoreFeatures) -> SetupScore:
+    def score_pullback(cls, factors: PullbackScoreFeatures) -> SetupScore:
         score = 0
 
-        if f.trend_ok:
+        if factors.trend_ok:
             score += 25
 
-        if f.pullback_to_ema:
+        if factors.pullback_to_ema:
             score += 20
 
-        if f.distance_from_ema <= 0.003:
+        if factors.distance_from_ema <= 0.003:
             score += 15
-        elif f.distance_from_ema <= 0.006:
+        elif factors.distance_from_ema <= 0.006:
             score += 8
 
-        if f.reclaim_candle:
+        if factors.reclaim_candle:
             score += 20
 
-        if f.direction == "LONG":
-            if f.ema20_slope > 0 and f.ema50_slope > 0:
+        if factors.direction == "LONG":
+            if factors.ema20_slope > 0 and factors.ema50_slope > 0:
                 score += 10
-            if f.rsi >= 50:
+            if factors.rsi >= 50:
                 score += 10
         else:
-            if f.ema20_slope < 0 and f.ema50_slope < 0:
+            if factors.ema20_slope < 0 and factors.ema50_slope < 0:
                 score += 10
-            if f.rsi <= 50:
+            if factors.rsi <= 50:
                 score += 10
 
-        if f.volume_ratio >= 1.1:
+        if factors.volume_ratio >= 1.1:
             score += 5
 
         return SetupScore(
             name="PULLBACK",
             score=cls.clamp(score),
         )
-
-    @classmethod
-    def score_liquidity_sweep_reversal(
-        cls,
-        f: LiquiditySweepReversalScoreFeatures,
-    ) -> SetupScore:
-        score = 0
-
-        if f.sweep_happened:
-            score += 25
-
-        if f.reclaim_level:
-            score += 25
-
-        if f.rejection_wick_ratio >= 0.55:
-            score += 20
-        elif f.rejection_wick_ratio >= 0.35:
-            score += 10
-
-        if f.volume_ratio >= 1.5:
-            score += 15
-        elif f.volume_ratio >= 1.2:
-            score += 8
-
-        if f.rsi_divergence:
-            score += 10
-
-        if f.near_support_resistance:
-            score += 10
-
-        if f.market_overextended:
-            score += 5
-
-        return SetupScore(
-            name="LIQUIDITY_SWEEP_REVERSAL",
-            score=cls.clamp(score),
-        )
-
     
     @classmethod
     def clamp(cls, score: int) -> int:

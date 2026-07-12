@@ -34,9 +34,9 @@ class MarketAnalyzer:
             except Exception:
                 pass
 
-        ema_slp = indicators.get("ema20_slope_15m") or 0.0
-        vol_r = indicators.get("volume_ratio") or 1.0
-        atr_pctl = indicators.get("atr_percentile") or 50
+        ema_slp = indicators.ema20_slope_15m or 0.0
+        vol_r = indicators.volume_ratio or 1.0
+        atr_pctl = indicators.atr_percentile or 50
 
         trend_dir_str = _trend_direction(ema_slp)
         trend_dir = (

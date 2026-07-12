@@ -3,10 +3,6 @@ from __future__ import annotations
 from app.signal_builder.models import TradeSignal
 from strategy.trend_following.config import MAX_SL_DISTANCE, TREND_BREAKOUT_STOP_ATR_MULT
 from strategy.trend_following.breakout.config import BREAKOUT_LONG
-from strategy.liquidity_sweep_reversal.config import (
-    ATR_PERIOD,
-    ATR_MULTIPLIER,
-)
 from indicators import calculate_atr
 from config import settings
 from app.signal_builder.config import TP_CONFIG
@@ -26,17 +22,6 @@ class SignalBuilder:
     ) -> tuple[float, float] | None:
         """Compute stop loss and distance for the trade signal."""
         atr_v = float(calculate_atr(ohlcv, ATR_PERIOD).iloc[-1])
-
-        if setup_type == BREAKOUT:
-            stop_atr_mult = float(TREND_BREAKOUT_STOP_ATR_MULT)
-
-            if stop_atr_mult <= 0:
-                stop_atr_mult = float(ATR_MULTIPLIER)
-            else:
-                stop_atr_mult = scale_atr_stop_mult(stop_atr_mult, cfg)
-        else:
-            stop_atr_mult = float(ATR_MULTIPLIER)
-            stop_atr_mult = scale_atr_stop_mult(stop_atr_mult, cfg)
 
         buf = atr_v * stop_atr_mult
         direction = setup.side.value
@@ -67,7 +52,6 @@ class SignalBuilder:
         setup: Setup,
         entry: float,
     ) -> TradeSignal | None:
-        """Build a trade signal for trend following strategies."""
 
         cfg = get_coin_config(setup.symbol)
         ohlcv = getattr(setup.market_state, "data_15m", None)
@@ -101,11 +85,6 @@ class SignalBuilder:
             anchor=float(setup.anchor),
         )
 
-        risk_mult = float(GRADE_RISK_MULTIPLIERS.get(setup.grade, 1.0))
-
-        risk_per_trade = float(settings.RISK_PER_TRADE) * risk_mult
-        r_multiple = abs(entry - sl) / max(entry, 1e-12)
-
         return TradeSignal(
             direction=direction,
             entry=entry,
@@ -114,13 +93,9 @@ class SignalBuilder:
             tp2=tp2,
             tp3=0.0,
             setup_score=int(round(setup.score)),
-            signal_risk_per_trade=risk_per_trade,
             setup_type=setup_type,
-            setup_grade=setup.grade,
             strategy_family=TREND_FOLLOWING,
-            r_multiple=r_multiple,
             confirmation_mode="confirmed",
-            confidence=float(sig_conf),
             tp1_r=tp1_r,
             tp2_r=tp2_r,
         )

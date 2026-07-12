@@ -38,8 +38,8 @@ class BreakoutRetestDetector:
         if not rf.retest_rejection_long:
             return None
 
-        ema_slope = float(ind.get("ema_slope_15m", 0.0))
-        rsi_raw = ind.get("rsi_15m", 0.0)
+        ema_slope = float(ind.ema_slope_15m or 0.0)
+        rsi_raw = ind.rsi_15m if ind.rsi_15m is not None else 0.0
         rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
         max_dev = float(TREND_BREAKOUT_RETEST_MAX_LEVEL_DEV)
         min_reclaim = float(TREND_BREAKOUT_RETEST_MIN_RECLAIM_PCT)
@@ -90,8 +90,8 @@ class BreakoutRetestDetector:
         if not rf.retest_rejection_short:
             return None
 
-        ema_slope = float(ind.get("ema_slope_15m", 0.0))
-        rsi_raw = ind.get("rsi_15m", 0.0)
+        ema_slope = float(ind.ema_slope_15m or 0.0)
+        rsi_raw = ind.rsi_15m if ind.rsi_15m is not None else 0.0
         rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
         max_dev = float(TREND_BREAKOUT_RETEST_MAX_LEVEL_DEV)
         min_reclaim = float(TREND_BREAKOUT_RETEST_MIN_RECLAIM_PCT)

@@ -39,8 +39,8 @@ class PullbackDetector:
         pf = features.pullback
         ind = market_state.indicators or {}
 
-        ema_slope = float(ind.get("ema_slope_15m", 0.0))
-        rsi_raw = ind.get("rsi_15m", 0.0)
+        ema_slope = float(ind.ema_slope_15m or 0.0)
+        rsi_raw = ind.rsi_15m if ind.rsi_15m is not None else 0.0
         rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
 
         price = pf.price
@@ -102,8 +102,8 @@ class PullbackDetector:
         pf = features.pullback
         ind = market_state.indicators or {}
 
-        ema_slope = float(ind.get("ema_slope_15m", 0.0))
-        rsi_raw = ind.get("rsi_15m", 0.0)
+        ema_slope = float(ind.ema_slope_15m or 0.0)
+        rsi_raw = ind.rsi_15m if ind.rsi_15m is not None else 0.0
         rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
 
         price = pf.price

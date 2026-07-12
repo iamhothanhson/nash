@@ -90,7 +90,7 @@ class FeatureBuilder:
         ms = detect_market_structure(high, low, lookback=20)
         market_structure: MarketStructure = ms if isinstance(ms, MarketStructure) else MarketStructure.UNKNOWN
 
-        htf_ema_slope = indicators["ema20_slope_1h"] if indicators else 0.0
+        htf_ema_slope = indicators.ema20_slope_1h if indicators else 0.0
 
         htf_confirmed = (
             (direction == "LONG" and htf_ema_slope > 0)

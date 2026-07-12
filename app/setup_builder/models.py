@@ -31,13 +31,11 @@ StrategyFamily = str
 @dataclass
 class Setup:
     symbol: str
-    timestamp: int
     setup_type: SetupType
     side: Optional[Side]
-    grade: str
     score: float
     market_state: MarketState
     features: dict[str, Any]
     anchor: float = 0.0
-    confidence: float = 0.0
     trade_allowed: bool = False
+    timestamp: int

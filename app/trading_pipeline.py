@@ -87,7 +87,6 @@ class TradingPipeline:
         setup = SetupBuilder.build_from_candidate(
             candidate=best_candidate,
             market_state=market_state,
-            score=float(getattr(best_candidate, "confidence", 0.0)),
         )
 
         if setup is None:

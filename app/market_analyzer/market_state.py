@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+from indicators.models import Indicators
 from market_analyzer.models import SetupFeatures
 
 
@@ -43,7 +44,7 @@ class MarketState:
     is_trending: bool
     is_ranging: bool
     is_high_volatility: bool
-    indicators: dict | None = None
+    indicators: Indicators | None = None
     data_5m: object | None = None
     data_15m: object | None = None
     data_1h: object | None = None

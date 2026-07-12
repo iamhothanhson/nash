@@ -102,8 +102,7 @@ class BacktestTradingPipeline:
 
         # Setup Builder
         best = self._select_best_candidate(candidates)
-        score = float(getattr(best, "confidence", 0.0))
-        setup = SetupBuilder.build_from_candidate(candidate=best, market_state=market_state, score=score)
+        setup = SetupBuilder.build_from_candidate(candidate=best, market_state=market_state)
         if setup is None or setup.grade == "Skip":
             return None
 

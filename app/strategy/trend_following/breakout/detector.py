@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import asdict
+
 from config.constants import BREAKOUT
 from core.types import MarketStructure
 from strategy.models import SetupCandidate
@@ -21,6 +23,7 @@ class BreakoutDetector:
                 direction="LONG",
                 trigger_type="breakout",
                 anchor=breakout_feature.breakout_level,
+                features=asdict(breakout_feature),
                 detected_at=market_state.timestamp,
                 timeframe=market_state.timeframe,
             )
@@ -35,6 +38,7 @@ class BreakoutDetector:
                 direction="SHORT",
                 trigger_type="breakout",
                 anchor=breakout_feature.breakout_level,
+                features=asdict(breakout_feature),
                 detected_at=market_state.timestamp,
                 timeframe=market_state.timeframe,
             )

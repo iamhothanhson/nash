@@ -37,6 +37,6 @@ class Setup:
     score: float
     market_state: MarketState
     features: dict[str, Any]
+    timestamp: int
     anchor: float = 0.0
     trade_allowed: bool = False
-    timestamp: int

@@ -3,12 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from backtesting.models import Direction
 from backtesting.portfolio import BacktestPortfolio
 
 
 SLIPPAGE_BPS = 5
-
 
 class BacktestExecutor:
     def update_positions(

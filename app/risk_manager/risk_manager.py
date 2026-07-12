@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from risk_manager.config import GRADE_RISK_MULTIPLIERS, MARKET_RISK_MULTIPLIERS, SCORE_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
+from risk_manager.config import SCORE_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
 from config import settings
 
 

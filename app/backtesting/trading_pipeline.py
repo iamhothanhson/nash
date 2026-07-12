@@ -3,7 +3,6 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any, Iterable
 
-import pandas as pd
 
 from backtesting.executor import BacktestExecutor
 from backtesting.marketplace import HistoricalMarketplace
@@ -14,13 +13,11 @@ from setup_builder.builder import SetupBuilder
 from signal_builder.builder import SignalBuilder
 from risk_manager.risk_manager import RiskManager
 from order_planner.order_planner import OrderPlanner
+from backtesting.config import LOOKBACK
 from config.settings import ENABLE_LIQUIDITY_SWEEP_REVERSAL
 from strategy.trend_following.breakout.detector import BreakoutDetector
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
 from strategy.trend_following.pullback.detector import PullbackDetector
-
-
-LOOKBACK = 200
 
 
 class BacktestTradingPipeline:
@@ -79,7 +76,7 @@ class BacktestTradingPipeline:
             return None
 
         # Marketplace -> OHLCV data
-        market_data = self._market_data_since(symbol, up_to=timestamp)
+        market_data = self.marketplace.get_market_data(symbol, up_to=timestamp, lookback=self.lookback)
         if market_data is None:
             return None
         if not self._has_enough_history(market_data):
@@ -98,13 +95,11 @@ class BacktestTradingPipeline:
         # Strategy Detectors -> SetupCandidate
         candidates = self._detect_setups(market_state)
         if not candidates:
-            return None
+            return None 
 
         # Setup Builder
         best = self._select_best_candidate(candidates)
         setup = SetupBuilder.build_from_candidate(candidate=best, market_state=market_state)
-        if setup is None or setup.grade == "Skip":
-            return None
 
         # Signal Builder -> TradeSignal
         signal = SignalBuilder.build(setup=setup)
@@ -151,20 +146,7 @@ class BacktestTradingPipeline:
             portfolio=self.portfolio,
         )
 
-    def _market_data_since(
-        self, symbol: str, up_to: Any,
-    ) -> dict[str, pd.DataFrame] | None:
-        symbol_data = self.marketplace.data.get(symbol)
-        if symbol_data is None:
-            return None
-        result: dict[str, pd.DataFrame] = {}
-        for tf, df in symbol_data.items():
-            idx = df.index.get_loc(up_to) if up_to in df.index else -1
-            if idx < 0:
-                return None
-            start = max(0, idx - self.lookback + 1)
-            result[tf] = df.iloc[start: idx + 1]
-        return result
+
 
     def _detect_setups(self, market_state: Any) -> list[Any]:
         candidates: list[Any] = []
@@ -182,7 +164,6 @@ class BacktestTradingPipeline:
         return max(
             candidates,
             key=lambda c: (
-                float(getattr(c, "confidence", 0.0)),
                 float(getattr(c, "score", 0.0)),
             ),
         )

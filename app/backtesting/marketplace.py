@@ -46,8 +46,25 @@ class HistoricalMarketplace:
 
         return cls(data=data)
 
-    def get_market_data(self, symbol: str) -> dict[str, pd.DataFrame]:
-        return self.data.get(symbol, {})
+    def get_market_data(
+        self,
+        symbol: str,
+        up_to: Any | None = None,
+        lookback: int | None = None,
+    ) -> dict[str, pd.DataFrame] | None:
+        symbol_data = self.data.get(symbol)
+        if symbol_data is None:
+            return None
+        if up_to is None:
+            return symbol_data
+        result: dict[str, pd.DataFrame] = {}
+        for tf, df in symbol_data.items():
+            idx = df.index.get_indexer([up_to], method="nearest")[0]
+            if idx < 0:
+                return None
+            start = max(0, idx - lookback + 1) if lookback is not None else 0
+            result[tf] = df.iloc[start: idx + 1]
+        return result
 
     def get_candle(self, symbol: str, timestamp: Any) -> dict[str, Any] | None:
         symbol_data = self.data.get(symbol)

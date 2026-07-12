@@ -76,14 +76,11 @@ class TradingPipeline:
         # Strategy Detectors -> SetupCandidate
         candidates = self._detect_setups(market_state)
 
-        if not candidates:
-            return None
-
         # Setup Builder -> Setup
         if not candidates:
             return None
 
-        best_candidate = max(candidates, key=lambda c: getattr(c, "confidence", 0.0))
+        best_candidate = max(candidates, key=lambda c: getattr(c, "score", 0.0))
         setup = SetupBuilder.build_from_candidate(
             candidate=best_candidate,
             market_state=market_state,

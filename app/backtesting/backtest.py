@@ -16,6 +16,7 @@ from backtesting.executor import BacktestExecutor
 from backtesting.marketplace import HistoricalMarketplace
 from backtesting.portfolio import BacktestPortfolio
 from backtesting.trading_pipeline import BacktestTradingPipeline
+from backtesting.config import LOOKBACK
 from backtesting.utils import print_result
 
 
@@ -33,7 +34,7 @@ def main() -> None:
 
     symbols = list(mp.data.keys())
     first_tf = next(iter(mp.data[symbols[0]].values()))
-    timestamps = first_tf.index[200:]
+    timestamps = first_tf.index[LOOKBACK:]
 
     pipeline = BacktestTradingPipeline(
         marketplace=mp, portfolio=portfolio, executor=executor,

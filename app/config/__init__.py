@@ -13,7 +13,7 @@ try:
         TP2_R,
     )
 except ImportError:  # pragma: no cover - fallback for script-style execution
-    from risk_manager.config import GRADE_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
+    from risk_manager.config import SETUP_RISK_MULTIPLIERS
     from config.settings import (
         SYMBOLS,
         INITIAL_CAPITAL,
@@ -26,7 +26,6 @@ except ImportError:  # pragma: no cover - fallback for script-style execution
     )
 
 STRATEGY_CONFIG: dict = {
-    "grade_risk_multipliers": GRADE_RISK_MULTIPLIERS,
     "setup_risk_multipliers": SETUP_RISK_MULTIPLIERS,
     "initial_capital": INITIAL_CAPITAL,
     "leverage": LEVERAGE,
@@ -39,6 +38,5 @@ STRATEGY_CONFIG: dict = {
 __all__ = [
     "STRATEGY_CONFIG",
     "SYMBOLS",
-    "GRADE_RISK_MULTIPLIERS",
     "SETUP_RISK_MULTIPLIERS",
 ]

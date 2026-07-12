@@ -92,11 +92,13 @@ class IndicatorBuilder:
                     ema20_1h.iloc[-1] - ema20_1h.iloc[-SLOPE_LOOKBACK]
                 )
             except Exception:
-                pass
+                indicators["ema20_slope_1h"] = 0.0
 
             try:
                 indicators["adx_1h"] = calculate_adx(data_1h, 14)
             except Exception:
                 pass
+        else:
+            indicators["ema20_slope_1h"] = 0.0
 
         return indicators

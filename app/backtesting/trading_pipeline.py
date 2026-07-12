@@ -47,10 +47,6 @@ class BacktestTradingPipeline:
             self.pullback_detector.detect,
         ]
 
-        if ENABLE_LIQUIDITY_SWEEP_REVERSAL:
-            from strategy.liquidity_sweep_reversal.detector import LiquiditySweepDetector
-
-            self.detectors.append(LiquiditySweepDetector.detect)
 
     def run(
         self,

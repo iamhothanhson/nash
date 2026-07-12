@@ -3,7 +3,7 @@ from __future__ import annotations
 from app.signal_builder.models import TradeSignal
 from strategy.trend_following.config import MAX_SL_DISTANCE, TREND_BREAKOUT_STOP_ATR_MULT
 from strategy.trend_following.breakout.config import BREAKOUT_LONG
-from strategy.liquidity_sweep_reversal.sweep_revesal_config import (
+from strategy.liquidity_sweep_reversal.config import (
     ATR_PERIOD,
     ATR_MULTIPLIER,
 )

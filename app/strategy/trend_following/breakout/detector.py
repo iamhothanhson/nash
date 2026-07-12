@@ -9,9 +9,6 @@ from strategy.trend_following.breakout.feature_builder import FeatureBuilder
 
 class BreakoutDetector:
 
-    def __call__(self, market_state):
-        return self.detect(market_state)
-
     def detect(self, market_state):
         structure = market_state.structure
         breakout_feature = FeatureBuilder.compute_breakout_features(market_state.data_15m, market_state.indicators)

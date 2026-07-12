@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 
@@ -24,6 +25,11 @@ HISTORY_DIR = Path(__file__).resolve().parent / "history_data"
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Run backtest")
+    parser.add_argument("--symbol", type=str, default=None, help="Symbol to backtest (e.g. TAOUSDT)")
+    parser.add_argument("--days", type=int, default=None, help="Number of recent days to backtest")
+    args = parser.parse_args()
+
     mp = HistoricalMarketplace.from_csv_dir(HISTORY_DIR)
     if not mp.data:
         print("No backtest data found in history_data")
@@ -32,9 +38,20 @@ def main() -> None:
     portfolio = BacktestPortfolio(initial_balance=100)
     executor = BacktestExecutor()
 
-    symbols = list(mp.data.keys())
+    if args.symbol:
+        if args.symbol not in mp.data:
+            print(f"Symbol {args.symbol} not found in history_data")
+            return
+        symbols = [args.symbol]
+    else:
+        symbols = list(mp.data.keys())
+
     first_tf = next(iter(mp.data[symbols[0]].values()))
     timestamps = first_tf.index[LOOKBACK:]
+
+    if args.days:
+        cutoff = timestamps[-1] - __import__("pandas").Timedelta(days=args.days)
+        timestamps = timestamps[timestamps >= cutoff]
 
     pipeline = BacktestTradingPipeline(
         marketplace=mp, portfolio=portfolio, executor=executor,

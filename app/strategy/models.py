@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from market_analyzer import feature
-
 
 @dataclass(frozen=True)
 class SetupCandidate:

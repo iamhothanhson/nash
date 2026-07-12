@@ -1,21 +1,17 @@
 from __future__ import annotations
 
-from typing import get_args
-
 import pandas as pd
 
 from core.types import MarketStructure
-
-_HHHL, _LHLL, _RANGE, _UNKNOWN = get_args(MarketStructure)
 
 
 def detect_market_structure(high: pd.Series, low: pd.Series, lookback: int = 40) -> MarketStructure:
     """Classify market structure as HHHL (bullish), LHLL (bearish), or RANGE."""
     if len(high) < 12:
-        return _RANGE
+        return MarketStructure.RANGE
     tail = min(lookback, len(high) - 4)
     if tail < 10:
-        return _RANGE
+        return MarketStructure.RANGE
 
     swings_high: list[tuple[int, float]] = []
     swings_low: list[tuple[int, float]] = []
@@ -54,11 +50,11 @@ def detect_market_structure(high: pd.Series, low: pd.Series, lookback: int = 40)
     )
 
     if has_hh and has_hl:
-        return _HHHL
+        return MarketStructure.HHHL
     if has_lh and has_ll:
-        return _LHLL
+        return MarketStructure.LHLL
     if has_hh and not has_ll:
-        return _HHHL
+        return MarketStructure.HHHL
     if has_ll and not has_hh:
-        return _LHLL
-    return _RANGE
+        return MarketStructure.LHLL
+    return MarketStructure.RANGE

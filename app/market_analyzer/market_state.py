@@ -44,7 +44,6 @@ class MarketState:
     is_ranging: bool
     is_high_volatility: bool
     indicators: dict | None = None
-    features: SetupFeatures | None = None
     data_5m: object | None = None
     data_15m: object | None = None
     data_1h: object | None = None

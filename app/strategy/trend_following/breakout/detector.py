@@ -1,83 +1,67 @@
 from __future__ import annotations
 
-from common.utils import dynamic_strength_threshold
 from config.constants import BREAKOUT
 from strategy.models import SetupCandidate
 from strategy.trend_following.breakout.config import BREAKOUT_LONG, BREAKOUT_SHORT
+from strategy.trend_following.breakout.feature_builder import FeatureBuilder
 
-
-def check_breakout_long(bf, cfg: dict) -> bool:
-    strength_threshold = dynamic_strength_threshold(bf.atr_percent, cfg)
-    return (
-        bf.close_above_recent_high
-        and bf.breakout_strength >= strength_threshold
-        and bf.volume_ratio >= cfg["min_volume_ratio"]
-        and bf.ema_slope >= cfg["min_ema_slope"]
-        and bf.rsi >= cfg["min_rsi"]
-        and bf.body_ratio >= cfg["min_body_ratio"]
-        and bf.close_to_high_pct <= cfg["max_close_to_high_pct"]
-        and (
-            not cfg["require_ema_alignment"]
-            or bf.ema_bullish_alignment
-        )
-    )
-
-
-def check_breakout_short(bf, cfg: dict) -> bool:
-    strength_threshold = dynamic_strength_threshold(bf.atr_percent, cfg)
-    return (
-        bf.close_below_recent_low
-        and bf.breakout_strength >= strength_threshold
-        and bf.volume_ratio >= cfg["min_volume_ratio"]
-        and bf.ema_slope <= cfg["max_ema_slope"]
-        and bf.rsi <= cfg["max_rsi"]
-        and bf.body_ratio >= cfg["min_body_ratio"]
-        and bf.close_to_low_pct <= cfg["max_close_to_low_pct"]
-        and (
-            not cfg["require_ema_alignment"]
-            or bf.ema_bearish_alignment
-        )
-    )
 
 class BreakoutDetector:
 
-    @staticmethod
-    def _satisfies(market_state, cfg, check_fn) -> bool:
-        features = getattr(market_state, "features", None)
-        if features is None:
-            return False
-        return check_fn(features.breakout, cfg)
+    def is_breakout_long(features, indicators):
+        values = {
+            # Breakout features
+            "close_above_recent_high": features.close_above_recent_high,
+            "strength": features.strength,
+            "strength_atr_factor": features.strength_atr_factor,
+            "body_ratio": features.body_ratio,
+            "close_to_high_pct": features.close_to_high_pct,
+            "ema_alignment": features.ema_alignment,
+            "sl_distance": features.sl_distance,
+
+            # Indicators
+            "volume_ratio": indicators.volume_ratio,
+            "ema_slope": indicators.ema_slope,
+            "rsi": indicators.rsi,
+        }
+        return (
+            values["close_above_recent_high"] == BREAKOUT_LONG["close_above_recent_high"]
+            and values["strength"] >= BREAKOUT_LONG["min_strength"]
+            and values["strength_atr_factor"] >= BREAKOUT_LONG["min_strength_atr_factor"]
+            and values["volume_ratio"] >= BREAKOUT_LONG["min_volume_ratio"]
+            and values["ema_slope"] >= BREAKOUT_LONG["min_ema_slope"]
+            and values["rsi"] >= BREAKOUT_LONG["min_rsi"]
+            and values["body_ratio"] >= BREAKOUT_LONG["min_body_ratio"]
+            and values["close_to_high_pct"] <= BREAKOUT_LONG["max_close_to_high_pct"]
+            and values["ema_alignment"] == BREAKOUT_LONG["require_ema_alignment"]
+            and values["sl_distance"] >= BREAKOUT_LONG["min_sl_distance"]
+        )
 
     def breakout_long_candidate(self, market_state):
-        if not self._satisfies(market_state, BREAKOUT_LONG, check_breakout_long):
+        breakout_feature = FeatureBuilder.compute_breakout_features(market_state.data_15m, market_state.indicators)
+
+        if not self.is_breakout_long(breakout_feature, market_state.indicators):
             return None
-        bf = market_state.features.breakout
         return SetupCandidate(
             setup_type=BREAKOUT,
             direction="LONG",
             trigger_type="breakout",
-            anchor=float(bf.recent_high_7),
+            anchor=breakout_feature.breakout_level,
             detected_at=market_state.timestamp,
             timeframe=market_state.timeframe,
-            features={
-                "breakout_strength": bf.breakout_strength,
-                "breakout_level": bf.recent_high_7,
-            },
         )
 
     def breakout_short_candidate(self, market_state):
-        if not self._satisfies(market_state, BREAKOUT_SHORT, check_breakout_short):
+        breakout_feature = FeatureBuilder.compute_breakout_features(market_state.data_15m, market_state.indicators)
+        if breakout_feature.breakout_level <= 0 or breakout_feature.direction != "SHORT":
             return None
-        bf = market_state.features.breakout
+        if not self._validate_short(breakout_feature, market_state.indicators):
+            return None
         return SetupCandidate(
             setup_type=BREAKOUT,
             direction="SHORT",
             trigger_type="breakout",
-            anchor=float(bf.recent_low_7),
+            anchor=breakout_feature.breakout_level,
             detected_at=market_state.timestamp,
             timeframe=market_state.timeframe,
-            features={
-                "breakout_strength": bf.breakout_strength,
-                "breakout_level": bf.recent_low_7,
-            },
         )

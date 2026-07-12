@@ -1,14 +1,10 @@
 from datetime import datetime, timezone
 
+from core.types import MarketRegime, MarketStructure, TrendDirection
 from indicators.indicator_builder import IndicatorBuilder
-from market_analyzer.feature_builder import build_features
+from strategy.trend_following.breakout.feature_builder import FeatureBuilder
 from market_analyzer.market_regime import _classify_regime, _regime_confidence, _trend_direction
-from market_analyzer.market_state import (
-    MarketRegime,
-    MarketState,
-    MarketStructure,
-    TrendDirection,
-)
+from market_analyzer.market_state import MarketState
 from market_analyzer.market_structure import detect_market_structure
 from market_analyzer.market_trend import calculate_adx
 from setup_builder.builder import SetupBuilder
@@ -29,9 +25,9 @@ class MarketAnalyzer:
             data_1h = data.get("1h")
 
         timestamp = int(datetime.now(timezone.utc).timestamp() * 1000)
-        ms_1h = detect_market_structure(data_1h["high"], data_1h["low"]) if data_1h is not None else "RANGE"
+        ms_1h = detect_market_structure(data_1h["high"], data_1h["low"]) if data_1h is not None else MarketStructure.RANGE
 
-        ms_15m = detect_market_structure(data_15m["high"], data_15m["low"]) if data_15m is not None else "RANGE"
+        ms_15m = detect_market_structure(data_15m["high"], data_15m["low"]) if data_15m is not None else MarketStructure.RANGE
 
         adx_v = 0.0
         if data_15m is not None and len(data_15m) >= 14:
@@ -65,12 +61,12 @@ class MarketAnalyzer:
 
         sa = (
             "aligned" if ms_1h == ms_15m
-            else "neutral" if "Range" in (ms_1h, ms_15m)
+            else "neutral" if any(ms == MarketStructure.RANGE for ms in (ms_1h, ms_15m))
             else "conflict"
         )
         trend_aligned = sa == "aligned"
 
-        features = build_features(
+        features = FeatureBuilder.build_features(
             data_15m=data_15m,
             indicators=indicators,
         )
@@ -109,10 +105,5 @@ def _map_regime(reg: str) -> MarketRegime:
     return mapping.get(reg, MarketRegime.RANGE)
 
 
-def _map_structure(ms: str) -> MarketStructure:
-    mapping = {
-        "HHHL": MarketStructure.HHHL,
-        "LHLL": MarketStructure.LHLL,
-        "Range": MarketStructure.RANGE,
-    }
-    return mapping.get(ms, MarketStructure.UNKNOWN)
+def _map_structure(ms: MarketStructure) -> MarketStructure:
+    return ms if isinstance(ms, MarketStructure) else MarketStructure.UNKNOWN

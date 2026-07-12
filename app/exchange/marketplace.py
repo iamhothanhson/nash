@@ -19,28 +19,21 @@ class BinanceMarketplace:
         symbol: str,
     ) -> dict[str, pd.DataFrame]:
         return {
-            "5m": self._get_ohlcv(symbol, "5m"),
-            "15m": self._get_ohlcv(symbol, "15m"),
-            "1h": self._get_ohlcv(symbol, "1h"),
+            "5m": self.get_candle(symbol, "5m"),
+            "15m": self.get_candle(symbol, "15m"),
+            "1h": self.get_candle(symbol, "1h"),
         }
 
-    def _get_ohlcv(
+    def get_candle(
         self,
         symbol: str,
         timeframe: str,
         limit: int = 300,
     ) -> pd.DataFrame:
-        history_file = self.history_dir / f"{symbol}_{timeframe}.csv"
-        if history_file.exists():
-            df = pd.read_csv(history_file)
-            if {"open", "high", "low", "close", "volume"}.issubset(df.columns):
-                for col in ["open", "high", "low", "close", "volume"]:
-                    df[col] = pd.to_numeric(df[col], errors="coerce")
-                return df[["open", "high", "low", "close", "volume"]].dropna().reset_index(drop=True)
 
         candles = self.client.get_klines(
             symbol=symbol,
-            timeframe=timeframe,
+            interval=timeframe,
             limit=limit,
         )
 

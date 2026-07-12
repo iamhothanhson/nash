@@ -47,14 +47,6 @@ wheels = [
 ]
 
 [[package]]
-name = "backtrader"
-version = "1.9.78.123"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/ef/328c6ec332435f63b3e18febd263686b8ba07e990676a862cc8522ba38f5/backtrader-1.9.78.123-py2.py3-none-any.whl", hash = "sha256:9a07a516b0de9155539a35c56e9404d8711dd7020b3d37b30495e83e1b9d5dfd", size = 419517, upload-time = "2023-04-19T14:13:18.842Z" },
-]
-
-[[package]]
 name = "certifi"
 version = "2026.6.17"
 source = { registry = "https://pypi.org/simple" }
@@ -367,7 +359,6 @@ name = "nash"
 version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "backtrader" },
     { name = "fastapi" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
@@ -386,7 +377,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "backtrader", specifier = ">=1.9.78.123" },
     { name = "fastapi", specifier = ">=0.139.0" },
     { name = "numpy", specifier = ">=2.2.6" },
     { name = "openai", specifier = ">=2.44.0" },

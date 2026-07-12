@@ -16,6 +16,7 @@ from backtesting.executor import BacktestExecutor
 from backtesting.marketplace import HistoricalMarketplace
 from backtesting.portfolio import BacktestPortfolio
 from backtesting.trading_pipeline import BacktestTradingPipeline
+from backtesting.utils import print_result
 
 
 HISTORY_DIR = Path(__file__).resolve().parent / "history_data"
@@ -27,7 +28,7 @@ def main() -> None:
         print("No backtest data found in history_data")
         return
 
-    portfolio = BacktestPortfolio(initial_balance=10000.0)
+    portfolio = BacktestPortfolio(initial_balance=100)
     executor = BacktestExecutor()
 
     symbols = list(mp.data.keys())
@@ -38,30 +39,7 @@ def main() -> None:
         marketplace=mp, portfolio=portfolio, executor=executor,
     )
     result = pipeline.run(symbols=symbols, timestamps=timestamps)
-    _print_result(result)
-
-
-def _print_result(result: dict) -> None:
-    trades = result["trades"]
-    equity = result["equity_curve"]
-
-    print(f"\n  Total Trades: {len(trades)}")
-    print(f"  Final Balance: {result['final_balance']:.2f}")
-    winners = [t for t in trades if t.net_pnl > 0]
-    losers = [t for t in trades if t.net_pnl <= 0]
-    print(f"  Win Rate: {len(winners) / max(len(trades), 1) * 100:.1f}%")
-    if losers:
-        pf = sum(t.net_pnl for t in winners) / abs(sum(t.net_pnl for t in losers)) if losers else float("inf")
-        print(f"  Profit Factor: {pf:.2f}")
-    if equity:
-        peak = max(e.equity for e in equity)
-        trough = min(e.equity for e in equity)
-        dd = (peak - trough) / peak * 100 if peak else 0
-        print(f"  Max Drawdown: {dd:.2f}%")
-    print(f"  Trades count: {len(trades)}")
-    for t in trades:
-        print(f"    {t.direction:5s} entry={t.entry_price:.2f} exit={t.exit_price:.2f} pnl={t.net_pnl:.2f} reason={t.exit_reason}")
-    print()
+    print_result(result)
 
 
 if __name__ == "__main__":

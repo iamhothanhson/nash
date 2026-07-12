@@ -11,7 +11,7 @@ FEES = 0.0004
 
 
 class BacktestPortfolio:
-    def __init__(self, initial_balance: float = 10000.0) -> None:
+    def __init__(self, initial_balance: float = 100) -> None:
         self.account = BacktestAccountService(initial_balance)
         self.positions: dict[str, BacktestPosition] = {}
         self.trades: list[BacktestTrade] = []

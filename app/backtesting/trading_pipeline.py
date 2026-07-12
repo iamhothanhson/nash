@@ -107,10 +107,7 @@ class BacktestTradingPipeline:
             return None
 
         # Signal Builder -> TradeSignal
-        entry = float(
-            market_data.get("15m", list(market_data.values())[0]).iloc[-1]["close"]
-        )
-        signal = SignalBuilder.build(setup=setup, entry=entry)
+        signal = SignalBuilder.build(setup=setup)
         if signal is None:
             return None
 

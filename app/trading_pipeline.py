@@ -93,10 +93,7 @@ class TradingPipeline:
             return None
 
         # Signal Builder -> Signal
-        signal = SignalBuilder.build(
-            setup=setup,
-            market_state=market_state,
-        )
+        signal = SignalBuilder.build(setup=setup)
 
         if signal is None:
             return None

@@ -31,6 +31,7 @@ StrategyFamily = str
 @dataclass
 class Setup:
     symbol: str
+    entry: float
     setup_type: SetupType
     side: Optional[Side]
     score: float

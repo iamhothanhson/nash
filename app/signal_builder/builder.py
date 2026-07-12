@@ -1,36 +1,35 @@
 from __future__ import annotations
 
 from app.signal_builder.models import TradeSignal
-from strategy.trend_following.config import MAX_SL_DISTANCE, TREND_BREAKOUT_STOP_ATR_MULT
-from strategy.trend_following.breakout.config import BREAKOUT_LONG
-from indicators import calculate_atr
-from config import settings
+from common.utils import get_coin_config, resolve_strategy_family
+from config.constants import BREAKOUT
 from app.signal_builder.config import TP_CONFIG
 from app.signal_builder.take_profit import resolve_tp1_tp2_prices
 from setup_builder.builder import Setup
-from config.constants import BREAKOUT, TREND_FOLLOWING
+from strategy.trend_following.breakout.config import BREAKOUT_LONG
+from strategy.trend_following.config import MAX_SL_DISTANCE
 
 
 class SignalBuilder:
-    @staticmethod
+
+    @classmethod
     def _compute_stop_loss(
-        setup: Setup,
+        cls,
         entry: float,
-        ohlcv,
-        cfg,
+        anchor: float,
+        direction: str,
+        indicators,
         setup_type: str,
     ) -> tuple[float, float] | None:
-        """Compute stop loss and distance for the trade signal."""
-        atr_v = float(calculate_atr(ohlcv, ATR_PERIOD).iloc[-1])
+        atr_v = float(indicators.atr_15m.iloc[-1])
+        stop_atr_mult = 1.10
 
         buf = atr_v * stop_atr_mult
-        direction = setup.side.value
-
         if direction == "LONG":
-            sl = setup.anchor - buf
+            sl = anchor - buf
             dist = (entry - sl) / entry
         else:
-            sl = setup.anchor + buf
+            sl = anchor + buf
             dist = (sl - entry) / entry
 
         if setup_type == BREAKOUT and dist < BREAKOUT_LONG["min_sl_distance"]:
@@ -38,7 +37,6 @@ class SignalBuilder:
                 sl = entry * (1.0 - BREAKOUT_LONG["min_sl_distance"])
             else:
                 sl = entry * (1.0 + BREAKOUT_LONG["min_sl_distance"])
-
             dist = BREAKOUT_LONG["min_sl_distance"]
 
         if dist <= 0 or dist > MAX_SL_DISTANCE:
@@ -50,18 +48,18 @@ class SignalBuilder:
     def build(
         cls,
         setup: Setup,
-        entry: float,
     ) -> TradeSignal | None:
 
-        cfg = get_coin_config(setup.symbol)
-        ohlcv = getattr(setup.market_state, "data_15m", None)
+        indicators = setup.market_state.indicators
         setup_type = setup.setup_type.value
+        direction = setup.side.value
+        cfg = get_coin_config(setup.symbol)
 
         sl_data = cls._compute_stop_loss(
-            setup=setup,
-            entry=entry,
-            ohlcv=ohlcv,
-            cfg=cfg,
+            entry=setup.entry,
+            anchor=setup.anchor,
+            direction=direction,
+            indicators=indicators,
             setup_type=setup_type,
         )
 
@@ -69,16 +67,15 @@ class SignalBuilder:
             return None
 
         sl, dist = sl_data
-        direction = setup.side.value
 
         tp1_r = float(TP_CONFIG.get("tp1_r", 1.0))
         tp2_r = float(TP_CONFIG.get("tp2_r", 1.5))
 
         tp1, tp2 = resolve_tp1_tp2_prices(
-            entry=entry,
+            entry=setup.entry,
             direction=direction,
             dist=dist,
-            data_15m=ohlcv,
+            data_15m=setup.market_state.data_15m,
             cfg=cfg,
             tp1_r=tp1_r,
             tp2_r=tp2_r,
@@ -87,14 +84,14 @@ class SignalBuilder:
 
         return TradeSignal(
             direction=direction,
-            entry=entry,
+            entry=setup.entry,
             stop_loss=sl,
             tp1=tp1,
             tp2=tp2,
             tp3=0.0,
             setup_score=int(round(setup.score)),
             setup_type=setup_type,
-            strategy_family=TREND_FOLLOWING,
+            strategy_family=resolve_strategy_family(setup_type),
             confirmation_mode="confirmed",
             tp1_r=tp1_r,
             tp2_r=tp2_r,

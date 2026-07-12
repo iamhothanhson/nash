@@ -42,19 +42,15 @@ class BacktestTradingPipeline:
         self.pullback_detector = PullbackDetector()
 
         self.detectors = [
-            self.breakout_detector.breakout_long_candidate,
-            self.breakout_detector.breakout_short_candidate,
-            self.retest_detector.detect_long,
-            self.retest_detector.detect_short,
-            self.pullback_detector.detect_long,
-            self.pullback_detector.detect_short,
+            self.breakout_detector.detect,
+            self.retest_detector.detect,
+            self.pullback_detector.detect,
         ]
 
         if ENABLE_LIQUIDITY_SWEEP_REVERSAL:
             from strategy.liquidity_sweep_reversal.detector import LiquiditySweepDetector
 
-            sd = LiquiditySweepDetector()
-            self.detectors.extend([sd.detect_long, sd.detect_short])
+            self.detectors.append(LiquiditySweepDetector.detect)
 
     def run(
         self,

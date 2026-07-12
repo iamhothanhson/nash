@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from core.types import MarketStructure
 from strategy.trend_following.config import (
     TREND_BREAKOUT_RETEST_LONG_RSI_MIN,
     TREND_BREAKOUT_RETEST_MAX_LEVEL_DEV,
@@ -14,8 +15,13 @@ from strategy.models import SetupCandidate
 
 
 class BreakoutRetestDetector:
-    retest_long = staticmethod(lambda market_state: BreakoutRetestDetector.detect_long(market_state))
-    retest_short = staticmethod(lambda market_state: BreakoutRetestDetector.detect_short(market_state))
+
+    def detect(self, market_state) -> SetupCandidate | None:
+        if market_state.structure == MarketStructure.HHHL:
+            return self.detect_long(market_state)
+        if market_state.structure == MarketStructure.LHLL:
+            return self.detect_short(market_state)
+        return None
 
     @staticmethod
     def detect_long(market_state) -> SetupCandidate | None:

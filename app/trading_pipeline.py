@@ -19,21 +19,15 @@ class TradingPipeline:
         self.marketplace = marketplace
         self.account_service = account_service or AccountService()
 
-        self.detectors = [
-            BreakoutDetector.breakout_long_candidate,
-            BreakoutDetector.breakout_short_candidate,
-            BreakoutRetestDetector.retest_long,
-            BreakoutRetestDetector.retest_short,
-            PullbackDetector.pullback_long,
-            PullbackDetector.pullback_short,
-        ]
+        self.breakout_detector = BreakoutDetector()
+        self.retest_detector = BreakoutRetestDetector()
+        self.pullback_detector = PullbackDetector()
 
-        if ENABLE_LIQUIDITY_SWEEP_REVERSAL:
-            from strategy.liquidity_sweep_reversal.detector import LiquiditySweepDetector
-            self.detectors.extend([
-                LiquiditySweepDetector.sweep_long,
-                LiquiditySweepDetector.sweep_short,
-            ])
+        self.detectors = [
+            self.breakout_detector.detect,
+            self.retest_detector.detect,
+            self.pullback_detector.detect,
+        ]
 
     def run(self, symbols: list[str]) -> dict[str, Any]:
         results: dict[str, Any] = {}

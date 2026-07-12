@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from core.types import MarketStructure
 from strategy.trend_following.config import (
     PULLBACK_EMA_SLOPE_MIN,
     PULLBACK_LONG_RSI_MIN,
@@ -22,8 +23,13 @@ def _cfg_float(cfg: dict | None, key: str, default: float) -> float:
 
 
 class PullbackDetector:
-    pullback_long = staticmethod(lambda market_state: PullbackDetector.detect_long(market_state))
-    pullback_short = staticmethod(lambda market_state: PullbackDetector.detect_short(market_state))
+
+    def detect(self, market_state, *, cfg: dict | None = None) -> SetupCandidate | None:
+        if market_state.structure == MarketStructure.HHHL:
+            return self.detect_long(market_state, cfg=cfg)
+        if market_state.structure == MarketStructure.LHLL:
+            return self.detect_short(market_state, cfg=cfg)
+        return None
 
     @staticmethod
     def detect_long(market_state, *, cfg: dict | None = None) -> SetupCandidate | None:

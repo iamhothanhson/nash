@@ -2,12 +2,10 @@ from datetime import datetime, timezone
 
 from core.types import MarketRegime, MarketStructure, TrendDirection
 from indicators.indicator_builder import IndicatorBuilder
-from strategy.trend_following.breakout.feature_builder import FeatureBuilder
 from market_analyzer.market_regime import _classify_regime, _regime_confidence, _trend_direction
 from market_analyzer.market_state import MarketState
 from market_analyzer.market_structure import detect_market_structure
 from market_analyzer.market_trend import calculate_adx
-from setup_builder.builder import SetupBuilder
 from setup_builder.models import Setup
 
 
@@ -66,10 +64,6 @@ class MarketAnalyzer:
         )
         trend_aligned = sa == "aligned"
 
-        features = FeatureBuilder.build_features(
-            data_15m=data_15m,
-            indicators=indicators,
-        )
         market_state = MarketState(
             symbol=symbol,
             timestamp=timestamp,
@@ -83,7 +77,6 @@ class MarketAnalyzer:
             is_ranging=is_ranging,
             is_high_volatility=is_high_volatility,
             indicators=indicators,
-            features=features,
             data_5m=data_5m,
             data_15m=data_15m,
             data_1h=data_1h,

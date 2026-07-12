@@ -29,9 +29,9 @@ class MarketAnalyzer:
             data_1h = data.get("1h")
 
         timestamp = int(datetime.now(timezone.utc).timestamp() * 1000)
+        ms_1h = detect_market_structure(data_1h["high"], data_1h["low"]) if data_1h is not None else "RANGE"
 
-        ms_1h = detect_market_structure(data_1h["high"], data_1h["low"]) if data_1h is not None else "Range"
-        ms_15m = detect_market_structure(data_15m["high"], data_15m["low"]) if data_15m is not None else "Range"
+        ms_15m = detect_market_structure(data_15m["high"], data_15m["low"]) if data_15m is not None else "RANGE"
 
         adx_v = 0.0
         if data_15m is not None and len(data_15m) >= 14:
@@ -71,9 +71,7 @@ class MarketAnalyzer:
         trend_aligned = sa == "aligned"
 
         features = build_features(
-            data_5m=data_5m,
             data_15m=data_15m,
-            data_1h=data_1h,
             indicators=indicators,
         )
         market_state = MarketState(

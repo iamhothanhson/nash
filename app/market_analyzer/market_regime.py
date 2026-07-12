@@ -31,7 +31,7 @@ def _classify_regime(
     market_structure: str,
 ) -> str:
     strong = adx > 25 and abs(ema_slope) > 0.001 and market_structure in ("HHHL", "LHLL") and atr_percentile < 80
-    weak = adx < 20 or (adx < 23 and market_structure == "Range")
+    weak = adx < 20 or (adx < 23 and market_structure == "RANGE")
     hv = atr_percentile > 78
     if strong:
         return f"Strong {trend_dir}"
@@ -66,7 +66,7 @@ def _regime_confidence(
         score += 5
     if market_structure in ("HHHL", "LHLL"):
         score += 10
-    if adx < 20 and market_structure == "Range":
+    if adx < 20 and market_structure == "RANGE":
         score -= 10
     if (ema_slope > 0.0003 and trend_dir == "Bearish") or (
         ema_slope < -0.0003 and trend_dir == "Bullish"

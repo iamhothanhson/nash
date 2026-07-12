@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-from market_analyzer.feature import SetupFeatures
+from market_analyzer.models import SetupFeatures
 
 
 class TrendDirection(str, Enum):

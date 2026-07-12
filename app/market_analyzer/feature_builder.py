@@ -1,297 +1,122 @@
 from __future__ import annotations
 
+from typing import get_args
+
 import pandas as pd
 
-from market_analyzer.feature import (
-    BreakoutFeatures,
-    PullbackFeatures,
-    RetestFeatures,
-    SetupFeatures,
-    SweepFeatures,
-)
-from market_analyzer.market_trend import calculate_ema
+from core.types import Direction, MarketStructure
+from market_analyzer.market_structure import detect_market_structure
+from market_analyzer.models import BreakoutFeatures, SetupFeatures
+
+_VALID_STRUCTURES = get_args(MarketStructure)
 
 
-def _safe_float(v, default: float = 0.0) -> float:
-    try:
-        return float(v)
-    except (TypeError, ValueError, IndexError):
-        return default
-
-
-def _safe_bool(v, default: bool = False) -> bool:
-    try:
-        return bool(v)
-    except Exception:
-        return default
-
-
-def compute_breakout_features(data_15m: pd.DataFrame | None, indicators: dict | None = None) -> BreakoutFeatures:
-    if data_15m is None or len(data_15m) < 20:
-        return BreakoutFeatures()
-
-    try:
-        close = data_15m["close"].astype(float)
-        open_ = data_15m["open"].astype(float)
-        high = data_15m["high"].astype(float)
-        low = data_15m["low"].astype(float)
-        vol = data_15m["volume"].astype(float)
-
-        price = float(close.iloc[-1])
-        recent_high_7 = float(high.iloc[-7:-1].max())
-        recent_low_7 = float(low.iloc[-7:-1].min())
-        recent_high_20 = float(high.iloc[-20:].max())
-        recent_low_20 = float(low.iloc[-20:].min())
-
-        breakout_up = price > recent_high_7
-        breakout_down = price < recent_low_7
-
-        volume_ratio = float(vol.iloc[-1]) / max(float(vol.iloc[-20:].mean()), 1e-12)
-
-        strength_up = (price - recent_high_7) / max(price, 1e-12) if breakout_up else 0.0
-        strength_down = (recent_low_7 - price) / max(price, 1e-12) if breakout_down else 0.0
-
-        candle_rng = max(float(high.iloc[-1]) - float(low.iloc[-1]), 1e-12)
-        body_ratio = abs(price - float(open_.iloc[-1])) / candle_rng
-        close_to_high_pct = (float(high.iloc[-1]) - price) / candle_rng
-        close_to_low_pct = (price - float(low.iloc[-1])) / candle_rng
-
-        ind = indicators or {}
-        ema_slope = _safe_float(ind.get("ema20_slope_15m", 0.0))
-        rsi_raw = ind.get("rsi_15m", 50.0)
-        rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
-        atr_percent = _safe_float(ind.get("atr_percent", 0.0))
-
-        ema20 = calculate_ema(data_15m, 20)
-        ema_val = float(ema20.iloc[-1])
-        ema_bullish_alignment = price > ema_val
-        ema_bearish_alignment = price < ema_val
-
+def compute_breakout_features(
+    data_15m: pd.DataFrame | None,
+    indicators: dict | None = None,
+) -> BreakoutFeatures:
+    if data_15m is None or len(data_15m) < 10:
         return BreakoutFeatures(
-            recent_high_7=recent_high_7,
-            recent_low_7=recent_low_7,
-            recent_high_20=recent_high_20,
-            recent_low_20=recent_low_20,
-            breakout_up=breakout_up,
-            breakout_down=breakout_down,
-            close_above_recent_high=price > recent_high_7,
-            close_below_recent_low=price < recent_low_7,
-            breakout_strength=max(strength_up, strength_down),
-            breakout_distance_pct=abs(price - recent_high_7) / max(recent_high_7, 1e-12) if breakout_up else abs(price - recent_low_7) / max(recent_low_7, 1e-12) if breakout_down else 0.0,
-            momentum_up=breakout_up and strength_up > 0.0,
-            momentum_down=breakout_down and strength_down > 0.0,
-            volume_ratio=volume_ratio,
-            body_ratio=body_ratio,
-            close_to_high_pct=close_to_high_pct,
-            close_to_low_pct=close_to_low_pct,
-            ema_slope=ema_slope,
-            ema_bullish_alignment=ema_bullish_alignment,
-            ema_bearish_alignment=ema_bearish_alignment,
-            rsi=rsi,
-            atr_percent=atr_percent,
-        )
-    except Exception:
-        return BreakoutFeatures()
-
-
-def compute_pullback_features(data_15m: pd.DataFrame | None) -> PullbackFeatures:
-    if data_15m is None or len(data_15m) < 20:
-        return PullbackFeatures()
-
-    try:
-        close = data_15m["close"].astype(float)
-        open_ = data_15m["open"].astype(float)
-        high = data_15m["high"].astype(float)
-        low = data_15m["low"].astype(float)
-        vol = data_15m["volume"].astype(float)
-
-        price = float(close.iloc[-1])
-        ema20 = calculate_ema(data_15m, 20)
-        ema_val = float(ema20.iloc[-1])
-
-        if ema_val <= 0:
-            return PullbackFeatures()
-
-        ema_dev = abs(price - ema_val) / max(ema_val, 1e-12)
-
-        bullish = price > float(open_.iloc[-1])
-        bearish = price < float(open_.iloc[-1])
-        body_size = abs(price - float(open_.iloc[-1]))
-        rng = max(float(high.iloc[-1]) - float(low.iloc[-1]), 1e-12)
-        body_r = body_size / rng
-
-        prior_high = float(high.iloc[-2])
-        prior_low = float(low.iloc[-2])
-        prior_mid = (prior_high + prior_low) / 2.0
-
-        momentum_up = price > float(close.iloc[-2]) and float(high.iloc[-1]) >= prior_high
-        momentum_down = price < float(close.iloc[-2]) and float(low.iloc[-1]) <= prior_low
-
-        impulse_pct = (float(close.iloc[-4]) - float(close.iloc[-12])) / max(abs(float(close.iloc[-12])), 1e-12)
-
-        volume_ratio = float(vol.iloc[-1]) / max(float(vol.iloc[-20:].mean()), 1e-12)
-
-        close_above_prior_mid = price > prior_mid
-        close_below_prior_mid = price < prior_mid
-
-        reclaim_long = (
-            bullish
-            and body_r >= 0.50
-            and close_above_prior_mid
-            and price > prior_high
-            and momentum_up
-        )
-        reclaim_short = (
-            bearish
-            and body_r >= 0.50
-            and close_below_prior_mid
-            and price < prior_low
-            and momentum_down
+            direction="LONG",
+            breakout_level=0.0,
+            close_above_level=False,
+            breakout_strength_pct=0.0,
+            distance_from_level_pct=0.0,
+            candle_body_ratio=0.0,
+            wick_ratio=0.0,
+            touch_count=0,
+            breakout_level_age=0,
+            market_structure="UNKNOWN",
+            htf_confirmed=False,
         )
 
-        return PullbackFeatures(
-            price=price,
-            ema_val=ema_val,
-            ema_deviation_pct=ema_dev,
-            in_pullback_zone_long=price >= ema_val * 0.99 and price <= ema_val * 1.003,
-            in_pullback_zone_short=price <= ema_val * 1.01 and price >= ema_val * 0.997,
-            bullish_body=bullish,
-            bearish_body=bearish,
-            body_size=body_size,
-            range_size=rng,
-            body_ratio=body_r,
-            prior_high=prior_high,
-            prior_low=prior_low,
-            prior_mid=prior_mid,
-            close_above_prior_high=price > prior_high,
-            close_below_prior_low=price < prior_low,
-            close_above_prior_mid=close_above_prior_mid,
-            close_below_prior_mid=close_below_prior_mid,
-            momentum_up=momentum_up,
-            momentum_down=momentum_down,
-            impulse_pct=impulse_pct,
-            volume_ratio=volume_ratio,
-            reclaim_long=reclaim_long,
-            reclaim_short=reclaim_short,
+    high = data_15m["high"]
+    low = data_15m["low"]
+    close = data_15m["close"]
+    ohlc_open = data_15m["open"]
+
+    lookback = min(20, len(data_15m) - 3)
+    recent_high = float(high.iloc[-lookback:-1].max())
+    recent_low = float(low.iloc[-lookback:-1].min())
+    current_close = float(close.iloc[-1])
+    current_high = float(high.iloc[-1])
+    current_low = float(low.iloc[-1])
+    current_open = float(ohlc_open.iloc[-1])
+
+    close_above = current_close > recent_high
+    close_below = current_close < recent_low
+
+    if close_above:
+        direction: Direction = "LONG"
+        breakout_level = recent_high
+    elif close_below:
+        direction = "SHORT"
+        breakout_level = recent_low
+    else:
+        return BreakoutFeatures(
+            direction="LONG",
+            breakout_level=0.0,
+            close_above_level=False,
+            breakout_strength_pct=0.0,
+            distance_from_level_pct=0.0,
+            candle_body_ratio=0.0,
+            wick_ratio=0.0,
+            touch_count=0,
+            breakout_level_age=0,
+            market_structure="UNKNOWN",
+            htf_confirmed=False,
         )
-    except Exception:
-        return PullbackFeatures()
 
+    dist = (
+        (current_close - breakout_level) / breakout_level * 100
+        if direction == "LONG"
+        else (breakout_level - current_close) / breakout_level * 100
+    )
+    distance_pct = max(dist, 0.0)
 
-def compute_retest_features(data_15m: pd.DataFrame | None) -> RetestFeatures:
-    if data_15m is None or len(data_15m) < 20:
-        return RetestFeatures()
+    candle_range = current_high - current_low
+    body = abs(current_close - current_open)
+    body_ratio = body / candle_range if candle_range > 0 else 0.0
+    wick_ratio = (candle_range - body) / candle_range if candle_range > 0 else 0.0
 
-    try:
-        close = data_15m["close"].astype(float)
-        open_ = data_15m["open"].astype(float)
-        high = data_15m["high"].astype(float)
-        low = data_15m["low"].astype(float)
+    touch_count = 0
+    breakout_level_age = 0
+    for i in range(-min(30, len(data_15m)), -1):
+        c = float(close.iloc[i])
+        if breakout_level > 0 and abs(c - breakout_level) / breakout_level < 0.002:
+            touch_count += 1
+            if breakout_level_age == 0:
+                breakout_level_age = abs(i)
 
-        price = float(close.iloc[-1])
-        level_up = float(high.iloc[-12:-3].max())
-        level_dn = float(low.iloc[-12:-3].min())
+    ms = detect_market_structure(high, low, lookback=20)
+    market_structure: MarketStructure = ms if ms in _VALID_STRUCTURES else _VALID_STRUCTURES[3]
 
-        max_dev = 0.003
-        min_reclaim = 0.001
+    htf_ema_slope = indicators.ema20_slope_1h
 
-        breakout_seen_up = float(close.iloc[-3:-1].max()) > level_up * 1.001
-        touched_level_up = float(low.iloc[-1]) <= level_up * (1.0 + max_dev)
-        reclaimed_up = price > level_up * (1.0 + min_reclaim) and price > float(open_.iloc[-1])
+    htf_confirmed = (
+        (direction == "LONG" and htf_ema_slope > 0)
+        or (direction == "SHORT" and htf_ema_slope < 0)
+    )
 
-        breakout_seen_dn = float(close.iloc[-3:-1].min()) < level_dn * 0.999
-        touched_level_dn = float(high.iloc[-1]) >= level_dn * (1.0 - max_dev)
-        reclaimed_dn = price < level_dn * (1.0 - min_reclaim) and price < float(open_.iloc[-1])
-
-        range_size = max(float(high.iloc[-1]) - float(low.iloc[-1]), 1e-12)
-        body_r = abs(price - float(open_.iloc[-1])) / range_size
-
-        close_strength_up = (price - float(low.iloc[-1])) / range_size
-        close_strength_dn = (float(high.iloc[-1]) - price) / range_size
-
-        vol = data_15m["volume"].astype(float) if "volume" in data_15m.columns else None
-        vol_r = float(vol.iloc[-1]) / max(float(vol.iloc[-20:].mean()), 1e-12) if vol is not None else 0.0
-
-        nearest_level = level_up if abs(price - level_up) < abs(price - level_dn) else level_dn
-        distance = abs(price - nearest_level) / max(nearest_level, 1e-12)
-
-        return RetestFeatures(
-            breakout_level=nearest_level,
-            distance_from_breakout_level_pct=distance,
-            touched_breakout_level=touched_level_up or touched_level_dn,
-            retest_rejection_long=reclaimed_up,
-            retest_rejection_short=reclaimed_dn,
-            body_ratio=body_r,
-            close_strength=max(close_strength_up, close_strength_dn),
-            vol_ratio=vol_r,
-            bullish_retest_confirm=breakout_seen_up and touched_level_up and reclaimed_up,
-            bearish_retest_confirm=breakout_seen_dn and touched_level_dn and reclaimed_dn,
-        )
-    except Exception:
-        return RetestFeatures()
-
-
-def compute_sweep_features(data_15m: pd.DataFrame | None) -> SweepFeatures:
-    if data_15m is None or len(data_15m) < 30:
-        return SweepFeatures()
-
-    try:
-        close = data_15m["close"].astype(float)
-        open_ = data_15m["open"].astype(float)
-        high = data_15m["high"].astype(float)
-        low = data_15m["low"].astype(float)
-        vol = data_15m["volume"].astype(float)
-
-        price = float(close.iloc[-1])
-        swing_high = float(high.iloc[-15:-1].max())
-        swing_low = float(low.iloc[-15:-1].min())
-
-        swept_high = float(high.iloc[-1]) > swing_high
-        swept_low = float(low.iloc[-1]) < swing_low
-
-        upper_wick = float(high.iloc[-1]) - max(price, float(open_.iloc[-1]))
-        lower_wick = min(price, float(open_.iloc[-1])) - float(low.iloc[-1])
-        rng = max(float(high.iloc[-1]) - float(low.iloc[-1]), 1e-12)
-        upper_wick_ratio = upper_wick / rng
-        lower_wick_ratio = lower_wick / rng
-        body_ratio = abs(price - float(open_.iloc[-1])) / rng
-
-        volume_ratio = float(vol.iloc[-1]) / max(float(vol.iloc[-20:].mean()), 1e-12)
-
-        reclaimed_high = swept_high and price < swing_high and price < float(open_.iloc[-1])
-        reclaimed_low = swept_low and price > swing_low and price > float(open_.iloc[-1])
-
-        return SweepFeatures(
-            swing_high=swing_high,
-            swing_low=swing_low,
-            swept_high=swept_high,
-            swept_low=swept_low,
-            reclaimed_after_high_sweep=reclaimed_high,
-            reclaimed_after_low_sweep=reclaimed_low,
-            upper_wick=upper_wick,
-            lower_wick=lower_wick,
-            upper_wick_ratio=upper_wick_ratio,
-            lower_wick_ratio=lower_wick_ratio,
-            body_ratio=body_ratio,
-            distance_from_swing_high_pct=abs(price - swing_high) / max(swing_high, 1e-12) if swing_high > 0 else 0.0,
-            distance_from_swing_low_pct=abs(price - swing_low) / max(swing_low, 1e-12) if swing_low > 0 else 0.0,
-            volume_ratio=volume_ratio,
-            rejection_long=reclaimed_low and lower_wick_ratio >= 0.45,
-            rejection_short=reclaimed_high and upper_wick_ratio >= 0.45,
-        )
-    except Exception:
-        return SweepFeatures()
+    return BreakoutFeatures(
+        direction=direction,
+        breakout_level=breakout_level,
+        close_above_level=close_above or direction == "LONG",
+        breakout_strength_pct=distance_pct,
+        distance_from_level_pct=distance_pct,
+        candle_body_ratio=body_ratio,
+        wick_ratio=wick_ratio,
+        touch_count=touch_count,
+        breakout_level_age=breakout_level_age,
+        market_structure=market_structure,
+        htf_confirmed=htf_confirmed,
+    )
 
 
 def build_features(
-    data_5m: pd.DataFrame | None = None,
     data_15m: pd.DataFrame | None = None,
-    data_1h: pd.DataFrame | None = None,
     indicators: dict | None = None,
 ) -> SetupFeatures:
-    return SetupFeatures(
-        breakout=compute_breakout_features(data_15m, indicators),
-        pullback=compute_pullback_features(data_15m),
-        retest=compute_retest_features(data_15m),
-        sweep=compute_sweep_features(data_15m),
-    )
+    features = SetupFeatures.empty()
+    features.breakout = compute_breakout_features(data_15m, data_1h, indicators)
+    return features

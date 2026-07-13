@@ -87,7 +87,6 @@ class OrderPlanner:
             risk_amount=risk_amount,
             risk_percent=risk_percent,
             setup_type=str(getattr(signal, "setup_type", "")),
-            setup_grade=str(getattr(signal, "setup_grade", "")),
             setup_score=float(getattr(signal, "setup_score", 0.0)),
             confirmation_mode=str(getattr(signal, "confirmation_mode", "")),
             strategy_family=str(getattr(signal, "strategy_family", "")),

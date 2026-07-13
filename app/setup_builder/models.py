@@ -21,11 +21,10 @@ class Side(str, Enum):
 
 
 class Direction(str, Enum):
+
     LONG = "LONG"
     SHORT = "SHORT"
 
-
-SetupGrade = str
 StrategyFamily = str
 
 @dataclass

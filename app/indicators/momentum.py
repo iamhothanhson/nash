@@ -22,3 +22,16 @@ def calculate_rsi(values: Iterable[float] | pd.DataFrame, period: int = 14) -> p
     avg_loss = loss.ewm(alpha=1.0 / period, adjust=False).mean()
     rs = avg_gain / avg_loss.replace(0, pd.NA)
     return 100 - (100 / (1 + rs))
+
+
+def rsi_latest(values: Iterable[float] | pd.DataFrame | pd.Series, period: int = 14) -> float:
+    if isinstance(values, pd.Series):
+        series = values
+    else:
+        series = calculate_rsi(values, period)
+    if series.empty:
+        return 0.0
+    val = series.iloc[-1]
+    if pd.isna(val):
+        return 0.0
+    return float(val)

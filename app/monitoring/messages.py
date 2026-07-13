@@ -200,11 +200,9 @@ def format_open_console_line(
     allocated_capital: float,
     risk_usdt: float,
     setup_type: str,
-    setup_grade: str,
     price_decimals: int = 2,
 ) -> str:
     _ = setup_type
-    _ = setup_grade
     sym = symbol.replace("USDT", "").strip().upper()
     pd = int(price_decimals)
     tp3_s = format_tp3_display(tp3=float(tp3), price_decimals=pd)

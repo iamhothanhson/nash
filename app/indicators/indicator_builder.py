@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from .models import Indicators
-from .momentum import calculate_rsi
+from .momentum import calculate_rsi, rsi_latest
 from .volatility import _atr_percentile, calculate_atr
 from .volume import _volume_ratio
 from market_analyzer.market_trend import calculate_adx, calculate_ema
@@ -58,8 +58,9 @@ class IndicatorBuilder:
                 pass
 
             try:
-                indicators.rsi_15m = calculate_rsi(data_15m, 14)
-                indicators.rsi = indicators.rsi_15m
+                rsi_series = calculate_rsi(data_15m, 14)
+                indicators.rsi_15m = rsi_series
+                indicators.rsi = rsi_latest(rsi_series)
             except Exception:
                 pass
 

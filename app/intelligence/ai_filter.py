@@ -6,7 +6,7 @@ from coins.loader import get_coin_config, passes_coin_execution_gates
 
 
 def ai_gate_score_tier(signal: Any, plan: Mapping[str, Any] | None = None) -> bool:
-    """Use AI only for A-grade setups with setup_score in [min_setup_score, 10]."""
+    """Use AI only for signals with setup_score in [min_setup_score, 10]."""
 
     def get_field(obj: Any, key: str, default=None):
         if isinstance(obj, Mapping):
@@ -24,21 +24,16 @@ def ai_gate_score_tier(signal: Any, plan: Mapping[str, Any] | None = None) -> bo
         return False
     cfg = get_coin_config(str(sym))
 
-    grade = ""
     score = 0.0
 
     if plan is not None:
-        grade = str(plan.get("setup_grade") or "").strip().upper()
         score = float(plan.get("setup_score") or 0)
-
-    if not grade:
-        grade = str(get_field(signal, "setup_grade", "") or "").strip().upper()
 
     if score == 0:
         score = float(get_field(signal, "setup_score", 0) or 0)
 
     lo = float(cfg["min_setup_score"])
-    return grade == "A" and lo <= score <= 10.0
+    return lo <= score <= 10.0
 
 
 def ai_gate_trade_metrics(trade_data: dict) -> bool:

@@ -18,7 +18,6 @@ class OrderPlan:
     risk_amount: float
     risk_percent: float
     setup_type: str
-    setup_grade: str
     setup_score: float
     confirmation_mode: str
     strategy_family: str

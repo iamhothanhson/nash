@@ -149,7 +149,6 @@ def _append_runtime_position(
         },
         "meta": {
             "setup_type": "manual_open_trade",
-            "setup_grade": "MANUAL",
             "strategy": "manual",
             "timeframe": None,
         },

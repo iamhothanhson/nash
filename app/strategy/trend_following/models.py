@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.setup_builder.models import Direction, SetupGrade, SetupType, StrategyFamily
+from app.setup_builder.models import Direction, SetupType, StrategyFamily
 from config.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK
 
 @dataclass(frozen=True)
@@ -17,7 +17,6 @@ class TradeSignal:
     setup_score: int
     signal_risk_per_trade: float
     setup_type: SetupType
-    setup_grade: SetupGrade
     strategy_family: StrategyFamily
     r_multiple: float
     confirmation_mode: str

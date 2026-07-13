@@ -13,7 +13,6 @@ class TradeSignal:
     setup_score: int
     signal_risk_per_trade: float
     setup_type: SetupType
-    setup_grade: str
     strategy_family: StrategyFamily 
     r_multiple: float
     confirmation_mode: str

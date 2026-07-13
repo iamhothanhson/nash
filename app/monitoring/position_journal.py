@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from coins.loader import price_tick_size
-from common.rounding import round_price
+from core.rounding import round_price
 
 from config.constants import BREAKOUT, PULLBACK
 

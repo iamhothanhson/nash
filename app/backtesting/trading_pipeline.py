@@ -1,6 +1,19 @@
 from __future__ import annotations
 
+import logging
 from types import SimpleNamespace
+
+logger = logging.getLogger(__name__)
+
+from core.messages import (
+    no_market_data,
+    not_enough_history,
+    no_setup_detected,
+    setup_build_failed,
+    signal_build_failed,
+    risk_rejected,
+    order_plan_failed,
+)
 from typing import Any, Iterable
 
 
@@ -77,8 +90,10 @@ class BacktestTradingPipeline:
         # Marketplace -> OHLCV data
         market_data = self.marketplace.get_market_data(symbol, up_to=timestamp, lookback=self.lookback)
         if market_data is None:
+            logger.warning(no_market_data(symbol, timestamp))
             return None
         if not self._has_enough_history(market_data):
+            logger.warning(not_enough_history(symbol, timestamp))
             return None
 
         # Indicators
@@ -94,15 +109,20 @@ class BacktestTradingPipeline:
         # Strategy Detectors -> SetupCandidate
         candidates = self._detect_setups(market_state)
         if not candidates:
+            logger.warning(no_setup_detected(symbol, timestamp))
             return None 
 
         # Setup Builder
         best = self._select_best_candidate(candidates)
         setup = SetupBuilder.build_from_candidate(candidate=best, market_state=market_state)
+        if setup is None:
+            logger.warning(setup_build_failed(symbol, timestamp))
+            return None
 
         # Signal Builder -> TradeSignal
         signal = SignalBuilder.build(setup=setup)
         if signal is None:
+            logger.warning(signal_build_failed(symbol, timestamp))
             return None
 
         # Risk Manager
@@ -112,11 +132,13 @@ class BacktestTradingPipeline:
         )
         risk = RiskManager.calculate(signal=signal, account=account)
         if not risk.allowed:
+            logger.warning(risk_rejected(symbol, timestamp, risk.reason))
             return None
 
         # Order Plan
         order_plan = OrderPlanner.build_order_plan(signal=signal, risk=risk)
         if order_plan is None:
+            logger.warning(order_plan_failed(symbol, timestamp))
             return None
 
         # Backtest execution

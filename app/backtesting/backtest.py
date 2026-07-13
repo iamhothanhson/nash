@@ -19,12 +19,14 @@ from backtesting.portfolio import BacktestPortfolio
 from backtesting.trading_pipeline import BacktestTradingPipeline
 from backtesting.config import LOOKBACK
 from backtesting.utils import print_result
+from core.logging import setup_logging
 
 
 HISTORY_DIR = Path(__file__).resolve().parent / "history_data"
 
 
 def main() -> None:
+    setup_logging(console=False)
     parser = argparse.ArgumentParser(description="Run backtest")
     parser.add_argument("--symbol", type=str, default=None, help="Symbol to backtest (e.g. TAOUSDT)")
     parser.add_argument("--days", type=int, default=None, help="Number of recent days to backtest")

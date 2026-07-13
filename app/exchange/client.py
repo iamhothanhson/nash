@@ -7,7 +7,7 @@ from typing import Any
 
 import requests
 
-from common.rounding import round_step
+from core.rounding import round_step
 from config import settings
 from exchange.exceptions import BinanceOrderError
 

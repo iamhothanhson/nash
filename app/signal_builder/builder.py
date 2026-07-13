@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.signal_builder.models import TradeSignal
-from common.utils import get_coin_config, resolve_strategy_family
+from core.utils import get_coin_config, resolve_strategy_family
 from config.constants import BREAKOUT
 from app.signal_builder.config import TP_CONFIG
 from app.signal_builder.take_profit import resolve_tp1_tp2_prices

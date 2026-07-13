@@ -7,7 +7,7 @@ from typing import Callable
 
 from app.config import settings
 from coins.loader import max_opened_positions_for, price_tick_size
-from common.rounding import round_price
+from core.rounding import round_price
 from execution.execution_engine import ExecutionEngine
 from monitoring.logger import log
 from position_management.staged import ManagedPosition

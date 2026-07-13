@@ -10,6 +10,7 @@ for path in (APP_DIR, ROOT_DIR):
         sys.path.insert(0, path)
 
 from app.config import SYMBOLS
+from core.logging import setup_logging
 from app.exchange import BinanceMarketplace
 from app.trading_pipeline import TradingPipeline
 
@@ -23,6 +24,7 @@ app = FastAPI(
 )
 
 def main() -> None:
+    setup_logging()
     marketplace = BinanceMarketplace()
     pipeline = TradingPipeline(
         marketplace=marketplace,

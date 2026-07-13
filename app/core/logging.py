@@ -50,10 +50,15 @@ def setup_logging(
     log_dir: str = "logs",
     level: int = logging.INFO,
     console: bool = True,
+    clean: bool = False,
 ) -> None:
     root = logging.getLogger()
     root.handlers.clear()
     root.setLevel(level)
+
+    if clean:
+        today_path = Path(log_dir) / f"{date.today():%Y-%m-%d}.log"
+        today_path.unlink(missing_ok=True)
 
     root.addHandler(DailyFileHandler(log_dir))
 

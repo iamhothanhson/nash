@@ -1,31 +1,29 @@
 from __future__ import annotations
 
-from typing import Any
+
+def no_market_data() -> str:
+    return "no market data"
 
 
-def no_market_data(symbol: str, timestamp: Any) -> str:
-    return f"{symbol} {timestamp}: no market data"
+def not_enough_history() -> str:
+    return "not enough history"
 
 
-def not_enough_history(symbol: str, timestamp: Any) -> str:
-    return f"{symbol} {timestamp}: not enough history"
+def no_setup_detected() -> str:
+    return "no setup detected"
 
 
-def no_setup_detected(symbol: str, timestamp: Any) -> str:
-    return f"{symbol} {timestamp}: no setup detected"
+def setup_build_failed() -> str:
+    return "setup build failed"
 
 
-def setup_build_failed(symbol: str, timestamp: Any) -> str:
-    return f"{symbol} {timestamp}: setup build failed"
+def signal_build_failed() -> str:
+    return "signal build failed"
 
 
-def signal_build_failed(symbol: str, timestamp: Any) -> str:
-    return f"{symbol} {timestamp}: signal build failed"
+def risk_rejected(reason: str) -> str:
+    return f"risk rejected: {reason}"
 
 
-def risk_rejected(symbol: str, timestamp: Any, reason: str) -> str:
-    return f"{symbol} {timestamp}: risk rejected: {reason}"
-
-
-def order_plan_failed(symbol: str, timestamp: Any) -> str:
-    return f"{symbol} {timestamp}: order plan build failed"
+def order_plan_failed() -> str:
+    return "order plan build failed"

@@ -26,7 +26,7 @@ HISTORY_DIR = Path(__file__).resolve().parent / "history_data"
 
 
 def main() -> None:
-    setup_logging(console=False)
+    setup_logging(console=False, clean=True)
     parser = argparse.ArgumentParser(description="Run backtest")
     parser.add_argument("--symbol", type=str, default=None, help="Symbol to backtest (e.g. TAOUSDT)")
     parser.add_argument("--days", type=int, default=None, help="Number of recent days to backtest")

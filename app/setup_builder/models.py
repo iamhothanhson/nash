@@ -12,16 +12,9 @@ class SetupType(str, Enum):
     BREAKOUT = BREAKOUT
     BREAKOUT_RETEST = BREAKOUT_RETEST
     PULLBACK = PULLBACK
-    LIQUIDITY_SWEEP = LIQUIDITY_SWEEP
-
-
-class Side(str, Enum):
-    LONG = "LONG"
-    SHORT = "SHORT"
 
 
 class Direction(str, Enum):
-
     LONG = "LONG"
     SHORT = "SHORT"
 
@@ -32,7 +25,7 @@ class Setup:
     symbol: str
     entry: float
     setup_type: SetupType
-    side: Optional[Side]
+    side: Optional[Direction]
     score: float
     market_state: MarketState
     features: dict[str, Any]

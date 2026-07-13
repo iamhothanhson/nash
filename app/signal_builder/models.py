@@ -1,10 +1,10 @@
 
 from dataclasses import dataclass
-from app.setup_builder.models import SetupType, Side, StrategyFamily
+from app.setup_builder.models import Direction, SetupType, StrategyFamily
 
 @dataclass(frozen=True)
 class TradeSignal:
-    direction: Side
+    direction: Direction
     entry: float
     stop_loss: float
     tp1: float

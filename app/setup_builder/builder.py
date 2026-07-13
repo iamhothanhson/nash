@@ -4,7 +4,7 @@ from turtle import pd
 from config.constants import BREAKOUT
 from market_analyzer.market_state import MarketState
 from setup_builder.config import Grade as GradeMap
-from setup_builder.models import Setup
+from setup_builder.models import Direction, Setup, SetupType
 from setup_builder.scorer import Scorer
 from strategy.models import SetupCandidate
 
@@ -42,8 +42,8 @@ class SetupBuilder:
             symbol=market_state.symbol,
             entry=entry,
             timestamp=market_state.timestamp,
-            setup_type=candidate.setup_type,
-            side=candidate.direction,
+            setup_type=SetupType(candidate.setup_type),
+            side=Direction(candidate.direction),
             score=score,
             market_state=market_state,
             features=candidate.features,

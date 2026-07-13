@@ -36,18 +36,21 @@ def detect_market_structure(high: pd.Series, low: pd.Series, lookback: int = 40)
     recent_highs = [p for p in swings_high if p[0] >= min_idx]
     recent_lows = [p for p in swings_low if p[0] >= min_idx]
 
-    has_hh = len(recent_highs) >= 2 and all(
-        recent_highs[i + 1][1] > recent_highs[i][1] for i in range(len(recent_highs) - 1)
-    )
-    has_hl = len(recent_lows) >= 2 and all(
-        recent_lows[i + 1][1] > recent_lows[i][1] for i in range(len(recent_lows) - 1)
-    )
-    has_lh = len(recent_highs) >= 2 and all(
-        recent_highs[i + 1][1] < recent_highs[i][1] for i in range(len(recent_highs) - 1)
-    )
-    has_ll = len(recent_lows) >= 2 and all(
-        recent_lows[i + 1][1] < recent_lows[i][1] for i in range(len(recent_lows) - 1)
-    )
+    def _trend_ratio(points: list[tuple[int, float]]) -> float:
+        if len(points) < 2:
+            return 0.0
+        up = sum(1 for i in range(len(points) - 1) if points[i + 1][1] > points[i][1])
+        return up / (len(points) - 1)
+
+    hh_ratio = _trend_ratio(recent_highs)
+    hl_ratio = _trend_ratio(recent_lows)
+    lh_ratio = 1 - hh_ratio
+    ll_ratio = 1 - hl_ratio
+
+    has_hh = hh_ratio >= 0.5
+    has_hl = hl_ratio >= 0.5
+    has_lh = lh_ratio >= 0.5
+    has_ll = ll_ratio >= 0.5
 
     if has_hh and has_hl:
         return MarketStructure.HHHL

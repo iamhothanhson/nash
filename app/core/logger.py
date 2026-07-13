@@ -10,13 +10,7 @@ logger = logging.getLogger("Nash")
 
 
 class LogType(str, Enum):
-    SIGNAL = "SIGNAL"
-    ORDER = "ORDER"
-    POSITION = "POSITION"
-    RISK = "RISK"
-    EXECUTOR = "EXECUTOR"
-    MARKET = "MARKET"
-    ERROR = "ERROR"
+    PLAN_REJECT = "PLAN_REJECT"
 
 
 def log(

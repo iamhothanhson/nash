@@ -86,11 +86,12 @@ class OrderPlanner:
             notional=position_notional,
             risk_amount=risk_amount,
             risk_percent=risk_percent,
+            risk_per_trade=float(getattr(risk, "risk_per_trade", 0.0)),
             setup_type=str(getattr(signal, "setup_type", "")),
             setup_score=float(getattr(signal, "setup_score", 0.0)),
             confirmation_mode=str(getattr(signal, "confirmation_mode", "")),
             strategy_family=str(getattr(signal, "strategy_family", "")),
-            r_multiple=float(getattr(signal, "r_multiple", 1.0)),
+            risk_multiplier=float(getattr(risk, "risk_multiplier", 1.0)),
         )
 
     @staticmethod

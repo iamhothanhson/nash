@@ -18,7 +18,7 @@ def evaluate_trade(trade_data: dict[str, Any]) -> dict[str, Any]:
     tp1 = float(trade_data.get("tp1", 0) or 0)
 
     setup_score = float(trade_data.get("setup_score", 0) or 0)
-    r_multiple = float(trade_data.get("r_multiple", 0) or 0)
+    r_multiple = float(trade_data.get("risk_multiplier", 0) or 0)
     structure = float(
         trade_data.get("structure_quality")
         or trade_data.get("structure")
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         "entry": 25000.0,
         "stop_loss": 24500.0,
         "tp1": 26000.0,
-        "r_multiple": 1.5,
+        "risk_multiplier": 1.5,
         "setup_score": 9,
         "min_confidence": 0.55,
         "structure_quality": 0.7,

@@ -11,10 +11,8 @@ class TradeSignal:
     tp2: float
     tp3: float
     setup_score: int
-    signal_risk_per_trade: float
     setup_type: SetupType
     strategy_family: StrategyFamily 
-    r_multiple: float
     confirmation_mode: str
     market_structure: str = "None"
     market_regime_detail: dict | None = None

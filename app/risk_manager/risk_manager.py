@@ -10,9 +10,11 @@ from config import settings
 @dataclass(frozen=True, slots=True)
 class RiskResult:
     allowed: bool
+    risk_per_trade: float
     risk_amount: float
     position_notional: float
     quantity: float
+    risk_multiplier: float = 1.0
     reason: str = ""
 
 
@@ -36,12 +38,14 @@ class RiskManager:
             return cls._reject("Invalid SL distance")
 
         available_balance = account.available_balance
-        risk_per_trade = float(getattr(signal, "signal_risk_per_trade", 0.0))
+        
+        base_risk_per_trade = float(settings.RISK_PER_TRADE)
         setup_type = str(getattr(signal, "setup_type", "")).strip()
         score = int(getattr(signal, "setup_score", 0))
         
         mult = cls.compute_risk_multiplier(setup_type, score)
-        risk_amount = available_balance * risk_per_trade * mult
+        risk_per_trade = base_risk_per_trade * mult
+        risk_amount = available_balance * risk_per_trade
 
         position_notional = risk_amount / sl_distance
 
@@ -62,6 +66,8 @@ class RiskManager:
             risk_amount=risk_amount,
             position_notional=position_notional,
             quantity=quantity,
+            risk_per_trade=risk_per_trade,
+            risk_multiplier=mult,
             reason="OK",
         )
 

@@ -17,10 +17,11 @@ class OrderPlan:
     notional: float
     risk_amount: float
     risk_percent: float
+    risk_per_trade: float
     setup_type: str
     setup_score: float
     confirmation_mode: str
     strategy_family: str
-    r_multiple: float
+    risk_multiplier: float
     market_structure: str = "None"
     market_regime_detail: Any | None = None

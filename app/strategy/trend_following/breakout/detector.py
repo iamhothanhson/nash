@@ -45,57 +45,26 @@ class BreakoutDetector:
 
         return None
 
-    def is_breakout_long(features, indicators):
-        values = {
-            # Breakout features
-            "close_above_recent_high": features.close_above_recent_high,
-            "strength": features.strength,
-            "strength_atr_factor": features.strength_atr_factor,
-            "body_ratio": features.body_ratio,
-            "close_to_high_pct": features.close_to_high_pct,
-            "ema_alignment": features.ema_alignment,
-            "sl_distance": features.sl_distance,
-
-            # Indicators
-            "volume_ratio": indicators.volume_ratio,
-            "ema_slope": indicators.ema_slope,
-            "rsi": indicators.rsi,
-        }
+    def is_breakout_long(self, features, indicators):
         return (
-            values["close_above_recent_high"] == BREAKOUT_LONG["close_above_recent_high"]
-            and values["strength"] >= BREAKOUT_LONG["min_strength"]
-            and values["strength_atr_factor"] >= BREAKOUT_LONG["min_strength_atr_factor"]
-            and values["volume_ratio"] >= BREAKOUT_LONG["min_volume_ratio"]
-            and values["ema_slope"] >= BREAKOUT_LONG["min_ema_slope"]
-            and values["rsi"] >= BREAKOUT_LONG["min_rsi"]
-            and values["body_ratio"] >= BREAKOUT_LONG["min_body_ratio"]
-            and values["close_to_high_pct"] <= BREAKOUT_LONG["max_close_to_high_pct"]
-            and values["ema_alignment"] == BREAKOUT_LONG["require_ema_alignment"]
-            and values["sl_distance"] >= BREAKOUT_LONG["min_sl_distance"]
+            features.close_above_level == BREAKOUT_LONG["close_above_recent_high"]
+            and features.breakout_strength_pct >= BREAKOUT_LONG["min_strength"]
+            and indicators.volume_ratio >= BREAKOUT_LONG["min_volume_ratio"]
+            and indicators.ema_slope >= BREAKOUT_LONG["min_ema_slope"]
+            and indicators.rsi >= BREAKOUT_LONG["min_rsi"]
+            and features.candle_body_ratio >= BREAKOUT_LONG["min_body_ratio"]
+            and features.distance_from_level_pct <= BREAKOUT_LONG["max_close_to_high_pct"]
+            and features.htf_confirmed == BREAKOUT_LONG["require_ema_alignment"]
         )
 
-    def is_breakout_short(features, indicators):
-        values = {
-            "close_below_recent_low": features.close_below_recent_low,
-            "strength": features.strength,
-            "strength_atr_factor": features.strength_atr_factor,
-            "body_ratio": features.body_ratio,
-            "close_to_low_pct": features.close_to_low_pct,
-            "ema_alignment": features.ema_alignment,
-            "sl_distance": features.sl_distance,
-            "volume_ratio": indicators.volume_ratio,
-            "ema_slope": indicators.ema_slope,
-            "rsi": indicators.rsi,
-        }
+    def is_breakout_short(self, features, indicators):
         return (
-            values["close_below_recent_low"] == BREAKOUT_SHORT["close_below_recent_low"]
-            and values["strength"] >= BREAKOUT_SHORT["min_strength"]
-            and values["strength_atr_factor"] >= BREAKOUT_SHORT["min_strength_atr_factor"]
-            and values["volume_ratio"] >= BREAKOUT_SHORT["min_volume_ratio"]
-            and values["ema_slope"] <= BREAKOUT_SHORT["max_ema_slope"]
-            and values["rsi"] <= BREAKOUT_SHORT["max_rsi"]
-            and values["body_ratio"] >= BREAKOUT_SHORT["min_body_ratio"]
-            and values["close_to_low_pct"] <= BREAKOUT_SHORT["max_close_to_low_pct"]
-            and values["ema_alignment"] == BREAKOUT_SHORT["require_ema_alignment"]
-            and values["sl_distance"] >= BREAKOUT_SHORT["min_sl_distance"]
+            not features.close_above_level == BREAKOUT_SHORT["close_below_recent_low"]
+            and features.breakout_strength_pct >= BREAKOUT_SHORT["min_strength"]
+            and indicators.volume_ratio >= BREAKOUT_SHORT["min_volume_ratio"]
+            and indicators.ema_slope <= BREAKOUT_SHORT["max_ema_slope"]
+            and indicators.rsi <= BREAKOUT_SHORT["max_rsi"]
+            and features.candle_body_ratio >= BREAKOUT_SHORT["min_body_ratio"]
+            and features.distance_from_level_pct <= BREAKOUT_SHORT["max_close_to_low_pct"]
+            and features.htf_confirmed == BREAKOUT_SHORT["require_ema_alignment"]
         )

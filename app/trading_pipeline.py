@@ -46,7 +46,7 @@ class TradingPipeline:
         for detector in self.detectors:
             try:
                 candidate = detector(market_state)
-            except TypeError:
+            except (TypeError, ValueError, KeyError):
                 candidate = None
             if candidate is not None:
                 candidates.append(candidate)
@@ -80,7 +80,7 @@ class TradingPipeline:
         if not candidates:
             return None
 
-        best_candidate = max(candidates, key=lambda c: getattr(c, "score", 0.0))
+        best_candidate = self._select_best_candidate(candidates)
         setup = SetupBuilder.build_from_candidate(
             candidate=best_candidate,
             market_state=market_state,
@@ -101,6 +101,8 @@ class TradingPipeline:
             signal=signal,
             account=account
         )
+        if not risk.allowed:
+            return None
 
         # OrderPlan
         order_plan = OrderPlanner.build_order_plan(
@@ -113,3 +115,10 @@ class TradingPipeline:
 
         # Execution
         return Executor.execute(order_plan)
+
+    @staticmethod
+    def _select_best_candidate(candidates: list[Any]) -> Any:
+        return max(
+            candidates,
+            key=lambda c: float(getattr(c, "score", 0.0)),
+        )

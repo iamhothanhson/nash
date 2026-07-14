@@ -17,7 +17,7 @@ from backtesting.executor import BacktestExecutor
 from backtesting.marketplace import HistoricalMarketplace
 from backtesting.portfolio import BacktestPortfolio
 from backtesting.trading_pipeline import BacktestTradingPipeline
-from backtesting.config import LOOKBACK
+from backtesting.config import BACKTEST_END, LOOKBACK
 from backtesting.utils import print_result
 from core.logging import setup_logging
 
@@ -51,6 +51,9 @@ def main() -> None:
 
     first_tf = next(iter(mp.data[symbols[0]].values()))
     timestamps = first_tf.index[LOOKBACK:]
+
+    end_dt = __import__("pandas").Timestamp(BACKTEST_END)
+    timestamps = timestamps[timestamps <= end_dt]
 
     if args.days:
         cutoff = timestamps[-1] - __import__("pandas").Timedelta(days=args.days)

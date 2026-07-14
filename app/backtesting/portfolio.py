@@ -77,6 +77,7 @@ class BacktestPortfolio:
             exit_reason=exit_reason,
             setup_type=pos.setup_type,
             setup_score=pos.setup_score,
+            risk_amount=pos.risk_amount,
         )
         self.trades.append(trade)
 

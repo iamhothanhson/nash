@@ -4,6 +4,7 @@ from app.setup_builder.models import Direction, SetupType, StrategyFamily
 
 @dataclass(frozen=True)
 class TradeSignal:
+    symbol: str
     direction: Direction
     entry: float
     stop_loss: float

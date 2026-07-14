@@ -69,11 +69,12 @@ class BreakoutDetector:
         ema_ok = features.htf_confirmed == hard["require_ema_alignment"]
 
         if not (close_above and strength_ok and ema_ok):
-                log(LogType.PLAN_REJECT, indicators.symbol,
-                f"long hard: close_above={close_above} "
-                f"strength={features.breakout_strength_pct:.4f}/{hard['min_strength']} "
-                f"ema_aligned={ema_ok}")
-        return False
+            log(LogType.PLAN_REJECT, indicators.symbol,
+            f"long hard: close_above={close_above} "
+            f"strength={features.breakout_strength_pct:.4f}/{hard['min_strength']} "
+            f"ema_aligned={ema_ok}")
+            
+            return False
 
         return True
 

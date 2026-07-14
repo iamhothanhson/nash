@@ -83,6 +83,7 @@ class SignalBuilder:
         )
 
         return TradeSignal(
+            symbol=setup.symbol,
             direction=direction,
             entry=setup.entry,
             stop_loss=sl,

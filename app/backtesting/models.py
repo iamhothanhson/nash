@@ -62,6 +62,7 @@ class BacktestTrade:
 
     setup_type: str | None = None
     setup_score: float = 0.0
+    risk_amount: float = 0.0
 
 
 @dataclass

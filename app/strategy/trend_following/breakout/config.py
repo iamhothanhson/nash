@@ -5,11 +5,20 @@ BREAKOUT_LONG_HARD = {
 }
 
 BREAKOUT_LONG_SOFT = {
-    "min_volume_ratio": 1.0,
-    "min_ema_slope": 0.0,
-    "min_rsi": 50.0,
-    "min_body_ratio": 0.4,
-    "max_close_to_high_pct": 0.3,
+    # Participation
+    "min_volume_ratio": 1.2,
+
+    # Trend must already be pointing up
+    "min_ema_slope": 0.001,
+
+    # Momentum confirmation
+    "min_rsi": 55.0,
+
+    # Strong bullish candle
+    "min_body_ratio": 0.55,
+
+    # Close near the high (little upper wick)
+    "max_close_to_high_pct": 0.20,
 }
 
 BREAKOUT_SHORT_HARD = {
@@ -19,9 +28,18 @@ BREAKOUT_SHORT_HARD = {
 }
 
 BREAKOUT_SHORT_SOFT = {
-    "min_volume_ratio": 1.0,
-    "max_ema_slope": 0.0,
-    "max_rsi": 50.0,
-    "min_body_ratio": 0.4,
-    "max_close_to_low_pct": 0.3,
+    # Strong market participation
+    "min_volume_ratio": 1.2,
+
+    # EMA must slope downward
+    "max_ema_slope": -0.001,
+
+    # Bearish momentum confirmation
+    "max_rsi": 45.0,
+
+    # Strong bearish candle body
+    "min_body_ratio": 0.55,
+
+    # Close near candle low
+    "max_close_to_low_pct": 0.20,
 }

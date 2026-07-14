@@ -37,7 +37,8 @@ def main() -> None:
         print("No backtest data found in history_data")
         return
 
-    portfolio = BacktestPortfolio(initial_balance=100)
+    initial_balance = float(os.environ.get("INITIAL_CAPITAL", "100"))
+    portfolio = BacktestPortfolio(initial_balance=initial_balance)
     executor = BacktestExecutor()
 
     if args.symbol:
@@ -59,6 +60,7 @@ def main() -> None:
         marketplace=mp, portfolio=portfolio, executor=executor,
     )
     result = pipeline.run(symbols=symbols, timestamps=timestamps)
+    result["initial_balance"] = initial_balance
     print_result(result)
 
 

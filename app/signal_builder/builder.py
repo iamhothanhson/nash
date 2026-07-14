@@ -6,7 +6,7 @@ from config.constants import BREAKOUT
 from app.signal_builder.config import TP_CONFIG
 from app.signal_builder.take_profit import resolve_tp1_tp2_prices
 from setup_builder.builder import Setup
-from strategy.trend_following.breakout.config import BREAKOUT_LONG
+MIN_SL_DISTANCE = 0.003
 from strategy.trend_following.config import MAX_SL_DISTANCE
 
 
@@ -32,12 +32,12 @@ class SignalBuilder:
             sl = anchor + buf
             dist = (sl - entry) / entry
 
-        if setup_type == BREAKOUT and dist < BREAKOUT_LONG["min_sl_distance"]:
+        if setup_type == BREAKOUT and dist < MIN_SL_DISTANCE:
             if direction == "LONG":
-                sl = entry * (1.0 - BREAKOUT_LONG["min_sl_distance"])
+                sl = entry * (1.0 - MIN_SL_DISTANCE)
             else:
-                sl = entry * (1.0 + BREAKOUT_LONG["min_sl_distance"])
-            dist = BREAKOUT_LONG["min_sl_distance"]
+                sl = entry * (1.0 + MIN_SL_DISTANCE)
+            dist = MIN_SL_DISTANCE
 
         if dist <= 0 or dist > MAX_SL_DISTANCE:
             return None

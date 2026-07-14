@@ -100,8 +100,10 @@ class RiskManager:
     def _reject(cls, reason: str) -> RiskResult:
         return RiskResult(
             allowed=False,
+            risk_per_trade=0.0,
             risk_amount=0.0,
             position_notional=0.0,
             quantity=0.0,
+            risk_multiplier=0.0,
             reason=reason,
         )

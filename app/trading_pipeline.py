@@ -7,6 +7,7 @@ from indicators.indicator_builder import IndicatorBuilder
 from market_analyzer.market_analyzer import MarketAnalyzer
 from exchange.account_service import AccountService
 from order_planner.order_planner import OrderPlanner
+from position.manager import PositionManager
 from risk_manager.risk_manager import RiskManager
 from setup_builder.builder import SetupBuilder
 from signal_builder.builder import SignalBuilder
@@ -17,6 +18,7 @@ class TradingPipeline:
     def __init__(self, marketplace: Any, account_service: AccountService | None = None) -> None:
         self.marketplace = marketplace
         self.account_service = account_service or AccountService()
+        self.position_manager = PositionManager()
 
         self.breakout_detector = BreakoutDetector()
         self.retest_detector = BreakoutRetestDetector()
@@ -53,6 +55,8 @@ class TradingPipeline:
         return candidates
 
     def run_symbol(self, symbol: str) -> Any | None:
+        self.position_manager.update_trailing_stops([symbol])
+
         # Marketplace -> OHLCV data
         market_data = self.marketplace.get_market_data(symbol)
 

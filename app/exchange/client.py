@@ -155,6 +155,9 @@ class BinanceFuturesClient:
     def place_order(self, params: dict[str, Any]) -> dict[str, Any]:
         return self.request("POST", "fapi/v1/order", params)
 
+    def get_order(self, symbol: str, order_id: int) -> dict[str, Any]:
+        return self.request("GET", "fapi/v1/order", {"symbol": symbol, "orderId": order_id})
+
     def cancel_order(self, symbol: str, order_id: int) -> dict[str, Any]:
         return self.request("POST", "fapi/v1/order", {"symbol": symbol, "orderId": order_id})
 

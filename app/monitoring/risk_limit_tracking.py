@@ -1,5 +1,5 @@
 """
-Single-day JSON snapshot: ``data/runtime_data/risk_limit_tracking.json``.
+Single-day JSON snapshot: ``data/runtime/risk_limit_tracking.json``.
 
 **Contract (live / demo, default path):** whenever this file is **created or replaced**
 on disk (via ``_write_tracking``), the same row is mirrored into
@@ -68,7 +68,7 @@ def tracking_path() -> Path:
     raw = os.getenv("RISK_LIMIT_TRACKING_PATH", "").strip()
     if raw:
         return Path(raw)
-    return _project_root() / "data" / "runtime_data" / "risk_limit_tracking.json"
+    return _project_root() / "data" / "runtime" / "risk_limit_tracking.json"
 
 
 def performance_dir() -> Path:
@@ -258,7 +258,7 @@ def row_to_snapshot(row: dict[str, Any], *, open_count: int | None = None) -> di
 
 
 def read_today_snapshot(*, open_count: int | None = None) -> dict[str, Any] | None:
-    """Current UTC day row from ``data/runtime_data/risk_limit_tracking.json`` as a performance snapshot."""
+    """Current UTC day row from ``data/runtime/risk_limit_tracking.json`` as a performance snapshot."""
     try:
         row = _read_row(tracking_path())
         if row is None:

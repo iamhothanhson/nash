@@ -32,7 +32,7 @@ from app.monitoring.position_journal import log_position_open
 
 
 def _position_state_path() -> Path:
-    return PROJECT_ROOT / "runtime_data" / "runtime_positions.json"
+    return PROJECT_ROOT / "runtime" / "positions.json"
 
 
 def _count_open_tracked_positions(symbol: str) -> int:

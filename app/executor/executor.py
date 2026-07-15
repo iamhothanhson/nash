@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from config import settings
@@ -8,6 +11,9 @@ from exchange.utils import position_side_for_direction
 from exchange.exceptions import BinanceOrderError
 from monitoring.logger import log
 from order_planner.models import OrderPlan
+
+
+RUNTIME_POSITIONS = Path("data/runtime/positions.json")
 
 
 class Executor:
@@ -69,7 +75,7 @@ class Executor:
         # ---- stop loss (STOP_MARKET, closePosition) ----
         sl_price = client.normalize_price(sym, plan.stop_loss)
         log(f"[EXECUTOR] {sym} | SL {opp} stopPrice={sl_price}")
-        client.place_order({
+        sl_resp = client.place_order({
             "symbol": sym,
             "side": opp,
             "type": "STOP_MARKET",
@@ -78,23 +84,91 @@ class Executor:
             "workingType": "MARK_PRICE",
             **({"positionSide": ps} if ps else {}),
         })
+        sl_order_id = sl_resp.get("orderId")
 
-        # ---- TP1 (TAKE_PROFIT_LIMIT) ----
+        # ---- TP1 (TAKE_PROFIT_MARKET) ----
         tp1_price = client.normalize_price(sym, plan.tp1)
         tp1_qty = client.normalize_qty(sym, plan.tp1_qty or filled_qty * settings.EXECUTOR_TP1_FRAC)
+        tp1_order_id = None
         if tp1_qty > 0:
             log(f"[EXECUTOR] {sym} | TP1 {opp} price={tp1_price} qty={tp1_qty}")
-            client.place_order({
+            tp1_resp = client.place_order({
                 "symbol": sym,
                 "side": opp,
-                "type": "TAKE_PROFIT_LIMIT",
-                "price": tp1_price,
+                "type": "TAKE_PROFIT_MARKET",
                 "stopPrice": tp1_price,
                 "quantity": tp1_qty,
-                "timeInForce": "GTC",
                 "workingType": "MARK_PRICE",
                 **({"positionSide": ps} if ps else {}),
             })
+            tp1_order_id = tp1_resp.get("orderId")
+
+        # ---- register for trailing stop management ----
+        # ---- persist position data ----
+        leverage = float(settings.LEVERAGE or 1)
+        size_usdt = plan.notional or filled_qty * fill_price
+        margin_usdt = size_usdt / leverage
+
+        sl_pct = ((fill_price - plan.stop_loss) / fill_price) * 100 if direction == "LONG" else ((plan.stop_loss - fill_price) / fill_price) * 100
+        tp1_pct = ((plan.tp1 - fill_price) / fill_price) * 100 if direction == "LONG" else ((fill_price - plan.tp1) / fill_price) * 100
+        tp2_pct = ((plan.tp2 - fill_price) / fill_price) * 100 if direction == "LONG" else ((fill_price - plan.tp2) / fill_price) * 100
+        tp3_pct = ((plan.tp3 - fill_price) / fill_price) * 100 if direction == "LONG" else ((fill_price - plan.tp3) / fill_price) * 100
+
+        pos_data = {
+            "status": "Open",
+            "symbol": sym,
+            "side": direction,
+            "strategy": "trend_following",
+            "setup": plan.setup_type,
+            "size_usdt": round(size_usdt, 2),
+            "margin_usdt": round(margin_usdt, 2),
+            "entry": fill_price,
+            "entry_qty": filled_qty,
+            "pos_side": ps,
+            "stop_loss": {
+                "price": plan.stop_loss,
+                "percent": round(sl_pct, 2),
+                "risk_usdt": plan.risk_amount,
+                "sl_order_id": sl_order_id,
+                "sl_hit": False,
+            },
+            "take_profit": [
+                {
+                    "tp1_partial_close": 50.0,
+                    "tp1_hit": False,
+                    "price": plan.tp1,
+                    "percent": round(tp1_pct, 2),
+                    "tp1_order_id": tp1_order_id,
+                },
+                {
+                    "tp2_partial_close": 30.0,
+                    "tp2_hit": False,
+                    "price": plan.tp2,
+                    "percent": round(tp2_pct, 2),
+                    "tp2_order_id": None,
+                },
+                {
+                    "tp3_partial_close": 20.0,
+                    "tp3_hit": False,
+                    "price": plan.tp3,
+                    "percent": round(tp3_pct, 2),
+                    "tp3_order_id": None,
+                },
+            ],
+            "pnl_usdt": 0.0,
+            "exchange_pnl_usdt": None,
+            "balance_usdt": client.get_balance("USDT"),
+            "closed_reason": None,
+            "opened": datetime.now(timezone.utc).strftime("%b-%d-%Y %H:%M:%S"),
+            "closed": None,
+        }
+
+        RUNTIME_POSITIONS.parent.mkdir(parents=True, exist_ok=True)
+        RUNTIME_POSITIONS.write_text(
+            json.dumps(pos_data, indent=2, default=str),
+            encoding="utf-8",
+        )
+        log(f"[EXECUTOR] {sym} | Position saved to {RUNTIME_POSITIONS}")
 
         result = {
             "status": "placed",

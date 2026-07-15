@@ -1,0 +1,14 @@
+{
+  "date": "2026-07-02",
+  "starting_balance": 13.41,
+  "ending_balance": 14.44,
+  "daily_pnl": 1.03,
+  "daily_pnl_percent": 7.68,
+  "total_trade": 4,
+  "win": 3,
+  "loss": 0,
+  "open": 0,
+  "max_drawdown_percent": 0.0,
+  "trading_stopped": false,
+  "peak_balance": 14.44
+}

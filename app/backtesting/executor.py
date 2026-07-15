@@ -24,44 +24,48 @@ class BacktestExecutor:
         low = float(candle["low"])
 
         if pos.direction == "LONG":
-            if low <= pos.stop_loss:
-                exit_price = pos.stop_loss * (1 - SLIPPAGE_BPS / 10000)
-                portfolio.close_position(symbol, exit_price, "STOP_LOSS", timestamp)
-
-            elif not pos.tp1_hit and high >= pos.tp1:
+            if not pos.tp1_hit and high >= pos.tp1:
                 exit_price = pos.tp1 * (1 - SLIPPAGE_BPS / 10000)
                 portfolio.close_position(symbol, exit_price, "TP1", timestamp, qty=pos.tp1_qty)
                 pos.tp1_hit = True
+                pos.stop_loss = max(pos.stop_loss, pos.entry)
 
-            elif pos.tp1_hit and not pos.tp2_hit and high >= pos.tp2:
+            if pos.tp1_hit and not pos.tp2_hit and high >= pos.tp2:
                 exit_price = pos.tp2 * (1 - SLIPPAGE_BPS / 10000)
                 portfolio.close_position(symbol, exit_price, "TP2", timestamp, qty=pos.tp2_qty)
                 pos.tp2_hit = True
+                pos.stop_loss = max(pos.stop_loss, pos.tp1)
 
-            elif pos.tp2_hit and not pos.tp3_hit and high >= pos.tp3:
+            if pos.tp2_hit and not pos.tp3_hit and high >= pos.tp3:
                 exit_price = pos.tp3 * (1 - SLIPPAGE_BPS / 10000)
                 portfolio.close_position(symbol, exit_price, "TP3", timestamp, qty=pos.tp3_qty)
                 pos.tp3_hit = True
 
-        else:
-            if high >= pos.stop_loss:
-                exit_price = pos.stop_loss * (1 + SLIPPAGE_BPS / 10000)
+            if low <= pos.stop_loss and portfolio.positions.get(symbol) is not None:
+                exit_price = pos.stop_loss * (1 - SLIPPAGE_BPS / 10000)
                 portfolio.close_position(symbol, exit_price, "STOP_LOSS", timestamp)
 
-            elif not pos.tp1_hit and low <= pos.tp1:
+        else:
+            if not pos.tp1_hit and low <= pos.tp1:
                 exit_price = pos.tp1 * (1 + SLIPPAGE_BPS / 10000)
                 portfolio.close_position(symbol, exit_price, "TP1", timestamp, qty=pos.tp1_qty)
                 pos.tp1_hit = True
+                pos.stop_loss = min(pos.stop_loss, pos.entry)
 
-            elif pos.tp1_hit and not pos.tp2_hit and low <= pos.tp2:
+            if pos.tp1_hit and not pos.tp2_hit and low <= pos.tp2:
                 exit_price = pos.tp2 * (1 + SLIPPAGE_BPS / 10000)
                 portfolio.close_position(symbol, exit_price, "TP2", timestamp, qty=pos.tp2_qty)
                 pos.tp2_hit = True
+                pos.stop_loss = min(pos.stop_loss, pos.tp1)
 
-            elif pos.tp2_hit and not pos.tp3_hit and low <= pos.tp3:
+            if pos.tp2_hit and not pos.tp3_hit and low <= pos.tp3:
                 exit_price = pos.tp3 * (1 + SLIPPAGE_BPS / 10000)
                 portfolio.close_position(symbol, exit_price, "TP3", timestamp, qty=pos.tp3_qty)
                 pos.tp3_hit = True
+
+            if high >= pos.stop_loss and portfolio.positions.get(symbol) is not None:
+                exit_price = pos.stop_loss * (1 + SLIPPAGE_BPS / 10000)
+                portfolio.close_position(symbol, exit_price, "STOP_LOSS", timestamp)
 
     def execute(
         self,

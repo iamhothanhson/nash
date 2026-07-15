@@ -25,3 +25,4 @@ class TradeSignal:
     trend_phase: str | None = None
     tp1_r: float = 0.0
     tp2_r: float = 0.0
+    tp3_r: float = 0.0

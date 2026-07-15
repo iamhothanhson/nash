@@ -80,38 +80,6 @@ def clamp_tp2_to_max_distance(
     )
 
 
-def _structure_profit_levels(
-    *,
-    entry: float,
-    direction: str,
-    data_15m,
-    lookback: int,
-    sep_frac: float,
-    anchor: float | None,
-) -> list[float]:
-    """15m swing levels in profit direction from entry (nearest first)."""
-    lookback_i = max(24, int(lookback))
-    sep = max(0.0005, float(sep_frac))
-    e = float(entry)
-    window = data_15m.tail(lookback_i)
-    if len(window) < 8:
-        return []
-
-    is_long = str(direction).upper() == "LONG"
-    if is_long:
-        min_px = e * (1.0 + sep)
-        raw = {float(v) for v in window["high"].tolist() if float(v) >= min_px}
-        if anchor is not None and float(anchor) >= min_px:
-            raw.add(float(anchor))
-        return sorted(raw)
-
-    max_px = e * (1.0 - sep)
-    raw = {float(v) for v in window["low"].tolist() if float(v) <= max_px}
-    if anchor is not None and float(anchor) <= max_px:
-        raw.add(float(anchor))
-    return sorted(raw, reverse=True)
-
-
 def resolve_tp1_price(
     *,
     entry: float,
@@ -161,6 +129,46 @@ def resolve_tp2_price(
     return tp2
 
 
+def clamp_tp3_to_max_distance(
+    *,
+    entry: float,
+    direction: str,
+    tp3: float,
+    max_tp3_distance: float,
+) -> float:
+    """Cap TP3 reward distance at ``max_tp3_distance``."""
+    return _clamp_tp_to_max_distance(
+        entry=float(entry),
+        direction=direction,
+        tp_price=float(tp3),
+        max_distance=float(max_tp3_distance),
+    )
+
+
+def resolve_tp3_price(
+    *,
+    entry: float,
+    direction: str | Literal["LONG", "SHORT"],
+    dist: float,
+    tp3_r: float,
+    max_tp3_distance: float | None = None,
+) -> float:
+    tp3 = tp_from_r(
+        entry=float(entry),
+        direction=direction,
+        dist=float(dist),
+        tp_r=float(tp3_r),
+    )
+    if max_tp3_distance is not None:
+        tp3 = clamp_tp3_to_max_distance(
+            entry=float(entry),
+            direction=direction,
+            tp3=tp3,
+            max_tp3_distance=float(max_tp3_distance),
+        )
+    return tp3
+
+
 def resolve_tp1_tp2_prices(
     *,
     entry: float,
@@ -195,62 +203,3 @@ def resolve_tp1_tp2_prices(
         max_tp2_distance=max_tp2,
     )
     return tp1, tp2
-
-
-def _tp3_structure_fallback(
-    *,
-    entry: float,
-    direction: str,
-    tp2: float,
-    sep_frac: float,
-) -> float:
-    """Minimal TP3 when 15m window is too short or no swings qualify beyond TP2."""
-    sep = max(0.0005, float(sep_frac))
-    e = float(entry)
-    t2 = float(tp2)
-    if str(direction).upper() == "LONG":
-        base = max(e, t2)
-        return float(base * (1.0 + sep))
-    base = min(e, t2)
-    return float(base * (1.0 - sep))
-
-
-def tp3_from_structure(
-    *,
-    entry: float,
-    direction: str,
-    data_15m,
-    tp2: float,
-    lookback: int,
-    sep_frac: float,
-) -> float:
-    """Pick TP3 from 15m swing highs (LONG) or lows (SHORT) beyond TP2."""
-    lookback_i = max(24, int(lookback))
-    sep = max(0.0005, float(sep_frac))
-    e = float(entry)
-    t2 = float(tp2)
-    window = data_15m.tail(lookback_i)
-    if len(window) < 8:
-        return _tp3_structure_fallback(entry=e, direction=direction, tp2=t2, sep_frac=sep)
-
-    if str(direction).upper() == "LONG":
-        raw = sorted(
-            {float(v) for v in window["high"].tolist() if float(v) > e * (1.0 + sep)}
-        )
-        min_tp3 = max(t2, e * (1.0 + sep))
-        levels = [v for v in raw if v >= min_tp3]
-        if not levels:
-            return _tp3_structure_fallback(entry=e, direction=direction, tp2=t2, sep_frac=sep)
-        tp3 = next((v for v in levels if v > t2), levels[0])
-        return float(max(tp3, t2 * (1.0 + sep)))
-
-    raw = sorted(
-        {float(v) for v in window["low"].tolist() if float(v) < e * (1.0 - sep)},
-        reverse=True,
-    )
-    max_tp3 = min(t2, e * (1.0 - sep))
-    levels = [v for v in raw if v <= max_tp3]
-    if not levels:
-        return _tp3_structure_fallback(entry=e, direction=direction, tp2=t2, sep_frac=sep)
-    tp3 = next((v for v in levels if v < t2), levels[0])
-    return float(min(tp3, t2 * (1.0 - sep)))

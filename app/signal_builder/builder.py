@@ -4,7 +4,7 @@ from app.signal_builder.models import TradeSignal
 from core.utils import get_coin_config, resolve_strategy_family
 from config.constants import BREAKOUT
 from app.signal_builder.config import TP_CONFIG
-from app.signal_builder.take_profit import resolve_tp1_tp2_prices
+from app.signal_builder.take_profit import resolve_tp1_tp2_prices, resolve_tp3_price
 from setup_builder.builder import Setup
 MIN_SL_DISTANCE = 0.003
 from strategy.trend_following.config import MAX_SL_DISTANCE
@@ -70,6 +70,7 @@ class SignalBuilder:
 
         tp1_r = float(TP_CONFIG.get("tp1_r", 1.0))
         tp2_r = float(TP_CONFIG.get("tp2_r", 1.5))
+        tp3_r = float(TP_CONFIG.get("tp3_r", 2.0))
 
         tp1, tp2 = resolve_tp1_tp2_prices(
             entry=setup.entry,
@@ -81,6 +82,13 @@ class SignalBuilder:
             tp2_r=tp2_r,
             anchor=float(setup.anchor),
         )
+        tp3 = resolve_tp3_price(
+            entry=setup.entry,
+            direction=direction,
+            dist=dist,
+            tp3_r=tp3_r,
+            max_tp3_distance=None,
+        )
 
         return TradeSignal(
             symbol=setup.symbol,
@@ -89,11 +97,12 @@ class SignalBuilder:
             stop_loss=sl,
             tp1=tp1,
             tp2=tp2,
-            tp3=0.0,
+            tp3=tp3,
             setup_score=int(round(setup.score)),
             setup_type=setup_type,
             strategy_family=resolve_strategy_family(setup_type),
             confirmation_mode="confirmed",
             tp1_r=tp1_r,
             tp2_r=tp2_r,
+            tp3_r=tp3_r,
         )

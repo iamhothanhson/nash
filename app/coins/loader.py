@@ -102,6 +102,11 @@ def resolve_max_tp2_distance(cfg: dict[str, Any]) -> float | None:
     return _resolve_max_tp_pct_distance(cfg, frac_key="max_tp2_distance", pct_key="max_tp2_pct")
 
 
+def resolve_max_tp3_distance(cfg: dict[str, Any]) -> float | None:
+    """Per-coin max TP3 distance (``max_tp3_pct`` percent points, e.g. 2.5 = 2.5%)."""
+    return _resolve_max_tp_pct_distance(cfg, frac_key="max_tp3_distance", pct_key="max_tp3_pct")
+
+
 def coin_enforces_min_risk_reward(cfg: dict[str, Any]) -> bool:
     """When false, skip min_risk_reward_multiple at signal build and execution gates."""
     raw = cfg.get("enforce_min_risk_reward_multiple")

@@ -4,13 +4,11 @@ from datetime import datetime
 from typing import Any
 
 from backtesting.account import BacktestAccountService, BacktestAccountState
+from backtesting.config import FEES, SLIPPAGE_BPS
 from backtesting.models import BacktestPosition, BacktestTrade, EquityPoint
 
 
-FEES = 0.0004
-
-
-class BacktestPortfolio:
+class BacktestPositionManager:
     def __init__(self, initial_balance: float = 100) -> None:
         self.account = BacktestAccountService(initial_balance)
         self.positions: dict[str, BacktestPosition] = {}
@@ -19,6 +17,58 @@ class BacktestPortfolio:
 
     def can_open_position(self, symbol: str) -> bool:
         return symbol not in self.positions
+
+    def update_positions(self, symbol: str, candle: Any, timestamp: datetime) -> None:
+        pos = self.positions.get(symbol)
+        if pos is None:
+            return
+
+        high = float(candle["high"])
+        low = float(candle["low"])
+
+        if pos.direction == "LONG":
+            if not pos.tp1_hit and high >= pos.tp1:
+                exit_price = pos.tp1 * (1 - SLIPPAGE_BPS / 10000)
+                self.close_position(symbol, exit_price, "TP1", timestamp, qty=pos.tp1_qty)
+                pos.tp1_hit = True
+                pos.stop_loss = max(pos.stop_loss, pos.entry)
+
+            if pos.tp1_hit and not pos.tp2_hit and high >= pos.tp2:
+                exit_price = pos.tp2 * (1 - SLIPPAGE_BPS / 10000)
+                self.close_position(symbol, exit_price, "TP2", timestamp, qty=pos.tp2_qty)
+                pos.tp2_hit = True
+                pos.stop_loss = max(pos.stop_loss, pos.tp1)
+
+            if pos.tp2_hit and not pos.tp3_hit and high >= pos.tp3:
+                exit_price = pos.tp3 * (1 - SLIPPAGE_BPS / 10000)
+                self.close_position(symbol, exit_price, "TP3", timestamp, qty=pos.tp3_qty)
+                pos.tp3_hit = True
+
+            if low <= pos.stop_loss and symbol in self.positions:
+                exit_price = pos.stop_loss * (1 - SLIPPAGE_BPS / 10000)
+                self.close_position(symbol, exit_price, "STOP_LOSS", timestamp)
+
+        else:
+            if not pos.tp1_hit and low <= pos.tp1:
+                exit_price = pos.tp1 * (1 + SLIPPAGE_BPS / 10000)
+                self.close_position(symbol, exit_price, "TP1", timestamp, qty=pos.tp1_qty)
+                pos.tp1_hit = True
+                pos.stop_loss = min(pos.stop_loss, pos.entry)
+
+            if pos.tp1_hit and not pos.tp2_hit and low <= pos.tp2:
+                exit_price = pos.tp2 * (1 + SLIPPAGE_BPS / 10000)
+                self.close_position(symbol, exit_price, "TP2", timestamp, qty=pos.tp2_qty)
+                pos.tp2_hit = True
+                pos.stop_loss = min(pos.stop_loss, pos.tp1)
+
+            if pos.tp2_hit and not pos.tp3_hit and low <= pos.tp3:
+                exit_price = pos.tp3 * (1 + SLIPPAGE_BPS / 10000)
+                self.close_position(symbol, exit_price, "TP3", timestamp, qty=pos.tp3_qty)
+                pos.tp3_hit = True
+
+            if high >= pos.stop_loss and symbol in self.positions:
+                exit_price = pos.stop_loss * (1 + SLIPPAGE_BPS / 10000)
+                self.close_position(symbol, exit_price, "STOP_LOSS", timestamp)
 
     def get_account_state(self) -> BacktestAccountState:
         return self.account.get_account_state()

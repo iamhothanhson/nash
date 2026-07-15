@@ -6,7 +6,7 @@ from typing import Any, Iterable
 
 from backtesting.executor import BacktestExecutor
 from backtesting.marketplace import HistoricalMarketplace
-from backtesting.portfolio import BacktestPortfolio
+from backtesting.position import BacktestPositionManager
 from indicators.indicator_builder import IndicatorBuilder
 from market_analyzer.market_analyzer import MarketAnalyzer
 from setup_builder.builder import SetupBuilder
@@ -23,7 +23,7 @@ class BacktestTradingPipeline:
     def __init__(
         self,
         marketplace: HistoricalMarketplace,
-        portfolio: BacktestPortfolio,
+        portfolio: BacktestPositionManager,
         executor: BacktestExecutor,
         lookback: int = LOOKBACK,
     ):
@@ -58,11 +58,10 @@ class BacktestTradingPipeline:
             candle = self.marketplace.get_candle(symbol=symbol, timestamp=timestamp)
             if candle is None:
                 continue
-            self.executor.update_positions(
+            self.portfolio.update_positions(
                 symbol=symbol,
                 candle=candle,
                 timestamp=timestamp,
-                portfolio=self.portfolio,
             )
 
         for symbol in symbols:

@@ -15,7 +15,7 @@ from pathlib import Path
 
 from backtesting.executor import BacktestExecutor
 from backtesting.marketplace import HistoricalMarketplace
-from backtesting.portfolio import BacktestPortfolio
+from backtesting.position import BacktestPositionManager
 from backtesting.trading_pipeline import BacktestTradingPipeline
 from backtesting.config import BACKTEST_END, LOOKBACK
 from backtesting.utils import print_result
@@ -38,7 +38,7 @@ def main() -> None:
         return
 
     initial_balance = float(os.environ.get("INITIAL_CAPITAL", "100"))
-    portfolio = BacktestPortfolio(initial_balance=initial_balance)
+    portfolio = BacktestPositionManager(initial_balance=initial_balance)
     executor = BacktestExecutor()
 
     if args.symbol:

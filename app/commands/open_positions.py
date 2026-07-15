@@ -16,8 +16,9 @@ APP_PATH = PROJECT_ROOT / "app"
 if str(APP_PATH) not in sys.path:
     sys.path.insert(0, str(APP_PATH))
 
-from app.common.rounding import round_price, round_qty, round_ratio, round_usd
-from app.coins.loader import get_coin_config, price_rounding_decimal, price_tick_size
+from app.coins.loader import get_coin_config
+from app.core.rounding import round_qty, round_ratio, round_usd
+from app.core.utils import round_price
 from app.config import settings
 from app.execution.exchange_entry_gate import should_block_exchange_entry
 from app.execution.execution_engine import create_execution_engine, ensure_demo_testnet_credentials
@@ -93,7 +94,6 @@ def _append_runtime_position(
         existing = []
     direction = "LONG" if side == "BUY" else "SHORT"
     sym_u = symbol.strip().upper()
-    tick = price_tick_size(sym_u)
     risk_per_unit = abs(float(entry) - float(stop_loss))
     initial_notional_usdt = abs(float(entry) * float(qty))
     leverage = max(1.0, float(settings.LEVERAGE))
@@ -106,15 +106,15 @@ def _append_runtime_position(
         "position": {
             "qty_total": round_qty(qty),
             "qty_open": round_qty(qty),
-            "entry_price": round_price(entry, tick),
+            "entry_price": round_price(sym_u, entry),
             "initial_notional_usdt": round_usd(initial_notional_usdt),
             "initial_margin_usdt": round_usd(initial_margin_usdt),
             "realized_pnl": round_usd(0.0),
             "fees_paid": round_usd(0.0),
         },
         "stop_loss": {
-            "initial_stop_loss": round_price(stop_loss, tick),
-            "current_stop_loss": round_price(stop_loss, tick),
+            "initial_stop_loss": round_price(sym_u, stop_loss),
+            "current_stop_loss": round_price(sym_u, stop_loss),
             "initial_risk_usd": round_usd(abs(float(entry) - float(stop_loss)) * float(qty)),
             "risk_reward_ratio": round_ratio(rr),
             "sl_order_id": stop_exchange_order_id,
@@ -122,21 +122,21 @@ def _append_runtime_position(
         },
         "take_profits": [
             {
-                "price": round_price(tp1, tick),
+                "price": round_price(sym_u, tp1),
                 "tp1_partial_close": round_ratio(50.0),
                 "tp1_hit": False,
                 "tp1_order_id": None,
                 "exchange_tp_orders_placed": False,
             },
             {
-                "price": round_price(tp2, tick),
+                "price": round_price(sym_u, tp2),
                 "tp2_partial_close": round_ratio(30.0),
                 "tp2_hit": False,
                 "tp2_order_id": None,
                 "exchange_tp_orders_placed": False,
             },
             {
-                "price": round_price(tp3, tick),
+                "price": round_price(sym_u, tp3),
                 "tp3_partial_close": round_ratio(20.0),
                 "tp3_hit": False,
                 "tp3_order_id": None,
@@ -144,7 +144,7 @@ def _append_runtime_position(
             },
         ],
         "exchange": {
-            "last_sent_stop_loss": round_price(stop_loss, tick),
+            "last_sent_stop_loss": round_price(sym_u, stop_loss),
             "last_sent_qty": round_qty(qty),
         },
         "meta": {
@@ -361,7 +361,8 @@ def main() -> int:
                 tp1_exchange_order_id = int(raw_tp1_oid)
             except (TypeError, ValueError):
                 tp1_exchange_order_id = None
-    price_dp = price_rounding_decimal(symbol)
+    _cfg = get_coin_config(symbol)
+    price_dp = max(0, min(16, int(_cfg.get("price_rounding_decimal", 2))))
     hedge_on = bool(getattr(client, "use_hedge_position_side", lambda: False)()) if client else False
     _append_runtime_position(
         symbol=symbol,

@@ -7,10 +7,10 @@ from typing import Any
 
 from exchange.client import BinanceFuturesClient
 from config import settings
+from position.archive import archive_position
 
 
 RUNTIME_POSITIONS = Path("data/runtime/positions.json")
-POSITION_HISTORY_DIR = Path("data/position_history")
 
 
 class PositionManager:
@@ -81,7 +81,7 @@ class PositionManager:
                 changed = True
 
         if pos["status"] != "Open":
-            self._archive_and_clear(pos)
+            archive_position(pos)
             return
 
         # --- 2. TP1 ---
@@ -118,7 +118,7 @@ class PositionManager:
 
         if pos["status"] != "Open":
             if changed:
-                self._archive_and_clear(pos)
+                archive_position(pos)
             return
 
         # --- update PnL ---
@@ -165,25 +165,6 @@ class PositionManager:
         resp = self._place_tp_order(pos["symbol"], tp3["price"], qty, side, ps)
         if resp:
             tp3["tp3_order_id"] = resp.get("orderId")
-
-    def _archive_and_clear(self, pos: dict[str, Any]) -> None:
-        """Move closed position to monthly history, clear positions.json."""
-        now = datetime.now(timezone.utc)
-        month_file = POSITION_HISTORY_DIR / f"{now.strftime('%m-%Y')}.json"
-        POSITION_HISTORY_DIR.mkdir(parents=True, exist_ok=True)
-
-        history = []
-        if month_file.exists():
-            raw = month_file.read_text(encoding="utf-8")
-            if raw.strip():
-                history = json.loads(raw)
-                if not isinstance(history, list):
-                    history = [history]
-
-        history.append(pos)
-        month_file.write_text(json.dumps(history, indent=2, default=str), encoding="utf-8")
-
-        RUNTIME_POSITIONS.write_text("{}\n", encoding="utf-8")
 
     def _place_tp_order(self, symbol: str, price: float, qty: float, side: str, ps: str | None) -> dict[str, Any] | None:
         if price <= 0 or qty <= 0:

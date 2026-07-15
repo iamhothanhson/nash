@@ -2,7 +2,43 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
+
+from core.utils import resolve_pct
+
+
+def _resolve_max_tp_pct_distance(
+    cfg: dict[str, Any],
+    *,
+    frac_key: str,
+    pct_key: str,
+) -> float | None:
+    raw = cfg.get(frac_key)
+    if raw is None:
+        pct = cfg.get(pct_key)
+        if pct is not None:
+            try:
+                return resolve_pct(pct)
+            except (TypeError, ValueError):
+                return None
+        return None
+    try:
+        v = float(raw)
+        if v > 1.0:
+            return resolve_pct(v)
+        return max(0.0, v)
+    except (TypeError, ValueError):
+        return None
+
+
+def resolve_max_tp1_distance(cfg: dict[str, Any]) -> float | None:
+    """Per-coin max TP1 distance (``max_tp1_pct`` percent points, e.g. 2.5 = 2.5%)."""
+    return _resolve_max_tp_pct_distance(cfg, frac_key="max_tp1_distance", pct_key="max_tp1_pct")
+
+
+def resolve_max_tp2_distance(cfg: dict[str, Any]) -> float | None:
+    """Per-coin max TP2 distance (``max_tp2_pct`` percent points, e.g. 3.5 = 3.5%)."""
+    return _resolve_max_tp_pct_distance(cfg, frac_key="max_tp2_distance", pct_key="max_tp2_pct")
 
 
 def tp_from_r(
@@ -180,11 +216,6 @@ def resolve_tp1_tp2_prices(
     tp2_r: float,
     anchor: float | None = None,
 ) -> tuple[float, float]:
-    from coins.loader import (
-        resolve_max_tp1_distance,
-        resolve_max_tp2_distance,
-    )
-
     max_tp1 = resolve_max_tp1_distance(cfg) if cfg else None
     max_tp2 = resolve_max_tp2_distance(cfg) if cfg else None
 

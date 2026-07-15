@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from config import settings
@@ -11,9 +9,7 @@ from exchange.utils import position_side_for_direction
 from exchange.exceptions import BinanceOrderError
 from monitoring.logger import log
 from order_planner.models import OrderPlan
-
-
-RUNTIME_POSITIONS = Path("data/runtime/positions.json")
+from position.archive import save_runtime_position
 
 
 class Executor:
@@ -163,12 +159,8 @@ class Executor:
             "closed": None,
         }
 
-        RUNTIME_POSITIONS.parent.mkdir(parents=True, exist_ok=True)
-        RUNTIME_POSITIONS.write_text(
-            json.dumps(pos_data, indent=2, default=str),
-            encoding="utf-8",
-        )
-        log(f"[EXECUTOR] {sym} | Position saved to {RUNTIME_POSITIONS}")
+        save_runtime_position(pos_data)
+        log(f"[EXECUTOR] {sym} | Position saved to runtime/positions.json")
 
         result = {
             "status": "placed",

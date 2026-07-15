@@ -3,9 +3,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from dataclasses import asdict
+
 from backtesting.account import BacktestAccountService, BacktestAccountState
 from backtesting.config import FEES, SLIPPAGE_BPS
 from backtesting.models import BacktestPosition, BacktestTrade, EquityPoint
+from position.archive import archive_position, save_runtime_position
 
 
 class BacktestPositionManager:
@@ -25,50 +28,37 @@ class BacktestPositionManager:
 
         high = float(candle["high"])
         low = float(candle["low"])
+        is_long = pos.direction == "LONG"
 
-        if pos.direction == "LONG":
-            if not pos.tp1_hit and high >= pos.tp1:
-                exit_price = pos.tp1 * (1 - SLIPPAGE_BPS / 10000)
-                self.close_position(symbol, exit_price, "TP1", timestamp, qty=pos.tp1_qty)
-                pos.tp1_hit = True
-                pos.stop_loss = max(pos.stop_loss, pos.entry)
+        # tp_levels: (hit_attr, level_attr, reason, qty_attr, trailing_stop_price)
+        levels = [
+            ("tp1_hit", "tp1", "TP1", "tp1_qty", "entry"),
+            ("tp2_hit", "tp2", "TP2", "tp2_qty", "tp1"),
+            ("tp3_hit", "tp3", "TP3", "tp3_qty", None),
+        ]
+        for hit_attr, level_attr, reason, qty_attr, trail_to in levels:
+            already_hit = getattr(pos, hit_attr)
+            if already_hit:
+                continue
+            level = getattr(pos, level_attr)
+            qty = getattr(pos, qty_attr)
+            price_touched = (high >= level) if is_long else (low <= level)
+            if not price_touched:
+                continue
+            slippage_mult = (1 - SLIPPAGE_BPS / 10000) if is_long else (1 + SLIPPAGE_BPS / 10000)
+            exit_price = level * slippage_mult
+            self.close_position(symbol, exit_price, reason, timestamp, qty=qty)
+            setattr(pos, hit_attr, True)
+            if trail_to:
+                trail_price = getattr(pos, trail_to)
+                pos.stop_loss = max(pos.stop_loss, trail_price) if is_long else min(pos.stop_loss, trail_price)
 
-            if pos.tp1_hit and not pos.tp2_hit and high >= pos.tp2:
-                exit_price = pos.tp2 * (1 - SLIPPAGE_BPS / 10000)
-                self.close_position(symbol, exit_price, "TP2", timestamp, qty=pos.tp2_qty)
-                pos.tp2_hit = True
-                pos.stop_loss = max(pos.stop_loss, pos.tp1)
-
-            if pos.tp2_hit and not pos.tp3_hit and high >= pos.tp3:
-                exit_price = pos.tp3 * (1 - SLIPPAGE_BPS / 10000)
-                self.close_position(symbol, exit_price, "TP3", timestamp, qty=pos.tp3_qty)
-                pos.tp3_hit = True
-
-            if low <= pos.stop_loss and symbol in self.positions:
-                exit_price = pos.stop_loss * (1 - SLIPPAGE_BPS / 10000)
-                self.close_position(symbol, exit_price, "STOP_LOSS", timestamp)
-
-        else:
-            if not pos.tp1_hit and low <= pos.tp1:
-                exit_price = pos.tp1 * (1 + SLIPPAGE_BPS / 10000)
-                self.close_position(symbol, exit_price, "TP1", timestamp, qty=pos.tp1_qty)
-                pos.tp1_hit = True
-                pos.stop_loss = min(pos.stop_loss, pos.entry)
-
-            if pos.tp1_hit and not pos.tp2_hit and low <= pos.tp2:
-                exit_price = pos.tp2 * (1 + SLIPPAGE_BPS / 10000)
-                self.close_position(symbol, exit_price, "TP2", timestamp, qty=pos.tp2_qty)
-                pos.tp2_hit = True
-                pos.stop_loss = min(pos.stop_loss, pos.tp1)
-
-            if pos.tp2_hit and not pos.tp3_hit and low <= pos.tp3:
-                exit_price = pos.tp3 * (1 + SLIPPAGE_BPS / 10000)
-                self.close_position(symbol, exit_price, "TP3", timestamp, qty=pos.tp3_qty)
-                pos.tp3_hit = True
-
-            if high >= pos.stop_loss and symbol in self.positions:
-                exit_price = pos.stop_loss * (1 + SLIPPAGE_BPS / 10000)
-                self.close_position(symbol, exit_price, "STOP_LOSS", timestamp)
+        # SL
+        sl_hit = (low <= pos.stop_loss) if is_long else (high >= pos.stop_loss)
+        if sl_hit and symbol in self.positions:
+            slippage_mult = (1 - SLIPPAGE_BPS / 10000) if is_long else (1 + SLIPPAGE_BPS / 10000)
+            exit_price = pos.stop_loss * slippage_mult
+            self.close_position(symbol, exit_price, "STOP_LOSS", timestamp)
 
     def get_account_state(self) -> BacktestAccountState:
         return self.account.get_account_state()
@@ -96,6 +86,40 @@ class BacktestPositionManager:
         self.positions[symbol] = pos
         self.account.wallet_balance -= risk_amount
         self.account.available_balance -= risk_amount
+
+        sl_pct = ((entry - stop_loss) / entry) * 100 if direction == "LONG" else ((stop_loss - entry) / entry) * 100
+        tp1_pct = ((tp1 - entry) / entry) * 100 if direction == "LONG" else ((entry - tp1) / entry) * 100
+        tp2_pct = ((tp2 - entry) / entry) * 100 if direction == "LONG" else ((entry - tp2) / entry) * 100
+        tp3_pct = ((tp3 - entry) / entry) * 100 if direction == "LONG" else ((entry - tp3) / entry) * 100
+        leverage = 1.0
+        size_usdt = qty * entry
+        margin_usdt = size_usdt / leverage
+
+        save_runtime_position({
+            "status": "Open",
+            "symbol": symbol,
+            "side": direction,
+            "strategy": "trend_following",
+            "setup": setup_type or "",
+            "size_usdt": round(size_usdt, 2),
+            "margin_usdt": round(margin_usdt, 2),
+            "entry": entry,
+            "entry_qty": qty,
+            "pos_side": None,
+            "stop_loss": {"price": stop_loss, "percent": round(sl_pct, 2), "risk_usdt": risk_amount, "sl_order_id": None, "sl_hit": False},
+            "take_profit": [
+                {"tp1_partial_close": tp1_qty / qty * 100, "tp1_hit": False, "price": tp1, "percent": round(tp1_pct, 2), "tp1_order_id": None},
+                {"tp2_partial_close": tp2_qty / qty * 100, "tp2_hit": False, "price": tp2, "percent": round(tp2_pct, 2), "tp2_order_id": None},
+                {"tp3_partial_close": tp3_qty / qty * 100, "tp3_hit": False, "price": tp3, "percent": round(tp3_pct, 2), "tp3_order_id": None},
+            ],
+            "pnl_usdt": 0.0,
+            "exchange_pnl_usdt": None,
+            "balance_usdt": self.account.wallet_balance,
+            "closed_reason": None,
+            "opened": timestamp.isoformat(),
+            "closed": None,
+        })
+
         return pos
 
     def close_position(self, symbol: str, exit_price: float,
@@ -141,6 +165,7 @@ class BacktestPositionManager:
             margin_release = pos.risk_amount
             self.account.wallet_balance += margin_release
             self.account.available_balance += margin_release
+            archive_position(asdict(pos) | {"closed": timestamp.isoformat(), "exit_reason": exit_reason})
             del self.positions[symbol]
 
         return trade

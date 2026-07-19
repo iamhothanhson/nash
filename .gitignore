@@ -9,6 +9,7 @@ __pycache__/
 .venv/
 venv/
 .vscode/
+data/runtime/positions.json
 data/position_history/*
 data/runtime_data/*
 data/performance/*

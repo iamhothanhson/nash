@@ -5,6 +5,7 @@ from typing import Any
 
 from backtesting.config import SLIPPAGE_BPS
 from backtesting.position import BacktestPositionManager
+from analysis.collect_position_metrics import build_entry_snapshot, save_entry_snapshot
 
 
 class BacktestExecutor:
@@ -32,6 +33,13 @@ class BacktestExecutor:
         tp1_qty = qty * 0.5
         tp2_qty = qty * 0.3
         tp3_qty = qty * 0.2
+
+        entry_snapshot = build_entry_snapshot(
+            order_plan.get("market_state"), order_plan.get("features"),
+            symbol=symbol, side=direction,
+            strategy_setup=order_plan.get("setup_type", ""),
+        )
+        save_entry_snapshot(entry_snapshot)
 
         portfolio.open_position(
             symbol=symbol,

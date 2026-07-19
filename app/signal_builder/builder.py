@@ -105,4 +105,6 @@ class SignalBuilder:
             tp1_r=tp1_r,
             tp2_r=tp2_r,
             tp3_r=tp3_r,
+            market_state=setup.market_state,
+            features=getattr(setup, "features", None),
         )

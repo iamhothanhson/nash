@@ -7,9 +7,9 @@ from config import settings
 from exchange.client import BinanceFuturesClient
 from exchange.utils import position_side_for_direction
 from exchange.exceptions import BinanceOrderError
-from monitoring.logger import log
 from order_planner.models import OrderPlan
 from position.archive import save_runtime_position
+from analysis.collect_position_metrics import build_entry_snapshot, save_entry_snapshot
 
 
 class Executor:
@@ -87,7 +87,6 @@ class Executor:
         tp1_qty = client.normalize_qty(sym, plan.tp1_qty or filled_qty * settings.EXECUTOR_TP1_FRAC)
         tp1_order_id = None
         if tp1_qty > 0:
-            log(f"[EXECUTOR] {sym} | TP1 {opp} price={tp1_price} qty={tp1_qty}")
             tp1_resp = client.place_order({
                 "symbol": sym,
                 "side": opp,
@@ -99,8 +98,6 @@ class Executor:
             })
             tp1_order_id = tp1_resp.get("orderId")
 
-        # ---- register for trailing stop management ----
-        # ---- persist position data ----
         leverage = float(settings.LEVERAGE or 1)
         size_usdt = plan.notional or filled_qty * fill_price
         margin_usdt = size_usdt / leverage
@@ -109,6 +106,12 @@ class Executor:
         tp1_pct = ((plan.tp1 - fill_price) / fill_price) * 100 if direction == "LONG" else ((fill_price - plan.tp1) / fill_price) * 100
         tp2_pct = ((plan.tp2 - fill_price) / fill_price) * 100 if direction == "LONG" else ((fill_price - plan.tp2) / fill_price) * 100
         tp3_pct = ((plan.tp3 - fill_price) / fill_price) * 100 if direction == "LONG" else ((fill_price - plan.tp3) / fill_price) * 100
+
+        entry_snapshot = build_entry_snapshot(
+            plan.market_state, plan.features,
+            symbol=sym, side=direction, strategy_setup=plan.setup_type,
+        )
+        save_entry_snapshot(entry_snapshot)
 
         pos_data = {
             "status": "Open",

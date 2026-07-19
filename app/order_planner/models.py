@@ -24,4 +24,5 @@ class OrderPlan:
     strategy_family: str
     risk_multiplier: float
     market_structure: str = "None"
-    market_regime_detail: Any | None = None
+    market_state: Any | None = None
+    features: dict[str, Any] | None = None

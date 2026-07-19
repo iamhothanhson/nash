@@ -140,6 +140,8 @@ class BacktestTradingPipeline:
                 "risk_amount": order_plan.risk_amount,
                 "setup_type": order_plan.setup_type,
                 "setup_score": order_plan.setup_score,
+                "market_state": order_plan.market_state,
+                "features": order_plan.features,
             },
             candle=current_candle,
             timestamp=timestamp,

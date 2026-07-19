@@ -116,7 +116,6 @@ class TradingPipeline:
         if order_plan is None:
             return None
 
-        # Execution
         return Executor.execute(order_plan)
 
     @staticmethod

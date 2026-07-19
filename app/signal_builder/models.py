@@ -1,4 +1,6 @@
 
+from typing import Any
+
 from dataclasses import dataclass
 from app.setup_builder.models import Direction, SetupType, StrategyFamily
 
@@ -16,7 +18,6 @@ class TradeSignal:
     strategy_family: StrategyFamily 
     confirmation_mode: str
     market_structure: str = "None"
-    market_regime_detail: dict | None = None
     confidence: float = 0.0
     rsi: float | None = None
     atr: float | None = None
@@ -26,3 +27,5 @@ class TradeSignal:
     tp1_r: float = 0.0
     tp2_r: float = 0.0
     tp3_r: float = 0.0
+    market_state: Any | None = None
+    features: dict | None = None

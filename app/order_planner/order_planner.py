@@ -92,6 +92,8 @@ class OrderPlanner:
             confirmation_mode=str(getattr(signal, "confirmation_mode", "")),
             strategy_family=str(getattr(signal, "strategy_family", "")),
             risk_multiplier=float(getattr(risk, "risk_multiplier", 1.0)),
+            market_state=getattr(signal, "market_state", None),
+            features=getattr(signal, "features", None),
         )
 
     @staticmethod

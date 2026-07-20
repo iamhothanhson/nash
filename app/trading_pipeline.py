@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from executor.executor import Executor
+from execution_service.execution import ExecutionService
 from indicators.indicator_builder import IndicatorBuilder
 from market_analyzer.market_analyzer import MarketAnalyzer
 from exchange.account_service import AccountService
@@ -19,6 +19,7 @@ class TradingPipeline:
         self.marketplace = marketplace
         self.account_service = account_service or AccountService()
         self.position_manager = PositionManager()
+        self.execution_service = ExecutionService()
 
         self.breakout_detector = BreakoutDetector()
         self.retest_detector = BreakoutRetestDetector()
@@ -116,7 +117,7 @@ class TradingPipeline:
         if order_plan is None:
             return None
 
-        return Executor.execute(order_plan)
+        return self.execution_service.execute(order_plan)
 
     @staticmethod
     def _select_best_candidate(candidates: list[Any]) -> Any:

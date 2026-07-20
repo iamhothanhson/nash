@@ -1,20 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from typing import Any
 
-from analysis.collect_position_metrics import (
-    build_entry_snapshot,
-    save_entry_snapshot,
-)
 from app.core.logger import log
 from config import settings
 from exchange.client import BinanceFuturesClient
 from exchange.exceptions import BinanceOrderError
 from exchange.utils import position_side_for_direction
+from execution_service.models import ExecutionResult
 from order_planner.models import OrderPlan
-from position.archive import save_runtime_position
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,16 +49,13 @@ class Executor:
         return cls._client
 
     @classmethod
-    def execute(cls, plan: OrderPlan) -> dict[str, Any]:
+    def execute(cls, plan: OrderPlan) -> ExecutionResult:
         if settings.MODE not in cls._allowed_modes:
             log(
                 f"[EXECUTOR] {plan.symbol} | "
                 f"skip (mode={settings.MODE})"
             )
-            return {
-                "status": "skipped",
-                "mode": settings.MODE,
-            }
+            return ExecutionResult(status="skipped", mode=settings.MODE)
 
         client = cls._get_client()
         context = cls._build_context(client, plan)
@@ -74,7 +66,12 @@ class Executor:
             symbol=context.symbol,
         )
         if rejection is not None:
-            return rejection
+            return ExecutionResult(
+                status="rejected",
+                symbol=context.symbol,
+                reason=rejection["reason"],
+                raw=rejection,
+            )
 
         entry = cls._place_entry_order(
             client=client,
@@ -89,36 +86,19 @@ class Executor:
             filled_qty=entry.qty,
         )
 
-        cls._save_entry_snapshot(
-            plan=plan,
+        result = ExecutionResult(
+            status="placed",
             symbol=context.symbol,
             direction=context.direction,
+            position_side=context.position_side,
+            entry_order_id=entry.order_id,
+            entry_price=entry.price,
+            filled_qty=entry.qty,
+            stop_loss_order_id=protective_orders.stop_loss_order_id,
+            tp1_order_id=protective_orders.tp1_order_id,
         )
 
-        position_data = cls._build_position_data(
-            client=client,
-            plan=plan,
-            context=context,
-            entry=entry,
-            protective_orders=protective_orders,
-        )
-        save_runtime_position(position_data)
-
-        log(
-            f"[EXECUTOR] {context.symbol} | "
-            "Position saved to runtime/positions.json"
-        )
-
-        result = {
-            "status": "placed",
-            "symbol": context.symbol,
-            "direction": context.direction,
-            "entry_order_id": entry.order_id,
-            "entry_price": entry.price,
-            "filled_qty": entry.qty,
-        }
-
-        log(f"[EXECUTOR] {context.symbol} | Done — {result}")
+        log(f"[EXECUTOR] {context.symbol} | Done — placed")
         return result
 
     @classmethod
@@ -364,158 +344,6 @@ class Executor:
 
         response = client.place_order(payload)
         return response.get("orderId")
-
-    @classmethod
-    def _save_entry_snapshot(
-        cls,
-        plan: OrderPlan,
-        symbol: str,
-        direction: str,
-    ) -> None:
-        snapshot = build_entry_snapshot(
-            plan.market_state,
-            plan.features,
-            symbol=symbol,
-            side=direction,
-            strategy_setup=plan.setup_type,
-        )
-
-        save_entry_snapshot(snapshot)
-
-    @classmethod
-    def _build_position_data(
-        cls,
-        client: BinanceFuturesClient,
-        plan: OrderPlan,
-        context: ExecutionContext,
-        entry: EntryFill,
-        protective_orders: ProtectiveOrders,
-    ) -> dict[str, Any]:
-        leverage = cls._get_leverage()
-
-        size_usdt = (
-            float(plan.notional)
-            if plan.notional
-            else entry.qty * entry.price
-        )
-        margin_usdt = size_usdt / leverage
-
-        sl_pct = cls._price_change_percent(
-            entry_price=entry.price,
-            target_price=plan.stop_loss,
-            direction=context.direction,
-            favorable=False,
-        )
-        tp1_pct = cls._price_change_percent(
-            entry_price=entry.price,
-            target_price=plan.tp1,
-            direction=context.direction,
-            favorable=True,
-        )
-        tp2_pct = cls._price_change_percent(
-            entry_price=entry.price,
-            target_price=plan.tp2,
-            direction=context.direction,
-            favorable=True,
-        )
-        tp3_pct = cls._price_change_percent(
-            entry_price=entry.price,
-            target_price=plan.tp3,
-            direction=context.direction,
-            favorable=True,
-        )
-
-        return {
-            "status": "Open",
-            "symbol": context.symbol,
-            "side": context.direction,
-            "strategy": plan.strategy_family or "trend_following",
-            "setup": plan.setup_type,
-            "size_usdt": round(size_usdt, 2),
-            "margin_usdt": round(margin_usdt, 2),
-            "entry": entry.price,
-            "entry_qty": entry.qty,
-            "pos_side": context.position_side,
-            "stop_loss": {
-                "price": plan.stop_loss,
-                "percent": round(sl_pct, 2),
-                "risk_usdt": plan.risk_amount,
-                "sl_order_id": protective_orders.stop_loss_order_id,
-                "sl_hit": False,
-            },
-            "take_profit": [
-                cls._build_take_profit_record(
-                    name="tp1",
-                    partial_close=50.0,
-                    price=plan.tp1,
-                    percent=tp1_pct,
-                    order_id=protective_orders.tp1_order_id,
-                ),
-                cls._build_take_profit_record(
-                    name="tp2",
-                    partial_close=30.0,
-                    price=plan.tp2,
-                    percent=tp2_pct,
-                    order_id=None,
-                ),
-                cls._build_take_profit_record(
-                    name="tp3",
-                    partial_close=20.0,
-                    price=plan.tp3,
-                    percent=tp3_pct,
-                    order_id=None,
-                ),
-            ],
-            "pnl_usdt": 0.0,
-            "exchange_pnl_usdt": None,
-            "balance_usdt": client.get_balance("USDT"),
-            "closed_reason": None,
-            "opened": datetime.now(timezone.utc).isoformat(),
-            "closed": None,
-        }
-
-    @staticmethod
-    def _build_take_profit_record(
-        *,
-        name: str,
-        partial_close: float,
-        price: float,
-        percent: float,
-        order_id: int | str | None,
-    ) -> dict[str, Any]:
-        return {
-            f"{name}_partial_close": partial_close,
-            f"{name}_hit": False,
-            "price": price,
-            "percent": round(percent, 2),
-            f"{name}_order_id": order_id,
-        }
-
-    @staticmethod
-    def _price_change_percent(
-        *,
-        entry_price: float,
-        target_price: float,
-        direction: str,
-        favorable: bool,
-    ) -> float:
-        if entry_price <= 0:
-            return 0.0
-
-        if direction == "LONG":
-            difference = (
-                target_price - entry_price
-                if favorable
-                else entry_price - target_price
-            )
-        else:
-            difference = (
-                entry_price - target_price
-                if favorable
-                else target_price - entry_price
-            )
-
-        return difference / entry_price * 100
 
     @staticmethod
     def _resolve_fill_price(

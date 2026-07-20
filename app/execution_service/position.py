@@ -5,8 +5,9 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
+from app.core.logger import log
 from config import settings
-from execution.models import ExecutionResult
+from execution_service.models import ExecutionResult
 from order_planner.models import OrderPlan
 from position.archive import save_runtime_position
 
@@ -19,12 +20,10 @@ class PositionService:
         *,
         plan: OrderPlan,
         execution: ExecutionResult,
-        balance_usdt: float,
     ) -> dict[str, Any]:
         position = self._build_position_data(
             plan=plan,
             execution=execution,
-            balance_usdt=balance_usdt,
         )
 
         save_runtime_position(position)
@@ -41,7 +40,6 @@ class PositionService:
         *,
         plan: OrderPlan,
         execution: ExecutionResult,
-        balance_usdt: float,
     ) -> dict[str, Any]:
         leverage = self._get_leverage()
 
@@ -136,7 +134,7 @@ class PositionService:
             ],
             "pnl_usdt": 0.0,
             "exchange_pnl_usdt": None,
-            "balance_usdt": float(balance_usdt),
+            "balance_usdt": 0.0,
             "closed_reason": None,
             "opened_at": datetime.now(timezone.utc).isoformat(),
             "closed_at": None,

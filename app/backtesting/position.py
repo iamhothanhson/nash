@@ -9,6 +9,7 @@ from backtesting.account import BacktestAccountService, BacktestAccountState
 from backtesting.config import FEES, SLIPPAGE_BPS
 from backtesting.models import BacktestPosition, BacktestTrade, EquityPoint
 from position.archive import archive_position, save_runtime_position
+from analysis.collect_position_metrics import update_entry_result
 
 
 class BacktestPositionManager:
@@ -68,7 +69,11 @@ class BacktestPositionManager:
                       qty: float, tp1_qty: float, tp2_qty: float, tp3_qty: float,
                       risk_amount: float, timestamp: datetime,
                       setup_type: str | None = None,
-                      setup_score: float = 0.0) -> BacktestPosition:
+                      setup_score: float = 0.0,
+                      position_id: str = "") -> BacktestPosition:
+        leverage = 1.0
+        margin_usdt = (qty * entry) / leverage
+
         pos = BacktestPosition(
             symbol=symbol,
             direction=direction,
@@ -80,6 +85,8 @@ class BacktestPositionManager:
             remaining_qty=qty,
             tp1_qty=tp1_qty, tp2_qty=tp2_qty, tp3_qty=tp3_qty,
             risk_amount=risk_amount,
+            margin_usdt=margin_usdt,
+            position_id=position_id,
             setup_type=setup_type,
             setup_score=setup_score,
         )
@@ -91,11 +98,10 @@ class BacktestPositionManager:
         tp1_pct = ((tp1 - entry) / entry) * 100 if direction == "LONG" else ((entry - tp1) / entry) * 100
         tp2_pct = ((tp2 - entry) / entry) * 100 if direction == "LONG" else ((entry - tp2) / entry) * 100
         tp3_pct = ((tp3 - entry) / entry) * 100 if direction == "LONG" else ((entry - tp3) / entry) * 100
-        leverage = 1.0
         size_usdt = qty * entry
-        margin_usdt = size_usdt / leverage
 
         save_runtime_position({
+            "position_id": position_id,
             "status": "Open",
             "symbol": symbol,
             "side": direction,
@@ -112,6 +118,7 @@ class BacktestPositionManager:
                 {"tp2_partial_close": tp2_qty / qty * 100, "tp2_hit": False, "price": tp2, "percent": round(tp2_pct, 2), "tp2_order_id": None},
                 {"tp3_partial_close": tp3_qty / qty * 100, "tp3_hit": False, "price": tp3, "percent": round(tp3_pct, 2), "tp3_order_id": None},
             ],
+            "realized_pnl": 0.0,
             "pnl_usdt": 0.0,
             "exchange_pnl_usdt": None,
             "balance_usdt": self.account.wallet_balance,
@@ -166,6 +173,10 @@ class BacktestPositionManager:
             self.account.wallet_balance += margin_release
             self.account.available_balance += margin_release
             archive_position(asdict(pos) | {"closed": timestamp.isoformat(), "exit_reason": exit_reason})
+            margin = pos.margin_usdt or (pos.entry * pos.initial_qty)
+            pnl_pct = (pos.realized_pnl / margin * 100) if margin else 0.0
+            result = "WIN" if pos.realized_pnl >= 0 else "LOSS"
+            update_entry_result(pos.position_id, result, pnl_pct, pos.realized_pnl, exit_reason)
             del self.positions[symbol]
 
         return trade

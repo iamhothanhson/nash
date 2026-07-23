@@ -30,6 +30,8 @@ class BacktestPosition:
     tp3_qty: float
 
     risk_amount: float
+    margin_usdt: float = 0.0
+    position_id: str = ""
     setup_type: str | None = None
     setup_score: float = 0.0
 

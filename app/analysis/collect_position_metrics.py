@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,15 @@ from analysis.models import EntrySnapshot, MarketStateSnapshot, IndicatorSnapsho
 _ANALYSIS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "analysis"
 
 
-def save_entry_snapshot(snapshot: EntrySnapshot) -> None:
+def clear_analysis_file() -> None:
+    filepath = _ANALYSIS_DIR / "position_analysis.json"
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text("[]\n", encoding="utf-8")
+
+
+def save_entry_snapshot(snapshot: EntrySnapshot) -> str:
+    position_id = snapshot.position_id or str(int(time.time() * 1_000_000))
+
     _ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
     filepath = _ANALYSIS_DIR / "position_analysis.json"
 
@@ -23,6 +32,7 @@ def save_entry_snapshot(snapshot: EntrySnapshot) -> None:
             existing = loaded if isinstance(loaded, list) else [loaded]
 
     existing.append({
+        "position_id": position_id,
         "symbol": snapshot.symbol,
         "side": snapshot.side,
         "strategy_setup": snapshot.strategy_setup,
@@ -61,6 +71,31 @@ def save_entry_snapshot(snapshot: EntrySnapshot) -> None:
     })
 
     filepath.write_text(json.dumps(existing, indent=2, default=str) + "\n", encoding="utf-8")
+    return position_id
+
+
+def update_entry_result(position_id: str, result: str, pnl_pct: float, pnl_usdt: float, exit_reason: str) -> None:
+    filepath = _ANALYSIS_DIR / "position_analysis.json"
+    if not filepath.exists():
+        return
+
+    raw = filepath.read_text(encoding="utf-8")
+    if not raw.strip():
+        return
+
+    data: list[dict[str, Any]] = json.loads(raw)
+    if not isinstance(data, list):
+        data = [data]
+
+    for entry in data:
+        if entry.get("position_id") == position_id:
+            entry["result"] = result
+            entry["pnl_pct"] = round(pnl_pct, 2)
+            entry["pnl_usdt"] = round(pnl_usdt, 2)
+            entry["exit_reason"] = exit_reason
+            break
+
+    filepath.write_text(json.dumps(data, indent=2, default=str) + "\n", encoding="utf-8")
 
 
 def build_entry_snapshot(
@@ -69,6 +104,7 @@ def build_entry_snapshot(
     symbol: str = "",
     side: str = "",
     strategy_setup: str = "",
+    position_id: str = "",
 ) -> EntrySnapshot:
     ind = getattr(market_state, "indicators", None) if market_state else None
 
@@ -92,6 +128,7 @@ def build_entry_snapshot(
         symbol=symbol,
         side=side,
         strategy_setup=strategy_setup,
+        position_id=position_id,
         captured_at=datetime.now(),
         market_state=MarketStateSnapshot(
             regime=enum_val(getattr(market_state, "regime", None), "Unknown"),

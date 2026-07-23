@@ -8,6 +8,7 @@ from typing import Any
 from exchange.client import BinanceFuturesClient
 from config import settings
 from position.archive import archive_position
+from analysis.collect_position_metrics import update_entry_result
 
 
 RUNTIME_POSITIONS = Path("data/runtime/positions.json")
@@ -59,6 +60,43 @@ class PositionManager:
 
         self._check_orders(pos)
 
+    @staticmethod
+    def _entry_price(pos: dict[str, Any]) -> float:
+        e = pos.get("entry", 0)
+        if isinstance(e, dict):
+            return float(e.get("price", 0))
+        return float(e)
+
+    @staticmethod
+    def _entry_qty(pos: dict[str, Any]) -> float:
+        e = pos.get("entry", 0)
+        if isinstance(e, dict):
+            return float(e.get("quantity", 0))
+        return float(pos.get("entry_qty", 0))
+
+    def _add_partial_pnl(self, pos: dict[str, Any], resp: dict[str, Any]) -> None:
+        entry_price = self._entry_price(pos)
+        fill_price = float(resp.get("avgPrice", 0)) or float(resp.get("price", 0))
+        fill_qty = float(resp.get("executedQty", 0)) or self._entry_qty(pos)
+        if pos.get("side") == "LONG":
+            pnl = (fill_price - entry_price) * fill_qty
+        else:
+            pnl = (entry_price - fill_price) * fill_qty
+        pos["realized_pnl"] = pos.get("realized_pnl", 0.0) + round(pnl, 2)
+
+    def _save_result(self, pos: dict[str, Any]) -> None:
+        pid = pos.get("position_id", "")
+        if not pid:
+            return
+        realized = pos.get("realized_pnl", 0.0)
+        margin = float(pos.get("margin_usdt", 0))
+        if margin == 0:
+            margin = self._entry_price(pos) * self._entry_qty(pos)
+        pnl_pct = (realized / margin * 100) if margin else 0.0
+        result = "WIN" if realized >= 0 else "LOSS"
+        exit_reason = pos.get("closed_reason", "UNKNOWN")
+        update_entry_result(pid, result, pnl_pct, realized, exit_reason)
+
     def _check_orders(self, pos: dict[str, Any]) -> None:
         sym = pos["symbol"]
         changed = False
@@ -78,10 +116,12 @@ class PositionManager:
                 pos["status"] = "Closed"
                 pos["closed"] = _now()
                 pos["closed_reason"] = "SL HIT"
+                self._add_partial_pnl(pos, resp)
                 changed = True
 
         if pos["status"] != "Open":
             archive_position(pos)
+            self._save_result(pos)
             return
 
         # --- 2. TP1 ---
@@ -90,7 +130,8 @@ class PositionManager:
             resp = self.client.get_order(sym, tp1_id)
             if resp.get("status") == "FILLED":
                 tp1["tp1_hit"] = True
-                self._replace_sl(sym, pos["entry"], pos)
+                self._add_partial_pnl(pos, resp)
+                self._replace_sl(sym, self._entry_price(pos), pos)
                 self._place_tp2(tp2, pos)
                 changed = True
 
@@ -100,7 +141,8 @@ class PositionManager:
             resp = self.client.get_order(sym, tp2_id)
             if resp.get("status") == "FILLED":
                 tp2["tp2_hit"] = True
-                tp1_price = tp1.get("price", pos["entry"])
+                self._add_partial_pnl(pos, resp)
+                tp1_price = tp1.get("price", self._entry_price(pos))
                 self._replace_sl(sym, tp1_price, pos)
                 self._place_tp3(tp3, pos)
                 changed = True
@@ -114,11 +156,13 @@ class PositionManager:
                 pos["status"] = "Closed"
                 pos["closed"] = _now()
                 pos["closed_reason"] = "TP3 FILLED"
+                self._add_partial_pnl(pos, resp)
                 changed = True
 
         if pos["status"] != "Open":
             if changed:
                 archive_position(pos)
+                self._save_result(pos)
             return
 
         # --- update PnL ---

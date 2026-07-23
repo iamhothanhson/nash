@@ -20,12 +20,15 @@ class PositionService:
         *,
         plan: OrderPlan,
         execution: ExecutionResult,
+        position_id: str = "",
     ) -> dict[str, Any]:
         position = self._build_position_data(
             plan=plan,
             execution=execution,
         )
 
+        position["position_id"] = position_id
+        position["realized_pnl"] = 0.0
         save_runtime_position(position)
 
         log(

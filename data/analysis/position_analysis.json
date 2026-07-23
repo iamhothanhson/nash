@@ -1,9 +1,10 @@
 [
   {
+    "position_id": "1784815192221206",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:14.031231",
+    "captured_at": "2026-07-23T20:59:52.221211",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -34,13 +35,18 @@
       "touch_count": 5,
       "breakout_level_age": 30,
       "htf_confirmed": true
-    }
+    },
+    "result": "WIN",
+    "pnl_pct": 0.27,
+    "pnl_usdt": 0.52,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815192274496",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:14.073448",
+    "captured_at": "2026-07-23T20:59:52.274501",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -71,13 +77,18 @@
       "touch_count": 2,
       "breakout_level_age": 24,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -1.45,
+    "pnl_usdt": -3.35,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815193120103",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:14.652481",
+    "captured_at": "2026-07-23T20:59:53.120106",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -108,13 +119,18 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -1.0,
+    "pnl_usdt": -2.47,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815193414316",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:14.879592",
+    "captured_at": "2026-07-23T20:59:53.414323",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -145,13 +161,18 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "WIN",
+    "pnl_pct": 0.68,
+    "pnl_usdt": 1.92,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815193467165",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:14.921766",
+    "captured_at": "2026-07-23T20:59:53.467169",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -182,13 +203,18 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -1.19,
+    "pnl_usdt": -3.17,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815194097827",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:15.500632",
+    "captured_at": "2026-07-23T20:59:54.097831",
     "market_state": {
       "regime": "high_volatility_chop",
       "trend_direction": "bullish",
@@ -219,13 +245,18 @@
       "touch_count": 2,
       "breakout_level_age": 29,
       "htf_confirmed": true
-    }
+    },
+    "result": "WIN",
+    "pnl_pct": 0.33,
+    "pnl_usdt": 0.73,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815195645499",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:17.027681",
+    "captured_at": "2026-07-23T20:59:55.645502",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -256,13 +287,18 @@
       "touch_count": 1,
       "breakout_level_age": 2,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -1.01,
+    "pnl_usdt": -2.31,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815196484179",
     "symbol": "TAOUSDT",
     "side": "SHORT",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:17.863452",
+    "captured_at": "2026-07-23T20:59:56.484182",
     "market_state": {
       "regime": "range",
       "trend_direction": "bearish",
@@ -293,13 +329,18 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -0.8,
+    "pnl_usdt": -1.52,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815197068115",
     "symbol": "TAOUSDT",
     "side": "SHORT",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:18.446027",
+    "captured_at": "2026-07-23T20:59:57.068118",
     "market_state": {
       "regime": "high_volatility_chop",
       "trend_direction": "bearish",
@@ -330,13 +371,18 @@
       "touch_count": 2,
       "breakout_level_age": 8,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -1.02,
+    "pnl_usdt": -1.4,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815200183035",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:21.357343",
+    "captured_at": "2026-07-23T21:00:00.183039",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -367,13 +413,18 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -1.36,
+    "pnl_usdt": -1.3,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815200500180",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:21.659629",
+    "captured_at": "2026-07-23T21:00:00.500183",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -404,13 +455,18 @@
       "touch_count": 1,
       "breakout_level_age": 2,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -1.12,
+    "pnl_usdt": -1.93,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815201190749",
     "symbol": "TAOUSDT",
     "side": "SHORT",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:22.379736",
+    "captured_at": "2026-07-23T21:00:01.190752",
     "market_state": {
       "regime": "range",
       "trend_direction": "bearish",
@@ -441,13 +497,18 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "WIN",
+    "pnl_pct": 0.58,
+    "pnl_usdt": 0.45,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815201237189",
     "symbol": "TAOUSDT",
     "side": "SHORT",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:22.422349",
+    "captured_at": "2026-07-23T21:00:01.237192",
     "market_state": {
       "regime": "high_volatility_chop",
       "trend_direction": "bearish",
@@ -478,13 +539,18 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -2.03,
+    "pnl_usdt": -1.17,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815201983960",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:23.143207",
+    "captured_at": "2026-07-23T21:00:01.983964",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -515,13 +581,18 @@
       "touch_count": 2,
       "breakout_level_age": 19,
       "htf_confirmed": true
-    }
+    },
+    "result": "WIN",
+    "pnl_pct": 0.45,
+    "pnl_usdt": 0.63,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815202030431",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:23.185438",
+    "captured_at": "2026-07-23T21:00:02.030434",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -552,13 +623,18 @@
       "touch_count": 2,
       "breakout_level_age": 3,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -2.09,
+    "pnl_usdt": -1.72,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815202140325",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:23.300624",
+    "captured_at": "2026-07-23T21:00:02.140328",
     "market_state": {
       "regime": "weak_bullish",
       "trend_direction": "bullish",
@@ -589,13 +665,18 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "LOSS",
+    "pnl_pct": -1.36,
+    "pnl_usdt": -1.7,
+    "exit_reason": "STOP_LOSS"
   },
   {
+    "position_id": "1784815202466564",
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-23T20:27:23.506433",
+    "captured_at": "2026-07-23T21:00:02.466573",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -626,6 +707,10 @@
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
-    }
+    },
+    "result": "WIN",
+    "pnl_pct": 0.4,
+    "pnl_usdt": 0.56,
+    "exit_reason": "STOP_LOSS"
   }
 ]

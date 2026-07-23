@@ -20,21 +20,23 @@ class ExecutionService:
         )
         self.position_service = position_service or PositionService()
 
-    def execute(self, plan: OrderPlan) -> ExecutionResult:
+    def execute(self, plan: OrderPlan, position_id: str = "") -> ExecutionResult:
         execution = self.executor.execute(plan)
 
         if execution.status != "placed":
             return execution
 
-        self.entry_snapshot_service.record_entry(
+        pid = self.entry_snapshot_service.record_entry(
             plan,
             symbol=execution.symbol,
             direction=execution.direction,
+            position_id=position_id,
         )
 
         self.position_service.record_position(
             plan=plan,
             execution=execution,
+            position_id=pid,
         )
 
         return execution

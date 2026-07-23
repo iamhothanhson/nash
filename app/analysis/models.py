@@ -56,6 +56,7 @@ class EntrySnapshot:
     symbol: str
     side: str
     strategy_setup: str
+    position_id: str
 
     # Snapshot time
     captured_at: datetime

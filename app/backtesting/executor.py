@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from datetime import datetime
 from typing import Any
 
@@ -34,10 +35,13 @@ class BacktestExecutor:
         tp2_qty = qty * 0.3
         tp3_qty = qty * 0.2
 
+        position_id = str(int(time.time() * 1_000_000))
+
         entry_snapshot = build_entry_snapshot(
             order_plan.get("market_state"), order_plan.get("features"),
             symbol=symbol, side=direction,
             strategy_setup=order_plan.get("setup_type", ""),
+            position_id=position_id,
         )
         save_entry_snapshot(entry_snapshot)
 
@@ -53,6 +57,7 @@ class BacktestExecutor:
             timestamp=timestamp,
             setup_type=order_plan.get("setup_type"),
             setup_score=order_plan.get("setup_score", 0.0),
+            position_id=position_id,
         )
 
         return {"status": "opened", "symbol": symbol, "direction": direction, "entry": entry, "qty": qty}

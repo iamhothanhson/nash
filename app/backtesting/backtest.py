@@ -13,6 +13,7 @@ for path in (APP_DIR, ROOT_DIR):
 
 from pathlib import Path
 
+from analysis.collect_position_metrics import clear_analysis_file
 from backtesting.executor import BacktestExecutor
 from backtesting.marketplace import HistoricalMarketplace
 from backtesting.position import BacktestPositionManager
@@ -31,6 +32,8 @@ def main() -> None:
     parser.add_argument("--symbol", type=str, default=None, help="Symbol to backtest (e.g. TAOUSDT)")
     parser.add_argument("--days", type=int, default=None, help="Number of recent days to backtest")
     args = parser.parse_args()
+
+    clear_analysis_file()
 
     mp = HistoricalMarketplace.from_csv_dir(HISTORY_DIR)
     if not mp.data:

@@ -3,7 +3,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:49.315496",
+    "captured_at": "2026-07-23T20:27:14.031231",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -15,22 +15,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 0.6066971865063238,
-      "ema_slope_1h": 1.8776808100107587,
-      "adx_15m": 20.504554260481104,
-      "adx_1h": 53.49527597351309,
-      "atr_percent": 0.006076056830699598,
+      "ema_slope_15m": 0.61,
+      "ema_slope_1h": 1.88,
+      "adx_15m": 20.5,
+      "adx_1h": 53.5,
+      "atr_percent": 0.01,
       "atr_percentile": 50,
-      "rsi": 64.26066448017812,
-      "volume_ratio": 1.238716268498138
+      "rsi": 64.26,
+      "volume_ratio": 1.24
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.09742519137092191,
-      "distance_from_level_pct": 0.09742519137092191,
-      "candle_body_ratio": 0.7237569060773484,
-      "wick_ratio": 0.27624309392265156,
+      "breakout_strength_pct": 0.1,
+      "distance_from_level_pct": 0.1,
+      "candle_body_ratio": 0.72,
+      "wick_ratio": 0.28,
       "touch_count": 5,
       "breakout_level_age": 30,
       "htf_confirmed": true
@@ -40,7 +40,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:49.338241",
+    "captured_at": "2026-07-23T20:27:14.073448",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -52,22 +52,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 1.036535549726068,
-      "ema_slope_1h": 1.8776808100107587,
-      "adx_15m": 22.03256135280236,
-      "adx_1h": 53.49527597351309,
-      "atr_percent": 0.006201645618519831,
+      "ema_slope_15m": 1.04,
+      "ema_slope_1h": 1.88,
+      "adx_15m": 22.03,
+      "adx_1h": 53.5,
+      "atr_percent": 0.01,
       "atr_percentile": 57,
-      "rsi": 71.19458339625989,
-      "volume_ratio": 2.021966959168253
+      "rsi": 71.19,
+      "volume_ratio": 2.02
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.6386671294689257,
-      "distance_from_level_pct": 0.6386671294689257,
-      "candle_body_ratio": 0.9183673469387584,
-      "wick_ratio": 0.08163265306124154,
+      "breakout_strength_pct": 0.64,
+      "distance_from_level_pct": 0.64,
+      "candle_body_ratio": 0.92,
+      "wick_ratio": 0.08,
       "touch_count": 2,
       "breakout_level_age": 24,
       "htf_confirmed": true
@@ -77,7 +77,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:49.706344",
+    "captured_at": "2026-07-23T20:27:14.652481",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -89,22 +89,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 0.4768256706962575,
-      "ema_slope_1h": 1.1312037648959858,
-      "adx_15m": 14.280229222340107,
-      "adx_1h": 44.4385707078396,
-      "atr_percent": 0.005562482519819018,
+      "ema_slope_15m": 0.48,
+      "ema_slope_1h": 1.13,
+      "adx_15m": 14.28,
+      "adx_1h": 44.44,
+      "atr_percent": 0.01,
       "atr_percentile": 21,
-      "rsi": 64.8508925830848,
-      "volume_ratio": 1.608139851198596
+      "rsi": 64.85,
+      "volume_ratio": 1.61
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.25215889464594754,
-      "distance_from_level_pct": 0.25215889464594754,
-      "candle_body_ratio": 0.7634069400630926,
-      "wick_ratio": 0.23659305993690732,
+      "breakout_strength_pct": 0.25,
+      "distance_from_level_pct": 0.25,
+      "candle_body_ratio": 0.76,
+      "wick_ratio": 0.24,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
@@ -114,7 +114,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:49.850385",
+    "captured_at": "2026-07-23T20:27:14.879592",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -126,22 +126,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 0.6444336398276391,
-      "ema_slope_1h": 1.461932569700707,
-      "adx_15m": 15.039637476381722,
-      "adx_1h": 44.252529535451124,
-      "atr_percent": 0.00509895440176249,
+      "ema_slope_15m": 0.64,
+      "ema_slope_1h": 1.46,
+      "adx_15m": 15.04,
+      "adx_1h": 44.25,
+      "atr_percent": 0.01,
       "atr_percentile": 6,
-      "rsi": 67.53094515839067,
-      "volume_ratio": 3.543998053144104
+      "rsi": 67.53,
+      "volume_ratio": 3.54
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.1509175098610865,
-      "distance_from_level_pct": 0.1509175098610865,
-      "candle_body_ratio": 0.35076923076922656,
-      "wick_ratio": 0.6492307692307734,
+      "breakout_strength_pct": 0.15,
+      "distance_from_level_pct": 0.15,
+      "candle_body_ratio": 0.35,
+      "wick_ratio": 0.65,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
@@ -151,7 +151,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:49.873989",
+    "captured_at": "2026-07-23T20:27:14.921766",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -163,22 +163,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 1.123059007303425,
-      "ema_slope_1h": 1.461932569700707,
-      "adx_15m": 17.874883924820633,
-      "adx_1h": 44.252529535451124,
-      "atr_percent": 0.005556784488877445,
+      "ema_slope_15m": 1.12,
+      "ema_slope_1h": 1.46,
+      "adx_15m": 17.87,
+      "adx_1h": 44.25,
+      "atr_percent": 0.01,
       "atr_percentile": 28,
-      "rsi": 76.28584744829222,
-      "volume_ratio": 2.603884222934602
+      "rsi": 76.29,
+      "volume_ratio": 2.6
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.44252306225959476,
-      "distance_from_level_pct": 0.44252306225959476,
-      "candle_body_ratio": 0.8527777777777705,
-      "wick_ratio": 0.1472222222222295,
+      "breakout_strength_pct": 0.44,
+      "distance_from_level_pct": 0.44,
+      "candle_body_ratio": 0.85,
+      "wick_ratio": 0.15,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
@@ -188,7 +188,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:50.201655",
+    "captured_at": "2026-07-23T20:27:15.500632",
     "market_state": {
       "regime": "high_volatility_chop",
       "trend_direction": "bullish",
@@ -200,22 +200,22 @@
       "is_high_volatility": true
     },
     "indicators": {
-      "ema_slope_15m": 0.3845608292776319,
-      "ema_slope_1h": 0.6423451575339527,
-      "adx_15m": 13.2854385351699,
-      "adx_1h": 40.918121847900665,
-      "atr_percent": 0.0063226157646441225,
+      "ema_slope_15m": 0.38,
+      "ema_slope_1h": 0.64,
+      "adx_15m": 13.29,
+      "adx_1h": 40.92,
+      "atr_percent": 0.01,
       "atr_percentile": 89,
-      "rsi": 62.839586236399626,
-      "volume_ratio": 1.8083418300378056
+      "rsi": 62.84,
+      "volume_ratio": 1.81
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.20233196159121225,
-      "distance_from_level_pct": 0.20233196159121225,
-      "candle_body_ratio": 0.9758064516129025,
-      "wick_ratio": 0.024193548387097513,
+      "breakout_strength_pct": 0.2,
+      "distance_from_level_pct": 0.2,
+      "candle_body_ratio": 0.98,
+      "wick_ratio": 0.02,
       "touch_count": 2,
       "breakout_level_age": 29,
       "htf_confirmed": true
@@ -225,7 +225,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:51.173117",
+    "captured_at": "2026-07-23T20:27:17.027681",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -237,22 +237,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 1.0559595581691497,
-      "ema_slope_1h": 0.023205509349168096,
-      "adx_15m": 17.106518582597424,
-      "adx_1h": 17.40192405666323,
-      "atr_percent": 0.005592809639443912,
+      "ema_slope_15m": 1.06,
+      "ema_slope_1h": 0.02,
+      "adx_15m": 17.11,
+      "adx_1h": 17.4,
+      "atr_percent": 0.01,
       "atr_percentile": 5,
-      "rsi": 68.99567825543087,
-      "volume_ratio": 1.772769935075428
+      "rsi": 69.0,
+      "volume_ratio": 1.77
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.25475484208688237,
-      "distance_from_level_pct": 0.25475484208688237,
-      "candle_body_ratio": 0.3832599118942532,
-      "wick_ratio": 0.6167400881057469,
+      "breakout_strength_pct": 0.25,
+      "distance_from_level_pct": 0.25,
+      "candle_body_ratio": 0.38,
+      "wick_ratio": 0.62,
       "touch_count": 1,
       "breakout_level_age": 2,
       "htf_confirmed": true
@@ -262,7 +262,7 @@
     "symbol": "TAOUSDT",
     "side": "SHORT",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:51.707053",
+    "captured_at": "2026-07-23T20:27:17.863452",
     "market_state": {
       "regime": "range",
       "trend_direction": "bearish",
@@ -274,22 +274,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": -0.3050640869286667,
-      "ema_slope_1h": -0.26811484728591495,
-      "adx_15m": 14.58047680350357,
-      "adx_1h": 11.649698652279374,
-      "atr_percent": 0.005277931401062572,
+      "ema_slope_15m": -0.31,
+      "ema_slope_1h": -0.27,
+      "adx_15m": 14.58,
+      "adx_1h": 11.65,
+      "atr_percent": 0.01,
       "atr_percentile": 11,
-      "rsi": 37.881611065602776,
-      "volume_ratio": 1.7591135408244647
+      "rsi": 37.88,
+      "volume_ratio": 1.76
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.07771929204789291,
-      "distance_from_level_pct": 0.07771929204789291,
-      "candle_body_ratio": 0.4278606965173934,
-      "wick_ratio": 0.5721393034826067,
+      "breakout_strength_pct": 0.08,
+      "distance_from_level_pct": 0.08,
+      "candle_body_ratio": 0.43,
+      "wick_ratio": 0.57,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
@@ -299,7 +299,7 @@
     "symbol": "TAOUSDT",
     "side": "SHORT",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:52.108661",
+    "captured_at": "2026-07-23T20:27:18.446027",
     "market_state": {
       "regime": "high_volatility_chop",
       "trend_direction": "bearish",
@@ -311,22 +311,22 @@
       "is_high_volatility": true
     },
     "indicators": {
-      "ema_slope_15m": -0.401048934995913,
-      "ema_slope_1h": -0.7283857434034644,
-      "adx_15m": 17.94629761746193,
-      "adx_1h": 9.652399272223755,
-      "atr_percent": 0.006935330235500747,
+      "ema_slope_15m": -0.4,
+      "ema_slope_1h": -0.73,
+      "adx_15m": 17.95,
+      "adx_1h": 9.65,
+      "atr_percent": 0.01,
       "atr_percentile": 90,
-      "rsi": 40.00062832141142,
-      "volume_ratio": 0.884346779390283
+      "rsi": 40.0,
+      "volume_ratio": 0.88
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.11691348402181823,
-      "distance_from_level_pct": 0.11691348402181823,
-      "candle_body_ratio": 0.5690376569037746,
-      "wick_ratio": 0.43096234309622533,
+      "breakout_strength_pct": 0.12,
+      "distance_from_level_pct": 0.12,
+      "candle_body_ratio": 0.57,
+      "wick_ratio": 0.43,
       "touch_count": 2,
       "breakout_level_age": 8,
       "htf_confirmed": true
@@ -336,7 +336,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:54.083635",
+    "captured_at": "2026-07-23T20:27:21.357343",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -348,22 +348,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 0.6479440216197645,
-      "ema_slope_1h": 1.3928900704035527,
-      "adx_15m": 15.342123625995574,
-      "adx_1h": 36.271287155260026,
-      "atr_percent": 0.008399419641694968,
+      "ema_slope_15m": 0.65,
+      "ema_slope_1h": 1.39,
+      "adx_15m": 15.34,
+      "adx_1h": 36.27,
+      "atr_percent": 0.01,
       "atr_percentile": 33,
-      "rsi": 60.65609669253669,
-      "volume_ratio": 1.0885987607349579
+      "rsi": 60.66,
+      "volume_ratio": 1.09
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.29533562325447527,
-      "distance_from_level_pct": 0.29533562325447527,
-      "candle_body_ratio": 0.9674556213017711,
-      "wick_ratio": 0.03254437869822893,
+      "breakout_strength_pct": 0.3,
+      "distance_from_level_pct": 0.3,
+      "candle_body_ratio": 0.97,
+      "wick_ratio": 0.03,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
@@ -373,7 +373,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:54.269048",
+    "captured_at": "2026-07-23T20:27:21.659629",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -385,22 +385,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 1.2273551820275088,
-      "ema_slope_1h": 0.796340249286061,
-      "adx_15m": 17.333576389867726,
-      "adx_1h": 32.21853088813392,
-      "atr_percent": 0.007458274206477163,
+      "ema_slope_15m": 1.23,
+      "ema_slope_1h": 0.8,
+      "adx_15m": 17.33,
+      "adx_1h": 32.22,
+      "atr_percent": 0.01,
       "atr_percentile": 10,
-      "rsi": 68.05512280463074,
-      "volume_ratio": 2.9597550936722627
+      "rsi": 68.06,
+      "volume_ratio": 2.96
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.16568424406563065,
-      "distance_from_level_pct": 0.16568424406563065,
-      "candle_body_ratio": 0.39591836734695174,
-      "wick_ratio": 0.6040816326530483,
+      "breakout_strength_pct": 0.17,
+      "distance_from_level_pct": 0.17,
+      "candle_body_ratio": 0.4,
+      "wick_ratio": 0.6,
       "touch_count": 1,
       "breakout_level_age": 2,
       "htf_confirmed": true
@@ -410,7 +410,7 @@
     "symbol": "TAOUSDT",
     "side": "SHORT",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:54.716581",
+    "captured_at": "2026-07-23T20:27:22.379736",
     "market_state": {
       "regime": "range",
       "trend_direction": "bearish",
@@ -422,22 +422,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": -1.2095928144948402,
-      "ema_slope_1h": -1.6974060634985904,
-      "adx_15m": 17.516458796235057,
-      "adx_1h": 21.596423778900956,
-      "atr_percent": 0.008814066437974534,
+      "ema_slope_15m": -1.21,
+      "ema_slope_1h": -1.7,
+      "adx_15m": 17.52,
+      "adx_1h": 21.6,
+      "atr_percent": 0.01,
       "atr_percentile": 63,
-      "rsi": 34.761679093327515,
-      "volume_ratio": 2.705732643782427
+      "rsi": 34.76,
+      "volume_ratio": 2.71
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.4103921893099296,
-      "distance_from_level_pct": 0.4103921893099296,
-      "candle_body_ratio": 0.6633663366336663,
-      "wick_ratio": 0.33663366336633366,
+      "breakout_strength_pct": 0.41,
+      "distance_from_level_pct": 0.41,
+      "candle_body_ratio": 0.66,
+      "wick_ratio": 0.34,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
@@ -447,7 +447,7 @@
     "symbol": "TAOUSDT",
     "side": "SHORT",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:54.741023",
+    "captured_at": "2026-07-23T20:27:22.422349",
     "market_state": {
       "regime": "high_volatility_chop",
       "trend_direction": "bearish",
@@ -459,22 +459,22 @@
       "is_high_volatility": true
     },
     "indicators": {
-      "ema_slope_15m": -1.8620125476551834,
-      "ema_slope_1h": -1.6974060634985904,
-      "adx_15m": 19.8747099274359,
-      "adx_1h": 21.596423778900956,
-      "atr_percent": 0.009604198189570702,
+      "ema_slope_15m": -1.86,
+      "ema_slope_1h": -1.7,
+      "adx_15m": 19.87,
+      "adx_1h": 21.6,
+      "atr_percent": 0.01,
       "atr_percentile": 81,
-      "rsi": 29.745795759894875,
-      "volume_ratio": 4.242323755235288
+      "rsi": 29.75,
+      "volume_ratio": 4.24
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.8193445243805078,
-      "distance_from_level_pct": 0.8193445243805078,
-      "candle_body_ratio": 0.5629496402877789,
-      "wick_ratio": 0.43705035971222106,
+      "breakout_strength_pct": 0.82,
+      "distance_from_level_pct": 0.82,
+      "candle_body_ratio": 0.56,
+      "wick_ratio": 0.44,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
@@ -484,7 +484,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:55.230642",
+    "captured_at": "2026-07-23T20:27:23.143207",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -496,22 +496,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 0.778222629960851,
-      "ema_slope_1h": 0.6472950398762691,
-      "adx_15m": 16.416322087217566,
-      "adx_1h": 15.100736426207016,
-      "atr_percent": 0.006431092137933221,
+      "ema_slope_15m": 0.78,
+      "ema_slope_1h": 0.65,
+      "adx_15m": 16.42,
+      "adx_1h": 15.1,
+      "atr_percent": 0.01,
       "atr_percentile": 19,
-      "rsi": 63.82480663287815,
-      "volume_ratio": 2.4338809472618945
+      "rsi": 63.82,
+      "volume_ratio": 2.43
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.43233328966330187,
-      "distance_from_level_pct": 0.43233328966330187,
-      "candle_body_ratio": 0.6803278688524569,
-      "wick_ratio": 0.31967213114754317,
+      "breakout_strength_pct": 0.43,
+      "distance_from_level_pct": 0.43,
+      "candle_body_ratio": 0.68,
+      "wick_ratio": 0.32,
       "touch_count": 2,
       "breakout_level_age": 19,
       "htf_confirmed": true
@@ -521,7 +521,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:55.255732",
+    "captured_at": "2026-07-23T20:27:23.185438",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -533,22 +533,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 1.6322411976296962,
-      "ema_slope_1h": 0.6472950398762691,
-      "adx_15m": 20.30516554773303,
-      "adx_1h": 15.100736426207016,
-      "atr_percent": 0.007096871403905388,
+      "ema_slope_15m": 1.63,
+      "ema_slope_1h": 0.65,
+      "adx_15m": 20.31,
+      "adx_1h": 15.1,
+      "atr_percent": 0.01,
       "atr_percentile": 36,
-      "rsi": 72.6207952027236,
-      "volume_ratio": 6.019604766246438
+      "rsi": 72.62,
+      "volume_ratio": 6.02
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 1.1852044803334156,
-      "distance_from_level_pct": 1.1852044803334156,
-      "candle_body_ratio": 0.7291280148423037,
-      "wick_ratio": 0.27087198515769634,
+      "breakout_strength_pct": 1.19,
+      "distance_from_level_pct": 1.19,
+      "candle_body_ratio": 0.73,
+      "wick_ratio": 0.27,
       "touch_count": 2,
       "breakout_level_age": 3,
       "htf_confirmed": true
@@ -558,7 +558,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:55.321038",
+    "captured_at": "2026-07-23T20:27:23.300624",
     "market_state": {
       "regime": "weak_bullish",
       "trend_direction": "bullish",
@@ -570,22 +570,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 0.8148782850663565,
-      "ema_slope_1h": 1.2689353232927374,
-      "adx_15m": 24.697018730094115,
-      "adx_1h": 16.517579034966488,
-      "atr_percent": 0.008442243932521196,
+      "ema_slope_15m": 0.81,
+      "ema_slope_1h": 1.27,
+      "adx_15m": 24.7,
+      "adx_1h": 16.52,
+      "atr_percent": 0.01,
       "atr_percentile": 65,
-      "rsi": 68.14264778966809,
-      "volume_ratio": 2.1420215868813544
+      "rsi": 68.14,
+      "volume_ratio": 2.14
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.2910975336681386,
-      "distance_from_level_pct": 0.2910975336681386,
-      "candle_body_ratio": 0.7483588621444123,
-      "wick_ratio": 0.2516411378555877,
+      "breakout_strength_pct": 0.29,
+      "distance_from_level_pct": 0.29,
+      "candle_body_ratio": 0.75,
+      "wick_ratio": 0.25,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true
@@ -595,7 +595,7 @@
     "symbol": "TAOUSDT",
     "side": "LONG",
     "strategy_setup": "breakout",
-    "captured_at": "2026-07-19T13:51:55.450429",
+    "captured_at": "2026-07-23T20:27:23.506433",
     "market_state": {
       "regime": "range",
       "trend_direction": "bullish",
@@ -607,22 +607,22 @@
       "is_high_volatility": false
     },
     "indicators": {
-      "ema_slope_15m": 1.1129795972357215,
-      "ema_slope_1h": 1.9701552086704055,
-      "adx_15m": 23.397190753514792,
-      "adx_1h": 18.916370494684294,
-      "atr_percent": 0.008164184376811726,
+      "ema_slope_15m": 1.11,
+      "ema_slope_1h": 1.97,
+      "adx_15m": 23.4,
+      "adx_1h": 18.92,
+      "atr_percent": 0.01,
       "atr_percentile": 68,
-      "rsi": 66.69144805542311,
-      "volume_ratio": 1.8733066146104056
+      "rsi": 66.69,
+      "volume_ratio": 1.87
     },
     "setup_features": {
       "setup_score": 0.0,
       "confirmation_mode": "",
-      "breakout_strength_pct": 0.13045691739850612,
-      "distance_from_level_pct": 0.13045691739850612,
-      "candle_body_ratio": 0.4882075471698087,
-      "wick_ratio": 0.5117924528301914,
+      "breakout_strength_pct": 0.13,
+      "distance_from_level_pct": 0.13,
+      "candle_body_ratio": 0.49,
+      "wick_ratio": 0.51,
       "touch_count": 0,
       "breakout_level_age": 0,
       "htf_confirmed": true

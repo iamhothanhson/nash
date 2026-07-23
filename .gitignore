@@ -21,3 +21,4 @@ app/backtesting/reports/
 data/loss_position/*
 data/daily/*
 data/position_analysis/position_analysis_data.json
+data/analysis/position_analysis.json

@@ -105,6 +105,7 @@ def build_entry_snapshot(
     side: str = "",
     strategy_setup: str = "",
     position_id: str = "",
+    setup_score: float = 0.0,
 ) -> EntrySnapshot:
     ind = getattr(market_state, "indicators", None) if market_state else None
 
@@ -151,7 +152,7 @@ def build_entry_snapshot(
             volume_ratio=ind_val("volume_ratio", 1.0),
         ),
         setup_features=SetupFeatureSnapshot(
-            setup_score=feat.get("setup_score", 0.0),
+            setup_score=setup_score,
             confirmation_mode=feat.get("confirmation_mode", ""),
             breakout_strength_pct=feat.get("breakout_strength_pct", 0.0),
             distance_from_level_pct=feat.get("distance_from_level_pct", 0.0),

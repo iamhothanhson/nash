@@ -42,6 +42,7 @@ class BacktestExecutor:
             symbol=symbol, side=direction,
             strategy_setup=order_plan.get("setup_type", ""),
             position_id=position_id,
+            setup_score=float(order_plan.get("setup_score", 0.0)),
         )
         save_entry_snapshot(entry_snapshot)
 

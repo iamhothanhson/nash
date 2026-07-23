@@ -26,6 +26,7 @@ class EntrySnapshotService:
             side=direction,
             strategy_setup=plan.setup_type,
             position_id=pid,
+            setup_score=plan.setup_score,
         )
 
         return save_entry_snapshot(snapshot)

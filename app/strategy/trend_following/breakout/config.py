@@ -1,6 +1,6 @@
 BREAKOUT_LONG_HARD = {
     "close_above_recent_high": True,
-    "min_strength": 0.004,
+    "min_strength": 0.4,
     "require_ema_alignment": True,
 }
 
@@ -23,7 +23,7 @@ BREAKOUT_LONG_SOFT = {
 
 BREAKOUT_SHORT_HARD = {
     "close_below_recent_low": True,
-    "min_strength": 0.004,
+    "min_strength": 0.4,
     "require_ema_alignment": True,
 }
 

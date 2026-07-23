@@ -108,6 +108,16 @@ class TradingPipeline:
         if not risk.allowed:
             return None
 
+        # Pre Trade Checker
+        # allowed, reason = pre_trade_checker.can_open_position(
+        #     signal=signal,
+        #     account=account,
+        # )
+
+        # if not allowed:
+        #     log("Trade rejected: %s", reason)
+        #     return
+
         # OrderPlan
         order_plan = OrderPlanner.build_order_plan(
             signal=signal,

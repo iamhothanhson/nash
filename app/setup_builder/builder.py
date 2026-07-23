@@ -1,7 +1,7 @@
 from __future__ import annotations
 from turtle import pd
 
-from config.constants import BREAKOUT
+from config.constants import BREAKOUT, MIN_SETUP_SCORE
 from market_analyzer.market_state import MarketState
 from setup_builder.config import Grade as GradeMap
 from setup_builder.models import Direction, Setup, SetupType
@@ -37,6 +37,9 @@ class SetupBuilder:
             )
         else:
             score = 0
+
+        if score < MIN_SETUP_SCORE:
+            return None
 
         return Setup(
             symbol=market_state.symbol,

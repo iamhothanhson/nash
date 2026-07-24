@@ -4,6 +4,7 @@ BREAKOUT_LONG_HARD = {
     "require_ema_alignment": True,
     # Avoid ranging markets
     "min_adx": 25,
+    "min_adx_1h": 25,
 }
 
 BREAKOUT_LONG_SOFT = {
@@ -29,6 +30,7 @@ BREAKOUT_SHORT_HARD = {
     "require_ema_alignment": True,
     # Avoid ranging markets
     "min_adx": 25,
+    "min_adx_1h": 25,
 }
 
 BREAKOUT_SHORT_SOFT = {

@@ -67,15 +67,17 @@ class BreakoutDetector:
         close_above = features.close_above_level == hard["close_above_recent_high"]
         strength_ok = features.breakout_strength_pct >= hard["min_strength"]
         ema_ok = features.htf_confirmed == hard["require_ema_alignment"]
-        adx_val = float(indicators.adx_15m.iloc[-1]) if indicators.adx_15m is not None else 0.0
-        adx_ok = adx_val >= hard["min_adx"]
+        adx_val_15m = float(indicators.adx_15m.iloc[-1]) if indicators.adx_15m is not None else 0.0
+        adx_val_1h = float(indicators.adx_1h.iloc[-1]) if indicators.adx_1h is not None else 0.0
+        adx_ok = adx_val_15m >= hard["min_adx"] and adx_val_1h >= hard["min_adx_1h"]
 
         if not (close_above and strength_ok and ema_ok and adx_ok):
             log(LogType.PLAN_REJECT, indicators.symbol,
             f"long hard: close_above={close_above} "
             f"strength={features.breakout_strength_pct:.4f}/{hard['min_strength']} "
             f"ema_aligned={ema_ok} "
-            f"adx={adx_val:.1f}/{hard['min_adx']}")
+            f"adx_15m={adx_val_15m:.1f}/{hard['min_adx']} "
+            f"adx_1h={adx_val_1h:.1f}/{hard['min_adx_1h']}")
             
             return False
 
@@ -107,15 +109,17 @@ class BreakoutDetector:
         close_below = not features.close_above_level == hard["close_below_recent_low"]
         strength_ok = features.breakout_strength_pct >= hard["min_strength"]
         ema_ok = features.htf_confirmed == hard["require_ema_alignment"]
-        adx_val = float(indicators.adx_15m.iloc[-1]) if indicators.adx_15m is not None else 0.0
-        adx_ok = adx_val >= hard["min_adx"]
+        adx_val_15m = float(indicators.adx_15m.iloc[-1]) if indicators.adx_15m is not None else 0.0
+        adx_val_1h = float(indicators.adx_1h.iloc[-1]) if indicators.adx_1h is not None else 0.0
+        adx_ok = adx_val_15m >= hard["min_adx"] and adx_val_1h >= hard["min_adx_1h"]
 
         if not (close_below and strength_ok and ema_ok and adx_ok):
             log(LogType.PLAN_REJECT, indicators.symbol,
                 f"short hard: close_below={close_below} "
                 f"strength={features.breakout_strength_pct:.4f}/{hard['min_strength']} "
                 f"ema_aligned={ema_ok} "
-                f"adx={adx_val:.1f}/{hard['min_adx']}")
+                f"adx_15m={adx_val_15m:.1f}/{hard['min_adx']} "
+                f"adx_1h={adx_val_1h:.1f}/{hard['min_adx_1h']}")
             return False
 
         return True

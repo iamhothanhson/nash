@@ -2,6 +2,8 @@ BREAKOUT_LONG_HARD = {
     "close_above_recent_high": True,
     "min_strength": 0.4,
     "require_ema_alignment": True,
+    # Avoid ranging markets
+    "min_adx": 25,
 }
 
 BREAKOUT_LONG_SOFT = {
@@ -25,6 +27,8 @@ BREAKOUT_SHORT_HARD = {
     "close_below_recent_low": True,
     "min_strength": 0.4,
     "require_ema_alignment": True,
+    # Avoid ranging markets
+    "min_adx": 25,
 }
 
 BREAKOUT_SHORT_SOFT = {

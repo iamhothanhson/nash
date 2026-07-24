@@ -19,7 +19,7 @@ def clear_analysis_file() -> None:
 
 
 def save_entry_snapshot(snapshot: EntrySnapshot) -> str:
-    position_id = snapshot.position_id or str(int(time.time() * 1_000_000))
+    position_id = snapshot.position_id or f"fallback_{int(time.time() * 1_000_000)}"
 
     _ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
     filepath = _ANALYSIS_DIR / "position_analysis.json"
@@ -106,6 +106,7 @@ def build_entry_snapshot(
     strategy_setup: str = "",
     position_id: str = "",
     setup_score: float = 0.0,
+    captured_at: datetime | None = None,
 ) -> EntrySnapshot:
     ind = getattr(market_state, "indicators", None) if market_state else None
 
@@ -124,13 +125,16 @@ def build_entry_snapshot(
         return getattr(ind, attr, default) if ind else default
 
     feat = features or {}
+    ts = captured_at or getattr(market_state, "timestamp", None)
+    if isinstance(ts, (int, float)):
+        ts = datetime.fromtimestamp(ts / 1000 if ts > 1e10 else ts)
 
     return EntrySnapshot(
         symbol=symbol,
         side=side,
         strategy_setup=strategy_setup,
         position_id=position_id,
-        captured_at=datetime.now(),
+        captured_at=ts or datetime.now(),
         market_state=MarketStateSnapshot(
             regime=enum_val(getattr(market_state, "regime", None), "Unknown"),
             trend_direction=enum_val(getattr(market_state, "trend_direction", None), "Neutral"),

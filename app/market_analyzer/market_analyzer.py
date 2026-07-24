@@ -16,13 +16,15 @@ class MarketAnalyzer:
         symbol: str,
         data=None,
         indicators=None,
+        timestamp: int | None = None,
     ) -> Setup:
         if data is not None:
             data_5m = data.get("5m") 
             data_15m = data.get("15m")
             data_1h = data.get("1h")
 
-        timestamp = int(datetime.now(timezone.utc).timestamp() * 1000)
+        if timestamp is None:
+            timestamp = int(datetime.now(timezone.utc).timestamp() * 1000)
         ms_1h = detect_market_structure(data_1h["high"], data_1h["low"]) if data_1h is not None else MarketStructure.RANGE
 
         ms_15m = detect_market_structure(data_15m["high"], data_15m["low"]) if data_15m is not None else MarketStructure.RANGE

@@ -84,10 +84,12 @@ class BacktestTradingPipeline:
         indicators = IndicatorBuilder.build(market_data)
 
         # Market State
+        ts_ms = int(timestamp.timestamp() * 1000) if hasattr(timestamp, "timestamp") else int(timestamp)
         market_state = self.market_analyzer.build_market_state(
             symbol=symbol,
             data=market_data,
             indicators=indicators,
+            timestamp=ts_ms,
         )
 
         # Strategy Detectors -> SetupCandidate

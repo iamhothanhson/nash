@@ -16,6 +16,7 @@ class BacktestPositionManager:
     def __init__(self, initial_balance: float = 100) -> None:
         self.account = BacktestAccountService(initial_balance)
         self.positions: dict[str, BacktestPosition] = {}
+        self.closed_positions: list[BacktestPosition] = []
         self.trades: list[BacktestTrade] = []
         self.equity_curve: list[EquityPoint] = []
 
@@ -177,6 +178,7 @@ class BacktestPositionManager:
             pnl_pct = (pos.realized_pnl / margin * 100) if margin else 0.0
             result = "WIN" if pos.realized_pnl >= 0 else "LOSS"
             update_entry_result(pos.position_id, result, pnl_pct, pos.realized_pnl, exit_reason)
+            self.closed_positions.append(pos)
             del self.positions[symbol]
 
         return trade
@@ -196,6 +198,7 @@ class BacktestPositionManager:
     def get_backtest_result(self) -> dict[str, Any]:
         return {
             "trades": self.trades,
+            "positions": self.closed_positions,
             "equity_curve": self.equity_curve,
             "final_balance": self.account.wallet_balance,
         }

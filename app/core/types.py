@@ -5,24 +5,24 @@ Direction = Literal["LONG", "SHORT"]
 
 
 class TrendDirection(str, Enum):
-    BULLISH = "bullish"
-    BEARISH = "bearish"
-    NEUTRAL = "neutral"
+    BULLISH = "BULLISH"
+    BEARISH = "BEARISH"
+    NEUTRAL = "NEUTRAL"
 
 
 class MarketRegime(str, Enum):
-    STRONG_BULLISH = "strong_bullish"
-    BULLISH = "bullish"
-    WEAK_BULLISH = "weak_bullish"
-    RANGE = "range"
-    WEAK_BEARISH = "weak_bearish"
-    BEARISH = "bearish"
-    STRONG_BEARISH = "strong_bearish"
-    HIGH_VOLATILITY_CHOP = "high_volatility_chop"
+    STRONG_BULLISH = "STRONG_BULLISH"
+    BULLISH = "BULLISH"
+    WEAK_BULLISH = "WEAK_BULLISH"
+    RANGE = "RANGE"
+    WEAK_BEARISH = "WEAK_BEARISH"
+    BEARISH = "BEARISH"
+    STRONG_BEARISH = "STRONG_BEARISH"
+    HIGH_VOLATILITY_CHOP = "HIGH_VOLATILITY_CHOP"
 
 
 class MarketStructure(str, Enum):
     HHHL = "HHHL"
     LHLL = "LHLL"
-    RANGE = "Range"
-    UNKNOWN = "Unknown"
+    RANGE = "RANGE"
+    UNKNOWN = "UNKNOWN"

@@ -45,8 +45,7 @@ class MarketAnalyzer:
             else TrendDirection.NEUTRAL
         )
 
-        regime_str = _classify_regime(adx_v, atr_pctl, ema_slp, trend_dir_str, ms_15m)
-        regime = _map_regime(regime_str)
+        regime = _classify_regime(adx_v, atr_pctl, ema_slp, trend_dir_str, ms_15m)
         structure = _map_structure(ms_1h)
         rc = float(_regime_confidence(adx_v, ema_slp, vol_r, ms_15m, trend_dir_str))
 
@@ -83,19 +82,6 @@ class MarketAnalyzer:
         )
 
         return market_state
-
-
-def _map_regime(reg: str) -> MarketRegime:
-    mapping = {
-        "Strong Bullish": MarketRegime.STRONG_BULLISH,
-        "Moderate Bullish": MarketRegime.WEAK_BULLISH,
-        "Neutral / Range": MarketRegime.RANGE,
-        "Weak / Choppy": MarketRegime.WEAK_BEARISH,
-        "Moderate Bearish": MarketRegime.WEAK_BEARISH,
-        "Strong Bearish": MarketRegime.STRONG_BEARISH,
-        "High Volatility Chop": MarketRegime.HIGH_VOLATILITY_CHOP,
-    }
-    return mapping.get(reg, MarketRegime.RANGE)
 
 
 def _map_structure(ms: MarketStructure) -> MarketStructure:

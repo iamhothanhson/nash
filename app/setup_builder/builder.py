@@ -34,6 +34,7 @@ class SetupBuilder:
                 features=candidate.features,
                 indicators=market_state.indicators,
                 market_state=market_state,
+                side=candidate.direction,
             )
         else:
             score = 0

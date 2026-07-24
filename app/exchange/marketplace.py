@@ -6,7 +6,7 @@ from typing import Any
 
 import pandas as pd
 
-from app.exchange.client import BinanceFuturesClient
+from exchange.client import BinanceFuturesClient
 from exchange.config import INDICATOR_WARMUP_BARS
 
 

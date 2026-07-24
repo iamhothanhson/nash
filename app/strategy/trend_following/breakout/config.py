@@ -1,10 +1,13 @@
+from app.core.types import MarketRegime
+
+
 BREAKOUT_LONG_HARD = {
     "close_above_recent_high": True,
     "min_strength": 0.4,
     "require_ema_alignment": True,
     # Avoid ranging markets
-    "min_adx": 25,
-    "min_adx_1h": 25,
+    "min_adx": 20,
+    "min_adx_1h": 20,
 }
 
 BREAKOUT_LONG_SOFT = {
@@ -21,7 +24,7 @@ BREAKOUT_LONG_SOFT = {
     "min_body_ratio": 0.55,
 
     # Close near the high (little upper wick)
-    "max_close_to_high_pct": 0.20,
+    "max_close_to_high_pct": 0.35,
 }
 
 BREAKOUT_SHORT_HARD = {
@@ -29,8 +32,8 @@ BREAKOUT_SHORT_HARD = {
     "min_strength": 0.4,
     "require_ema_alignment": True,
     # Avoid ranging markets
-    "min_adx": 25,
-    "min_adx_1h": 25,
+    "min_adx": 20,
+    "min_adx_1h": 20,
 }
 
 BREAKOUT_SHORT_SOFT = {
@@ -47,5 +50,12 @@ BREAKOUT_SHORT_SOFT = {
     "min_body_ratio": 0.55,
 
     # Close near candle low
-    "max_close_to_low_pct": 0.20,
+    "max_close_to_low_pct": 0.35,
+}
+
+
+BREAKOUT_ALLOWED_REGIMES = {
+    MarketRegime.WEAK_BULLISH,
+    MarketRegime.BULLISH,
+    MarketRegime.STRONG_BULLISH
 }

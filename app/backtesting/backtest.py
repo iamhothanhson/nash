@@ -18,7 +18,7 @@ from backtesting.executor import BacktestExecutor
 from backtesting.marketplace import HistoricalMarketplace
 from backtesting.position import BacktestPositionManager
 from backtesting.trading_pipeline import BacktestTradingPipeline
-from backtesting.config import BACKTEST_END, LOOKBACK
+from backtesting.config import BACKTEST_END, INDICATOR_WARMUP_BARS
 from backtesting.utils import print_result
 from core.logging import setup_logging
 
@@ -53,7 +53,7 @@ def main() -> None:
         symbols = list(mp.data.keys())
 
     first_tf = next(iter(mp.data[symbols[0]].values()))
-    timestamps = first_tf.index[LOOKBACK:]
+    timestamps = first_tf.index[INDICATOR_WARMUP_BARS:]
 
     end_dt = __import__("pandas").Timestamp(BACKTEST_END)
     timestamps = timestamps[timestamps <= end_dt]

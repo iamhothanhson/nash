@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import pandas as pd
 
+from market_analyzer.config import MARKET_STRUCTURE_SWING_LOOKBACK, MARKET_STRUCTURE_HH_HL_THRESHOLD
 from core.types import MarketStructure
 
 
-def detect_market_structure(high: pd.Series, low: pd.Series, lookback: int = 40) -> MarketStructure:
+def detect_market_structure(high: pd.Series, low: pd.Series, lookback: int = MARKET_STRUCTURE_SWING_LOOKBACK) -> MarketStructure:
     """Classify market structure as HHHL (bullish), LHLL (bearish), or RANGE."""
     if len(high) < 12:
         return MarketStructure.RANGE
@@ -47,10 +48,10 @@ def detect_market_structure(high: pd.Series, low: pd.Series, lookback: int = 40)
     lh_ratio = 1 - hh_ratio
     ll_ratio = 1 - hl_ratio
 
-    has_hh = hh_ratio >= 0.5
-    has_hl = hl_ratio >= 0.5
-    has_lh = lh_ratio >= 0.5
-    has_ll = ll_ratio >= 0.5
+    has_hh = hh_ratio >= MARKET_STRUCTURE_HH_HL_THRESHOLD
+    has_hl = hl_ratio >= MARKET_STRUCTURE_HH_HL_THRESHOLD
+    has_lh = lh_ratio >= MARKET_STRUCTURE_HH_HL_THRESHOLD
+    has_ll = ll_ratio >= MARKET_STRUCTURE_HH_HL_THRESHOLD
 
     if has_hh and has_hl:
         return MarketStructure.HHHL

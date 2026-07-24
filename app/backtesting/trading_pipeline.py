@@ -13,7 +13,7 @@ from setup_builder.builder import SetupBuilder
 from signal_builder.builder import SignalBuilder
 from risk_manager.risk_manager import RiskManager
 from order_planner.order_planner import OrderPlanner
-from backtesting.config import LOOKBACK
+from backtesting.config import INDICATOR_WARMUP_BARS
 from strategy.trend_following.breakout.detector import BreakoutDetector
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
 from strategy.trend_following.pullback.detector import PullbackDetector
@@ -25,7 +25,7 @@ class BacktestTradingPipeline:
         marketplace: HistoricalMarketplace,
         portfolio: BacktestPositionManager,
         executor: BacktestExecutor,
-        lookback: int = LOOKBACK,
+        lookback: int = INDICATOR_WARMUP_BARS,
     ):
         self.lookback = lookback
         self.marketplace = marketplace

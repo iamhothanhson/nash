@@ -7,6 +7,7 @@ from typing import Any
 import pandas as pd
 
 from app.exchange.client import BinanceFuturesClient
+from exchange.config import INDICATOR_WARMUP_BARS
 
 
 class BinanceMarketplace:
@@ -28,7 +29,7 @@ class BinanceMarketplace:
         self,
         symbol: str,
         timeframe: str,
-        limit: int = 300,
+        limit: int = INDICATOR_WARMUP_BARS,
     ) -> pd.DataFrame:
 
         candles = self.client.get_klines(

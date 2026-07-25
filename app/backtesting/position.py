@@ -24,9 +24,6 @@ class BacktestPositionManager:
     def can_open_position(self, symbol: str) -> bool:
         return symbol not in self.positions
 
-    def get_account_state(self) -> BacktestAccountState:
-        return self.account.get_account_state()
-
     def open_position(
         self,
         order_plan: OrderPlan,

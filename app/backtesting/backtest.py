@@ -42,7 +42,7 @@ def main() -> None:
 
     initial_balance = float(os.environ.get("INITIAL_CAPITAL", "100"))
     portfolio = BacktestPositionManager(initial_balance=initial_balance)
-    executor = BacktestExecutor()
+    executor = BacktestExecutor(marketplace=mp, portfolio=portfolio)
 
     if args.symbol:
         if args.symbol not in mp.data:

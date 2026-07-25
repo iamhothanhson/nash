@@ -22,13 +22,9 @@ class TradingPipeline:
         self.execution_service = ExecutionService()
 
         self.breakout_detector = BreakoutDetector()
-        self.retest_detector = BreakoutRetestDetector()
-        self.pullback_detector = PullbackDetector()
 
         self.detectors = [
-            self.breakout_detector.detect,
-            self.retest_detector.detect,
-            self.pullback_detector.detect,
+            self.breakout_detector.detect
         ]
 
     def run(self, symbols: list[str]) -> dict[str, Any]:
@@ -107,16 +103,6 @@ class TradingPipeline:
         )
         if not risk.allowed:
             return None
-
-        # Pre Trade Checker
-        # allowed, reason = pre_trade_checker.can_open_position(
-        #     signal=signal,
-        #     account=account,
-        # )
-
-        # if not allowed:
-        #     log("Trade rejected: %s", reason)
-        #     return
 
         # OrderPlan
         order_plan = OrderPlanner.build_order_plan(

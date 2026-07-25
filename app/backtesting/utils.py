@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 from collections import defaultdict
-
-
+from typing import Any
 def print_result(result: dict) -> None:
-    trades = result["trades"]
     positions = result.get("positions", [])
     equity = result["equity_curve"]
 
@@ -51,9 +49,23 @@ def print_result(result: dict) -> None:
     print(f"Trend Following: {all_positions} positions:")
     for name, ps in sorted_families:
         count = len(ps)
+        grades = defaultdict(int)
+        for p in ps:
+            grades[p.setup_grade] += 1
+        grade_parts = ", ".join(f"{g}: {n}" for g, n in sorted(grades.items()))
         total_margin = sum(p.risk_amount for p in ps)
         total_pnl = sum(p.realized_pnl for p in ps)
         avg_margin = total_margin / count if count else 0
         roi = total_pnl / total_margin * 100 if total_margin else 0
         sign = "+" if total_pnl >= 0 else ""
-        print(f"   - {name}: {count} positions, Avg Margin: {avg_margin:.2f} USDT, ROI: {sign}{roi:.2f}%, Net Profit: {sign}{total_pnl:.2f} USDT")
+        print(f"   - {name}: {count} positions, {grade_parts}")
+        print(f"   - Avg Margin: {avg_margin:.2f} USDT, ROI: {sign}{roi:.2f}%, Net Profit: {sign}{total_pnl:.2f} USDT")
+
+
+def has_enough_history(
+    market_data: dict[str, Any], minimum_bars: int = 60,
+) -> bool:
+    for df in market_data.values():
+        if len(df) < minimum_bars:
+            return False
+    return True

@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any
 
 from config import settings
-from .config import TP_CLOSE_PCT
+from .config import TP_CLOSE_PCT, TP_CONFIG
 from .models import OrderPlan
 
 try:
@@ -70,16 +70,24 @@ class OrderPlanner:
         tp3_qty = quantity * TP_CLOSE_PCT.get("tp_3", 0) / 100.0
 
         risk_percent=risk_amount / (position_notional * sl_distance) * 100.0 if position_notional > 0 and sl_distance > 0 else 0.0
+        margin_usdt = position_notional / float(settings.LEVERAGE)
+
+        tp1_pct = TP_CONFIG["tp1_r"] * sl_distance * 100
+        tp2_pct = TP_CONFIG["tp2_r"] * sl_distance * 100
+        tp3_pct = TP_CONFIG["tp3_r"] * sl_distance * 100
 
         return OrderPlan(
             symbol=str(getattr(signal, "symbol", "UNKNOWN")).strip().upper(),
             direction=direction,
             entry=entry,
+            qty=quantity,
             stop_loss=stop_loss,
             tp1=float(getattr(signal, "tp1", 0.0)),
             tp2=float(getattr(signal, "tp2", 0.0)),
             tp3=float(getattr(signal, "tp3", 0.0)),
-            qty=quantity,
+            tp1_pct=tp1_pct,
+            tp2_pct=tp2_pct,
+            tp3_pct=tp3_pct,
             tp1_qty=tp1_qty,
             tp2_qty=tp2_qty,
             tp3_qty=tp3_qty,
@@ -92,14 +100,7 @@ class OrderPlanner:
             confirmation_mode=str(getattr(signal, "confirmation_mode", "")),
             strategy_family=str(getattr(signal, "strategy_family", "")),
             risk_multiplier=float(getattr(risk, "risk_multiplier", 1.0)),
+            margin_usdt=margin_usdt,
             market_state=getattr(signal, "market_state", None),
             features=getattr(signal, "features", None),
         )
-
-    @staticmethod
-    def _stringify(value: Any) -> str:
-        if value is None:
-            return ""
-        if isinstance(value, str):
-            return value
-        return str(value)

@@ -23,6 +23,10 @@ class OrderPlan:
     confirmation_mode: str
     strategy_family: str
     risk_multiplier: float
+    margin_usdt: float = 0.0
+    tp1_pct: float = 0.0
+    tp2_pct: float = 0.0
+    tp3_pct: float = 0.0
     market_structure: str = "None"
     market_state: Any | None = None
     features: dict[str, Any] | None = None

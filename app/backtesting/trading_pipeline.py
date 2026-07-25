@@ -14,6 +14,7 @@ from signal_builder.builder import SignalBuilder
 from risk_manager.risk_manager import RiskManager
 from order_planner.order_planner import OrderPlanner
 from backtesting.config import INDICATOR_WARMUP_BARS
+from backtesting.utils import has_enough_history
 from strategy.trend_following.breakout.detector import BreakoutDetector
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
 from strategy.trend_following.pullback.detector import PullbackDetector
@@ -34,13 +35,9 @@ class BacktestTradingPipeline:
         self.market_analyzer = MarketAnalyzer()
 
         self.breakout_detector = BreakoutDetector()
-        self.retest_detector = BreakoutRetestDetector()
-        self.pullback_detector = PullbackDetector()
 
         self.detectors = [
-            self.breakout_detector.detect,
-            self.retest_detector.detect,
-            self.pullback_detector.detect,
+            self.breakout_detector.detect
         ]
 
 
@@ -77,7 +74,7 @@ class BacktestTradingPipeline:
         market_data = self.marketplace.get_market_data(symbol, up_to=timestamp, lookback=self.lookback)
         if market_data is None:
             return None
-        if not self._has_enough_history(market_data):
+        if not has_enough_history(market_data):
             return None
 
         # Indicators
@@ -122,33 +119,7 @@ class BacktestTradingPipeline:
         if order_plan is None:
             return None
 
-        # Backtest execution
-        current_candle = self.marketplace.get_candle(
-            symbol=symbol, timestamp=timestamp,
-        )
-        if current_candle is None:
-            return None
-
-        return self.executor.execute(
-            order_plan={
-                "symbol": order_plan.symbol,
-                "direction": order_plan.direction,
-                "entry": order_plan.entry,
-                "stop_loss": order_plan.stop_loss,
-                "tp1": order_plan.tp1,
-                "tp2": order_plan.tp2,
-                "tp3": order_plan.tp3,
-                "qty": order_plan.qty,
-                "risk_amount": order_plan.risk_amount,
-                "setup_type": order_plan.setup_type,
-                "setup_score": order_plan.setup_score,
-                "market_state": order_plan.market_state,
-                "features": order_plan.features,
-            },
-            candle=current_candle,
-            timestamp=timestamp,
-            portfolio=self.portfolio,
-        )
+        return self.executor.execute(order_plan, timestamp=timestamp)
 
 
     def _detect_setups(self, market_state: Any) -> list[Any]:

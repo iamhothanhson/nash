@@ -32,3 +32,11 @@ def resolve_pct(val: float | None) -> float:
         return 0.0
     return max(0.0, float(val) / 100.0)
 
+
+def stringify(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    return str(value)
+

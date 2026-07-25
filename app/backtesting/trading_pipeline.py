@@ -52,6 +52,7 @@ class BacktestTradingPipeline:
             self._process_timestamp(symbols=symbols, timestamp=timestamp)
         result = self.position_manager.get_backtest_result()
         result["reject_reasons"] = self.reject_stats.reasons
+        result["breakout_rejection"] = self.breakout_detector.breakout_rejection
         return result
 
     def _process_timestamp(self, symbols: list[str], timestamp: Any) -> None:

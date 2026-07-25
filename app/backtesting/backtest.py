@@ -22,6 +22,7 @@ from backtesting.config import BACKTEST_END, INDICATOR_WARMUP_BARS
 from backtesting.utils import print_result
 from core.logging import setup_logging
 from market_analyzer.market_structure import market_structure_debug
+from strategy.trend_following.breakout.rejection import BreakoutRejectionAnalyzer
 
 
 HISTORY_DIR = Path(__file__).resolve().parent / "history_data"
@@ -71,6 +72,15 @@ def main() -> None:
     print_result(result)
     if market_structure_debug:
         market_structure_debug.print_summary()
+
+
+    breakout_rejection: BreakoutRejectionAnalyzer | None = result.get("breakout_rejection")
+    if breakout_rejection and breakout_rejection.items:
+        print("\n Breakout Rejection Summary")
+        for group, reasons in breakout_rejection.summary().items():
+            print(f"\n  {group}")
+            for reason, count, pct in reasons:
+                print(f"    {reason:<20} {count:>4} ({pct:5.1f}%)")
 
 
 if __name__ == "__main__":

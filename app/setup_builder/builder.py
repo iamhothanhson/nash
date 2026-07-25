@@ -5,6 +5,7 @@ from config.constants import BREAKOUT, MIN_SETUP_SCORE
 from market_analyzer.market_state import MarketState
 from setup_builder.config import Grade as GradeMap
 from setup_builder.models import Direction, Setup, SetupType
+from setup_builder.grader import Grader
 from setup_builder.scorer import Scorer
 from strategy.models import SetupCandidate
 
@@ -30,7 +31,8 @@ class SetupBuilder:
             return None
 
         if candidate.setup_type == BREAKOUT:
-            score = Scorer.score_breakout_setup(
+            scorer = Scorer()
+            score = scorer.score_breakout_setup(
                 features=candidate.features,
                 indicators=market_state.indicators,
                 market_state=market_state,
@@ -42,6 +44,8 @@ class SetupBuilder:
         if score < MIN_SETUP_SCORE:
             return None
 
+        grade_result = Grader.grade(score)
+
         return Setup(
             symbol=market_state.symbol,
             entry=entry,
@@ -49,6 +53,7 @@ class SetupBuilder:
             setup_type=SetupType(candidate.setup_type),
             side=Direction(candidate.direction),
             score=score,
+            grade=grade_result.grade,
             market_state=market_state,
             features=candidate.features,
             anchor=candidate.anchor,

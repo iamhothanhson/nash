@@ -27,6 +27,7 @@ class Setup:
     setup_type: SetupType
     side: Optional[Direction]
     score: float
+    grade: str
     market_state: MarketState
     features: dict[str, Any]
     timestamp: int

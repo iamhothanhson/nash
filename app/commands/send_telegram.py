@@ -14,7 +14,7 @@ APP_PATH = PROJECT_ROOT / "app"
 if str(APP_PATH) not in sys.path:
     sys.path.insert(0, str(APP_PATH))
 
-from app.config import settings
+from app.core import settings
 from app.monitoring.telegram_test_suite import (
     EXIT_DECISION_CASE_KEYS,
     REPORT_CASE_KEYS,

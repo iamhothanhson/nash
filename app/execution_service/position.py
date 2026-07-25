@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from app.core.logger import log
-from config import settings
+from app.core import settings
 from execution_service.models import ExecutionResult
 from order_planner.models import OrderPlan
 from position.archive import save_runtime_position

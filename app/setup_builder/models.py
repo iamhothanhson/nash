@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Any, Optional
 
 from market_analyzer.market_state import MarketState
-from config.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK, LIQUIDITY_SWEEP
+from app.core.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK, LIQUIDITY_SWEEP
 
 
 class SetupType(str, Enum):

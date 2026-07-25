@@ -1,7 +1,7 @@
 from __future__ import annotations
 from turtle import pd
 
-from config.constants import BREAKOUT, MIN_SETUP_SCORE
+from app.core.constants import BREAKOUT, MIN_SETUP_SCORE
 from market_analyzer.market_state import MarketState
 from setup_builder.config import Grade as GradeMap
 from setup_builder.models import Direction, Setup, SetupType

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from config.constants import BREAKOUT
+from app.core.constants import BREAKOUT
 from core.logger import log, LogType
 from core.types import MarketStructure
 from strategy.models import SetupCandidate

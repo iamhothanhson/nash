@@ -9,7 +9,7 @@ from strategy.trend_following.config import (
     TREND_PULLBACK_RECLAIM_BODY_RATIO,
     TREND_PULLBACK_IMPULSE_PCT_MIN,
 )
-from config.constants import PULLBACK
+from app.core.constants import PULLBACK
 from strategy.models import SetupCandidate
 
 

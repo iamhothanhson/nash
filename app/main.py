@@ -9,7 +9,7 @@ for path in (APP_DIR, ROOT_DIR):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from app.config import SYMBOLS
+from app.core import SYMBOLS
 from core.logging import setup_logging
 from app.exchange import BinanceMarketplace
 from app.trading_pipeline import TradingPipeline

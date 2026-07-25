@@ -24,13 +24,13 @@ class BacktestTradingPipeline:
     def __init__(
         self,
         marketplace: HistoricalMarketplace,
-        portfolio: BacktestPositionManager,
+        position_manager: BacktestPositionManager,
         executor: BacktestExecutor,
         lookback: int = INDICATOR_WARMUP_BARS,
     ):
         self.lookback = lookback
         self.marketplace = marketplace
-        self.portfolio = portfolio
+        self.position_manager = position_manager
         self.executor = executor
         self.market_analyzer = MarketAnalyzer()
 
@@ -48,14 +48,14 @@ class BacktestTradingPipeline:
     ) -> dict[str, Any]:
         for timestamp in timestamps:
             self._process_timestamp(symbols=symbols, timestamp=timestamp)
-        return self.portfolio.get_backtest_result()
+        return self.position_manager.get_backtest_result()
 
     def _process_timestamp(self, symbols: list[str], timestamp: Any) -> None:
         for symbol in symbols:
             candle = self.marketplace.get_candle(symbol=symbol, timestamp=timestamp)
             if candle is None:
                 continue
-            self.portfolio.update_positions(
+            self.position_manager.update_positions(
                 symbol=symbol,
                 candle=candle,
                 timestamp=timestamp,
@@ -64,10 +64,10 @@ class BacktestTradingPipeline:
         for symbol in symbols:
             self.run_symbol(symbol=symbol, timestamp=timestamp)
 
-        self.portfolio.record_equity(timestamp)
+        self.position_manager.record_equity(timestamp)
 
     def run_symbol(self, symbol: str, timestamp: Any) -> Any | None:
-        if not self.portfolio.can_open_position(symbol):
+        if not self.position_manager.can_open_position(symbol):
             return None
 
         # Marketplace -> OHLCV data
@@ -106,7 +106,7 @@ class BacktestTradingPipeline:
             return None
 
         # Risk Manager
-        account_raw = self.portfolio.get_account_state()
+        account_raw = self.position_manager.get_account_state()
         account = SimpleNamespace(
             available_balance=float(account_raw.available_balance),
         )

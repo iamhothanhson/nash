@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from config.constants import LIQUIDITY_SWEEP_REVERSAL, TREND_FOLLOWING
+from app.core.constants import LIQUIDITY_SWEEP_REVERSAL, TREND_FOLLOWING
 from coins.loader import get_coin_config
 
 

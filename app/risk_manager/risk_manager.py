@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from risk_manager.config import SCORE_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
-from config import settings
+from app.core import settings
 
 
 @dataclass(frozen=True, slots=True)

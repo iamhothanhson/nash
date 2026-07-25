@@ -4,7 +4,7 @@ from typing import Optional
 
 from openai import OpenAI
 
-from config import settings
+from app.core import settings
 
 _client: Optional[OpenAI] = None
 

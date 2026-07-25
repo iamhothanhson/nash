@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from app.core.logger import log
-from config import settings
+from app.core import settings
 from exchange.client import BinanceFuturesClient
 from exchange.exceptions import BinanceOrderError
 from exchange.utils import position_side_for_direction

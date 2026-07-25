@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from config import settings
+from app.core import settings
 from intelligence.ai_filter import ai_gate_score_tier, ai_gate_trade_metrics
 from intelligence.ai_evaluator import evaluate_trade as evaluate_openai_trade
 from intelligence.ai_mocker import evaluate_trade as evaluate_mock_trade

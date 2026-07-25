@@ -12,7 +12,7 @@ APP_PATH = PROJECT_ROOT / "app"
 if str(APP_PATH) not in sys.path:
     sys.path.insert(0, str(APP_PATH))
 
-from config import settings
+from app.core import settings
 from risk_manager.config import (
     GRADE_RISK_MULTIPLIERS,
     MAX_RISK_MULTIPLIERS,

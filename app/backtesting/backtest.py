@@ -41,8 +41,8 @@ def main() -> None:
         return
 
     initial_balance = float(os.environ.get("INITIAL_CAPITAL", "100"))
-    portfolio = BacktestPositionManager(initial_balance=initial_balance)
-    executor = BacktestExecutor(marketplace=mp, portfolio=portfolio)
+    position_manager = BacktestPositionManager(initial_balance=initial_balance)
+    executor = BacktestExecutor(marketplace=mp, position_manager=position_manager)
 
     if args.symbol:
         if args.symbol not in mp.data:
@@ -63,7 +63,7 @@ def main() -> None:
         timestamps = timestamps[timestamps >= cutoff]
 
     pipeline = BacktestTradingPipeline(
-        marketplace=mp, portfolio=portfolio, executor=executor,
+        marketplace=mp, position_manager=position_manager, executor=executor,
     )
     result = pipeline.run(symbols=symbols, timestamps=timestamps)
     result["initial_balance"] = initial_balance

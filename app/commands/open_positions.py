@@ -19,7 +19,7 @@ if str(APP_PATH) not in sys.path:
 from app.coins.loader import get_coin_config
 from app.core.rounding import round_qty, round_ratio, round_usd
 from app.core.utils import round_price
-from app.config import settings
+from app.core import settings
 from app.execution.exchange_entry_gate import should_block_exchange_entry
 from app.execution.execution_engine import create_execution_engine, ensure_demo_testnet_credentials
 from app.monitoring import risk_limit_tracking

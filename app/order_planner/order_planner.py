@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any
 
-from config import settings
+from app.core import settings
 from .config import TP_CLOSE_PCT, TP_CONFIG
 from .models import OrderPlan
 

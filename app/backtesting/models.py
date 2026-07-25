@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Literal
+
+from app.core.enums import TrailType
 
 
 Direction = Literal["LONG", "SHORT"]
@@ -35,8 +37,11 @@ class BacktestPosition:
     leverage: int = 0
 
     # Take Profit
-    take_profits: list[TakeProfit]
+    take_profits: list[TakeProfit] = field(default_factory=list)
     sl_hit: bool = False
+    atr_trailing: bool = False
+    atr_multiplier: float = 2.0
+    highest_price: float = 0.0
 
     # Runtime
     status: str = "Open"
@@ -62,8 +67,10 @@ class TakeProfit:
     level: int
     price: float
     qty: float
+    pct: float
     hit: bool = False
-    trail_to: float | None = None
+    trail_type: TrailType = TrailType.NONE
+    atr_multiplier: float | None = None
 
 @dataclass
 class BacktestTrade:

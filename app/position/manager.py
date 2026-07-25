@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from exchange.client import BinanceFuturesClient
-from config import settings
+from app.core import settings
 from position.archive import archive_position
 from analysis.collect_position_metrics import update_entry_result
 

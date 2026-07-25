@@ -10,7 +10,7 @@ from strategy.trend_following.config import (
     TREND_BREAKOUT_RETEST_SHORT_RSI_MAX,
 )
 
-from config.constants import BREAKOUT_RETEST
+from app.core.constants import BREAKOUT_RETEST
 from strategy.models import SetupCandidate
 
 

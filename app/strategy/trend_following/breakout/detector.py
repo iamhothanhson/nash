@@ -4,6 +4,7 @@ from dataclasses import asdict
 
 from app.core.constants import BREAKOUT
 from core.enums import RejectReason, RejectionStage
+from core.types import RejectionMetric
 from strategy.models import SetupCandidate
 from strategy.trend_following.breakout.config import (
     BREAKOUT_LONG_HARD,
@@ -63,21 +64,27 @@ class BreakoutDetector:
     def hard_check_long(self, features, indicators):
         hard = BREAKOUT_LONG_HARD
         reasons = []
+        metrics = []
 
         if features.close_above_level != hard["close_above_recent_high"]:
             reasons.append("no_close_above_high")
+            metrics.append(RejectionMetric("close_above_level", float(features.close_above_level), float(hard["close_above_recent_high"])))
 
         if features.breakout_strength_pct < hard["min_strength"]:
             reasons.append(f"weak_strength {features.breakout_strength_pct:.4f}")
+            metrics.append(RejectionMetric("breakout_strength_pct", features.breakout_strength_pct, hard["min_strength"]))
 
         if hard["require_ema_alignment"] and not features.htf_confirmed:
             reasons.append("ema_alignment")
+            metrics.append(RejectionMetric("htf_confirmed", float(features.htf_confirmed), float(hard["require_ema_alignment"])))
 
         adx15 = float(indicators.adx_15m.iloc[-1]) if indicators.adx_15m is not None else 0
         adx1h = float(indicators.adx_1h.iloc[-1]) if indicators.adx_1h is not None else 0
 
         if adx15 < hard["min_adx"] or adx1h < hard["min_adx_1h"]:
             reasons.append(f"weak_adx {adx15:.1f}/{adx1h:.1f}")
+            metrics.append(RejectionMetric("adx_15m", adx15, hard["min_adx"]))
+            metrics.append(RejectionMetric("adx_1h", adx1h, hard["min_adx_1h"]))
 
         if reasons:
             if self.reject_stats:
@@ -90,7 +97,7 @@ class BreakoutDetector:
                     side="LONG",
                     stage=RejectionStage.HARD,
                     reasons=reasons,
-                    features=asdict(features),
+                    metrics=metrics,
                 )
 
             return False
@@ -100,23 +107,27 @@ class BreakoutDetector:
     def soft_check_long(self, features, indicators):
         soft = BREAKOUT_LONG_SOFT
         reasons = []
+        metrics = []
 
         if indicators.volume_ratio < soft["min_volume_ratio"]:
             reasons.append(f"low_volume {indicators.volume_ratio:.2f}")
+            metrics.append(RejectionMetric("volume_ratio", indicators.volume_ratio, soft["min_volume_ratio"]))
 
         if indicators.ema_slope < soft["min_ema_slope"]:
             reasons.append(f"weak_ema_slope {indicators.ema_slope:.5f}")
+            metrics.append(RejectionMetric("ema_slope", indicators.ema_slope, soft["min_ema_slope"]))
 
         if indicators.rsi < soft["min_rsi"]:
             reasons.append(f"weak_rsi {indicators.rsi:.1f}")
+            metrics.append(RejectionMetric("rsi", indicators.rsi, soft["min_rsi"]))
 
         if features.candle_body_ratio < soft["min_body_ratio"]:
             reasons.append(f"small_body {features.candle_body_ratio:.2f}")
+            metrics.append(RejectionMetric("candle_body_ratio", features.candle_body_ratio, soft["min_body_ratio"]))
 
         if features.distance_from_level_pct > soft["max_close_to_high_pct"]:
-            reasons.append(
-                f"poor_close_location {features.distance_from_level_pct:.3f}"
-            )
+            reasons.append(f"poor_close_location {features.distance_from_level_pct:.3f}")
+            metrics.append(RejectionMetric("distance_from_level_pct", features.distance_from_level_pct, soft["max_close_to_high_pct"]))
 
         passed_soft = 5 - len(reasons)
 
@@ -131,7 +142,7 @@ class BreakoutDetector:
                     side="LONG",
                     stage=RejectionStage.SOFT,
                     reasons=reasons,
-                    features=asdict(features),
+                    metrics=metrics,
                 )
 
             return False
@@ -141,25 +152,27 @@ class BreakoutDetector:
     def hard_check_short(self, features, indicators):
         hard = BREAKOUT_SHORT_HARD
         reasons = []
+        metrics = []
 
         if features.close_above_level:
             reasons.append("no_close_below_low")
+            metrics.append(RejectionMetric("close_below_level", float(not features.close_above_level), 1.0))
 
         if features.breakout_strength_pct < hard["min_strength"]:
-            reasons.append(
-                f"weak_strength {features.breakout_strength_pct:.4f}"
-            )
+            reasons.append(f"weak_strength {features.breakout_strength_pct:.4f}")
+            metrics.append(RejectionMetric("breakout_strength_pct", features.breakout_strength_pct, hard["min_strength"]))
 
         if hard["require_ema_alignment"] and not features.htf_confirmed:
             reasons.append("ema_alignment")
+            metrics.append(RejectionMetric("htf_confirmed", float(features.htf_confirmed), float(hard["require_ema_alignment"])))
 
         adx15 = float(indicators.adx_15m.iloc[-1]) if indicators.adx_15m is not None else 0
         adx1h = float(indicators.adx_1h.iloc[-1]) if indicators.adx_1h is not None else 0
 
         if adx15 < hard["min_adx"] or adx1h < hard["min_adx_1h"]:
-            reasons.append(
-                f"weak_adx {adx15:.1f}/{adx1h:.1f}"
-            )
+            reasons.append(f"weak_adx {adx15:.1f}/{adx1h:.1f}")
+            metrics.append(RejectionMetric("adx_15m", adx15, hard["min_adx"]))
+            metrics.append(RejectionMetric("adx_1h", adx1h, hard["min_adx_1h"]))
 
         if reasons:
             if self.reject_stats:
@@ -172,7 +185,7 @@ class BreakoutDetector:
                     side="SHORT",
                     stage=RejectionStage.HARD,
                     reasons=reasons,
-                    features=asdict(features),
+                    metrics=metrics,
                 )
 
             return False
@@ -182,31 +195,27 @@ class BreakoutDetector:
     def soft_check_short(self, features, indicators):
         soft = BREAKOUT_SHORT_SOFT
         reasons = []
+        metrics = []
 
         if indicators.volume_ratio < soft["min_volume_ratio"]:
-            reasons.append(
-                f"low_volume {indicators.volume_ratio:.2f}"
-            )
+            reasons.append(f"low_volume {indicators.volume_ratio:.2f}")
+            metrics.append(RejectionMetric("volume_ratio", indicators.volume_ratio, soft["min_volume_ratio"]))
 
         if indicators.ema_slope > soft["max_ema_slope"]:
-            reasons.append(
-                f"weak_ema_slope {indicators.ema_slope:.5f}"
-            )
+            reasons.append(f"weak_ema_slope {indicators.ema_slope:.5f}")
+            metrics.append(RejectionMetric("ema_slope", indicators.ema_slope, soft["max_ema_slope"]))
 
         if indicators.rsi > soft["max_rsi"]:
-            reasons.append(
-                f"weak_rsi {indicators.rsi:.1f}"
-            )
+            reasons.append(f"weak_rsi {indicators.rsi:.1f}")
+            metrics.append(RejectionMetric("rsi", indicators.rsi, soft["max_rsi"]))
 
         if features.candle_body_ratio < soft["min_body_ratio"]:
-            reasons.append(
-                f"small_body {features.candle_body_ratio:.2f}"
-            )
+            reasons.append(f"small_body {features.candle_body_ratio:.2f}")
+            metrics.append(RejectionMetric("candle_body_ratio", features.candle_body_ratio, soft["min_body_ratio"]))
 
         if features.distance_from_level_pct > soft["max_close_to_low_pct"]:
-            reasons.append(
-                f"poor_close_location {features.distance_from_level_pct:.3f}"
-            )
+            reasons.append(f"poor_close_location {features.distance_from_level_pct:.3f}")
+            metrics.append(RejectionMetric("distance_from_level_pct", features.distance_from_level_pct, soft["max_close_to_low_pct"]))
 
         passed_soft = 5 - len(reasons)
 
@@ -223,7 +232,7 @@ class BreakoutDetector:
                     side="SHORT",
                     stage=RejectionStage.SOFT,
                     reasons=reasons,
-                    features=asdict(features),
+                    metrics=metrics,
                 )
 
             return False

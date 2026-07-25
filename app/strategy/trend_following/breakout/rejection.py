@@ -1,10 +1,11 @@
 
 from dataclasses import dataclass, field
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime
 from typing import Any
 
 from app.core.enums import RejectionStage
+from app.core.types import RejectionMetric
 
 
 @dataclass
@@ -14,7 +15,7 @@ class BreakoutRejection:
     side: str   # LONG / SHORT
     stage: RejectionStage
     reasons: list[str]
-    features: dict[str, Any] = field(default_factory=dict)
+    metrics: list[RejectionMetric] = field(default_factory=list)
 
 
 class BreakoutRejectionAnalyzer:
@@ -29,7 +30,7 @@ class BreakoutRejectionAnalyzer:
         side: str,
         stage: str,
         reasons: list[str],
-        features: dict[str, Any] | None = None,
+        metrics: list[RejectionMetric] | None = None,
     ):
         self.items.append(
             BreakoutRejection(
@@ -38,7 +39,7 @@ class BreakoutRejectionAnalyzer:
                 side=side,
                 stage=stage,
                 reasons=reasons,
-                features=features or {},
+                metrics=metrics
             )
         )
 
@@ -64,3 +65,12 @@ class BreakoutRejectionAnalyzer:
             result[f"{stage}_{side}"] = items
 
         return result
+
+    def metric_summary(self):
+        stats = defaultdict(list)
+
+        for item in self.items:
+            for metric in item.metrics:
+                stats[metric.name].append(metric.value)
+
+        return stats

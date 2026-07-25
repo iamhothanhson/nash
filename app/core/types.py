@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 from typing import Literal
 
@@ -26,3 +27,9 @@ class MarketStructure(str, Enum):
     LHLL = "LHLL"
     RANGE = "RANGE"
     UNKNOWN = "UNKNOWN"
+
+@dataclass
+class RejectionMetric:
+    name: str
+    value: float
+    threshold: float

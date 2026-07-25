@@ -82,6 +82,14 @@ def main() -> None:
             for reason, count, pct in reasons:
                 print(f"    {reason:<20} {count:>4} ({pct:5.1f}%)")
 
+        for name, values in breakout_rejection.metric_summary().items():
+            print(
+                f"{name:<20} "
+                f"avg={sum(values)/len(values):.2f} "
+                f"min={min(values):.2f} "
+                f"max={max(values):.2f}"
+            )
+
 
 if __name__ == "__main__":
     main()

@@ -6,7 +6,6 @@ from backtesting.config import SLIPPAGE_BPS
 from backtesting.marketplace import HistoricalMarketplace
 from backtesting.position import BacktestPositionManager
 from order_planner.models import OrderPlan
-from setup_builder.grader import Grader
 from analysis.collect_position_metrics import build_entry_snapshot, save_entry_snapshot
 
 

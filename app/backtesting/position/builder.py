@@ -21,6 +21,7 @@ def build_position(
         strategy_family=order_plan.strategy_family,
         setup_type=order_plan.setup_type,
         setup_score=order_plan.setup_score,
+        setup_grade=order_plan.setup_grade,
         entry_time=timestamp,
         entry=order_plan.entry,
         initial_qty=order_plan.qty,

@@ -17,6 +17,7 @@ class TradeSignal:
     setup_type: SetupType
     strategy_family: StrategyFamily 
     confirmation_mode: str
+    setup_grade: str = ""
     market_structure: str = "None"
     confidence: float = 0.0
     rsi: float | None = None

@@ -14,6 +14,9 @@ class OrderPlan:
     tp1_qty: float
     tp2_qty: float
     tp3_qty: float
+    tp1_pct: float = 0.0
+    tp2_pct: float = 0.0
+    tp3_pct: float = 0.0
     notional: float
     risk_amount: float
     risk_percent: float
@@ -23,10 +26,8 @@ class OrderPlan:
     confirmation_mode: str
     strategy_family: str
     risk_multiplier: float
+    setup_grade: str = ""
     margin_usdt: float = 0.0
-    tp1_pct: float = 0.0
-    tp2_pct: float = 0.0
-    tp3_pct: float = 0.0
     market_structure: str = "None"
     market_state: Any | None = None
     features: dict[str, Any] | None = None

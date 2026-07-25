@@ -99,6 +99,7 @@ class SignalBuilder:
             tp2=tp2,
             tp3=tp3,
             setup_score=int(round(setup.score)),
+            setup_grade=setup.grade,
             setup_type=setup_type,
             strategy_family=resolve_strategy_family(setup_type),
             confirmation_mode="confirmed",

@@ -62,7 +62,6 @@ class Closing:
         del self.positions[symbol]
 
     def _release_margin(self, pos: BacktestPosition) -> None:
-        self.account.wallet_balance += pos.margin_usdt
         self.account.available_balance += pos.margin_usdt
 
     @staticmethod

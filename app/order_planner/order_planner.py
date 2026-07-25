@@ -5,6 +5,7 @@ from app.core import settings
 from .config import TP_CLOSE_PCT, TP_CONFIG
 from .models import OrderPlan
 
+
 try:
     from exchange.client import BinanceFuturesClient
 except ImportError:
@@ -97,6 +98,7 @@ class OrderPlanner:
             risk_per_trade=float(getattr(risk, "risk_per_trade", 0.0)),
             setup_type=str(getattr(signal, "setup_type", "")),
             setup_score=float(getattr(signal, "setup_score", 0.0)),
+            setup_grade=str(getattr(signal, "setup_grade", "")),
             confirmation_mode=str(getattr(signal, "confirmation_mode", "")),
             strategy_family=str(getattr(signal, "strategy_family", "")),
             risk_multiplier=float(getattr(risk, "risk_multiplier", 1.0)),

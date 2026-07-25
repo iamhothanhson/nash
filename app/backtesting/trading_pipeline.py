@@ -14,7 +14,7 @@ from signal_builder.builder import SignalBuilder
 from risk_manager.risk_manager import RiskManager
 from order_planner.order_planner import OrderPlanner
 from backtesting.config import INDICATOR_WARMUP_BARS
-from backtesting.utils import has_enough_history
+from backtesting.utils import RejectStats, has_enough_history
 from strategy.trend_following.breakout.detector import BreakoutDetector
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
 from strategy.trend_following.pullback.detector import PullbackDetector
@@ -33,8 +33,10 @@ class BacktestTradingPipeline:
         self.position_manager = position_manager
         self.executor = executor
         self.market_analyzer = MarketAnalyzer()
+        self.reject_stats = RejectStats()
 
         self.breakout_detector = BreakoutDetector()
+        self.breakout_detector.reject_stats = self.reject_stats
 
         self.detectors = [
             self.breakout_detector.detect
@@ -48,7 +50,9 @@ class BacktestTradingPipeline:
     ) -> dict[str, Any]:
         for timestamp in timestamps:
             self._process_timestamp(symbols=symbols, timestamp=timestamp)
-        return self.position_manager.get_backtest_result()
+        result = self.position_manager.get_backtest_result()
+        result["reject_reasons"] = self.reject_stats.reasons
+        return result
 
     def _process_timestamp(self, symbols: list[str], timestamp: Any) -> None:
         for symbol in symbols:
@@ -96,7 +100,7 @@ class BacktestTradingPipeline:
 
         # Setup Builder
         best = self._select_best_candidate(candidates)
-        setup = SetupBuilder.build_from_candidate(candidate=best, market_state=market_state)
+        setup = SetupBuilder.build_from_candidate(candidate=best, market_state=market_state, reject_stats=self.reject_stats)
         if setup is None:
             return None
 
@@ -110,7 +114,7 @@ class BacktestTradingPipeline:
         account = SimpleNamespace(
             available_balance=float(account_raw.available_balance),
         )
-        risk = RiskManager.calculate(signal=signal, account=account)
+        risk = RiskManager.calculate(signal=signal, account=account, reject_stats=self.reject_stats)
         if not risk.allowed:
             return None
 

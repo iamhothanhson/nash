@@ -1,7 +1,9 @@
 from __future__ import annotations
+from typing import Any
 from turtle import pd
 
 from app.core.constants import BREAKOUT, MIN_SETUP_SCORE
+from core.enums import RejectReason
 from market_analyzer.market_state import MarketState
 from setup_builder.config import Grade as GradeMap
 from setup_builder.models import Direction, Setup, SetupType
@@ -17,6 +19,7 @@ class SetupBuilder:
         cls,
         candidate: SetupCandidate,
         market_state: MarketState,
+        reject_stats: Any = None,
     ) -> Setup:
         data_15m = market_state.data_15m
 
@@ -42,6 +45,8 @@ class SetupBuilder:
             score = 0
 
         if score < MIN_SETUP_SCORE:
+            if reject_stats:
+                reject_stats.reject(RejectReason.SCORE)
             return None
 
         grade_result = Grader.grade(score)

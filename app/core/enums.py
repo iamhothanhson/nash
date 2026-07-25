@@ -5,3 +5,9 @@ class TrailType(Enum):
     BREAK_EVEN = auto()
     ATR = auto()
     SWING = auto()
+
+class RejectReason(Enum):
+    STRUCTURE = auto()
+    BREAKOUT = auto()
+    SCORE = auto()
+    RISK = auto()

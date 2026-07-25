@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from typing import Any
+
+from core.enums import RejectReason
 from risk_manager.config import SCORE_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
 from app.core import settings
 
@@ -24,18 +27,19 @@ class RiskManager:
         cls,
         signal: Any,
         account: Any,
+        reject_stats: Any = None,
     ) -> RiskResult:
         entry = float(getattr(signal, "entry", 0.0))
         stop_loss = float(getattr(signal, "stop_loss", 0.0))
 
         if entry <= 0:
-            return cls._reject("Invalid entry price")
+            return cls._reject("Invalid entry price", reject_stats=reject_stats)
         if stop_loss <= 0:
-            return cls._reject("Invalid stop loss")
+            return cls._reject("Invalid stop loss", reject_stats=reject_stats)
 
         sl_distance = abs(entry - stop_loss) / entry
         if sl_distance <= 0:
-            return cls._reject("Invalid SL distance")
+            return cls._reject("Invalid SL distance", reject_stats=reject_stats)
 
         available_balance = account.available_balance
         
@@ -56,7 +60,8 @@ class RiskManager:
         min_notional = float(getattr(settings, "MIN_POSITION_NOTIONAL", 25))
         if position_notional < min_notional:
             return cls._reject(
-                f"Position notional {position_notional:.2f} below minimum {min_notional:.2f}"
+                f"Position notional {position_notional:.2f} below minimum {min_notional:.2f}",
+                reject_stats=reject_stats,
             )
 
         quantity = position_notional / entry
@@ -97,7 +102,9 @@ class RiskManager:
         return setup_mult * score_mult
 
     @classmethod
-    def _reject(cls, reason: str) -> RiskResult:
+    def _reject(cls, reason: str, reject_stats: Any = None) -> RiskResult:
+        if reject_stats:
+            reject_stats.reject(RejectReason.RISK)
         return RiskResult(
             allowed=False,
             risk_per_trade=0.0,

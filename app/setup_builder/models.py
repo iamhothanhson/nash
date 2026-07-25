@@ -33,3 +33,7 @@ class Setup:
     timestamp: int
     anchor: float = 0.0
     trade_allowed: bool = False
+
+@dataclass(frozen=True)
+class ScoreResult:
+    score: float

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict
 
 from app.core.constants import BREAKOUT
+from core.enums import RejectReason
 from core.logger import log, LogType
 from core.types import MarketStructure
 from strategy.models import SetupCandidate
@@ -17,14 +18,15 @@ from strategy.trend_following.breakout.feature_builder import FeatureBuilder
 
 class BreakoutDetector:
 
+    def __init__(self):
+        self.reject_stats = None
+
     def detect(self, market_state):
-        sym = market_state.symbol
-        structure = market_state.structure
         breakout_feature = FeatureBuilder.compute_breakout_features(
             market_state.data_15m, market_state.indicators
         )
 
-        if structure == MarketStructure.HHHL:
+        if breakout_feature.direction == "LONG":
             if not self.hard_check_long(breakout_feature, market_state.indicators):
                 return None
             if not self.soft_check_long(breakout_feature, market_state.indicators):
@@ -39,12 +41,7 @@ class BreakoutDetector:
                 timeframe=market_state.timeframe,
             )
 
-        if structure == MarketStructure.LHLL:
-            if breakout_feature.breakout_level <= 0 or breakout_feature.direction != "SHORT":
-                log(LogType.PLAN_REJECT, sym,
-                    f"Breakout Short Rejected: level={breakout_feature.breakout_level}"
-                    f" direction={breakout_feature.direction}")
-                return None
+        elif breakout_feature.direction == "SHORT":
             if not self.hard_check_short(breakout_feature, market_state.indicators):
                 return None
             if not self.soft_check_short(breakout_feature, market_state.indicators):
@@ -59,7 +56,6 @@ class BreakoutDetector:
                 timeframe=market_state.timeframe,
             )
 
-        log(LogType.PLAN_REJECT, sym, f"structure={structure.value} Skipped Breakout")
         return None
 
     def hard_check_long(self, features, indicators):
@@ -72,13 +68,8 @@ class BreakoutDetector:
         adx_ok = adx_val_15m >= hard["min_adx"] and adx_val_1h >= hard["min_adx_1h"]
 
         if not (close_above and strength_ok and ema_ok and adx_ok):
-            log(LogType.PLAN_REJECT, indicators.symbol,
-            f"long hard: close_above={close_above} "
-            f"strength={features.breakout_strength_pct:.4f}/{hard['min_strength']} "
-            f"ema_aligned={ema_ok} "
-            f"adx_15m={adx_val_15m:.1f}/{hard['min_adx']} "
-            f"adx_1h={adx_val_1h:.1f}/{hard['min_adx_1h']}")
-            
+            if self.reject_stats:
+                self.reject_stats.reject(RejectReason.BREAKOUT)
             return False
 
         return True
@@ -93,13 +84,8 @@ class BreakoutDetector:
         passed_soft = sum((vol_ok, ema_slope_ok, rsi_ok, body_ok, close_loc_ok))
 
         if passed_soft < 3:
-            log(LogType.PLAN_REJECT, indicators.symbol,
-                f"long soft: vol={vol_ok}({indicators.volume_ratio:.2f}) "
-                f"slope={ema_slope_ok}({indicators.ema_slope:.4f}) "
-                f"rsi={rsi_ok}({indicators.rsi:.1f}) "
-                f"body={body_ok}({features.candle_body_ratio:.2f}) "
-                f"loc={close_loc_ok}({features.distance_from_level_pct:.3f}) "
-                f"passed={passed_soft}")
+            if self.reject_stats:
+                self.reject_stats.reject(RejectReason.BREAKOUT)
             return False
 
         return True
@@ -114,12 +100,8 @@ class BreakoutDetector:
         adx_ok = adx_val_15m >= hard["min_adx"] and adx_val_1h >= hard["min_adx_1h"]
 
         if not (close_below and strength_ok and ema_ok and adx_ok):
-            log(LogType.PLAN_REJECT, indicators.symbol,
-                f"short hard: close_below={close_below} "
-                f"strength={features.breakout_strength_pct:.4f}/{hard['min_strength']} "
-                f"ema_aligned={ema_ok} "
-                f"adx_15m={adx_val_15m:.1f}/{hard['min_adx']} "
-                f"adx_1h={adx_val_1h:.1f}/{hard['min_adx_1h']}")
+            if self.reject_stats:
+                self.reject_stats.reject(RejectReason.BREAKOUT)
             return False
 
         return True
@@ -134,13 +116,8 @@ class BreakoutDetector:
         passed_soft = sum((vol_ok, ema_slope_ok, rsi_ok, body_ok, close_loc_ok))
 
         if passed_soft < 3:
-            log(LogType.PLAN_REJECT, indicators.symbol,
-                f"short soft: vol={vol_ok}({indicators.volume_ratio:.2f}) "
-                f"slope={ema_slope_ok}({indicators.ema_slope:.4f}) "
-                f"rsi={rsi_ok}({indicators.rsi:.1f}) "
-                f"body={body_ok}({features.candle_body_ratio:.2f}) "
-                f"loc={close_loc_ok}({features.distance_from_level_pct:.3f}) "
-                f"passed={passed_soft}")
+            if self.reject_stats:
+                self.reject_stats.reject(RejectReason.BREAKOUT)
             return False
 
         return True

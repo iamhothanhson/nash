@@ -6,11 +6,6 @@ from indicators.models import Indicators
 from market_analyzer.market_state import MarketState
 
 
-@dataclass(frozen=True)
-class ScoreResult:
-    score: float
-
-
 class Scorer:
     def score_breakout_setup(
         self,
@@ -21,7 +16,6 @@ class Scorer:
     ) -> int:
         features = SimpleNamespace(**features)
         score = 0
-
         score += self._score_strenth(features.breakout_strength_pct)
         score += self._score_volume(indicators.volume_ratio)
         score += self._score_rsi(side, indicators.rsi)

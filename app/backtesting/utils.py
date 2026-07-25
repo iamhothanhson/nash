@@ -1,7 +1,20 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass, field
 from typing import Any
+
+from core.enums import RejectReason
+
+
+@dataclass
+class RejectStats:
+    reasons: dict[RejectReason, int] = field(default_factory=dict)
+
+    def reject(self, reason: RejectReason) -> None:
+        self.reasons[reason] = self.reasons.get(reason, 0) + 1
+
+
 def print_result(result: dict) -> None:
     positions = result.get("positions", [])
     equity = result["equity_curve"]
@@ -25,6 +38,14 @@ def print_result(result: dict) -> None:
         trough = min(e.equity for e in equity)
         dd = (peak - trough) / peak * 100 if peak else 0
         print(f"Max Drawdown: {dd:.2f}%")
+
+    reject_reasons = result.get("reject_reasons", {})
+    if reject_reasons:
+        total = sum(reject_reasons.values())
+        parts = ", ".join(
+            f"{r.name.lower()}: {n}" for r, n in sorted(reject_reasons.items(), key=lambda x: -x[1])
+        )
+        print(f"Rejections: {total} total, {parts}")
 
     # Group by setup_type
     family_groups = defaultdict(list)

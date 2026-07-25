@@ -3,7 +3,11 @@ from __future__ import annotations
 import pandas as pd
 
 from market_analyzer.config import MARKET_STRUCTURE_SWING_LOOKBACK
+from market_analyzer.market_structure_debug import MarketStructureDebug
+from core.debug import MARKET_STRUCTURE_DEBUG
 from core.types import MarketStructure
+
+market_structure_debug = MarketStructureDebug() if MARKET_STRUCTURE_DEBUG else None
 
 
 def detect_market_structure(
@@ -65,6 +69,14 @@ def detect_market_structure(
 
     high_score = trend_score(high_values)
     low_score = trend_score(low_values)
+
+    if market_structure_debug:
+        market_structure_debug.record(
+            recent_highs,
+            recent_lows,
+            high_score,
+            low_score,
+        )
 
     # Strong bullish structure
     if high_score >= 2 and low_score >= 2:

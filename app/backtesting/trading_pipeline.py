@@ -16,6 +16,7 @@ from order_planner.order_planner import OrderPlanner
 from backtesting.config import INDICATOR_WARMUP_BARS
 from backtesting.utils import RejectStats, has_enough_history
 from strategy.trend_following.breakout.detector import BreakoutDetector
+from strategy.trend_following.breakout.types import BreakoutPipelineStats
 from strategy.trend_following.breakout_retest.detector import BreakoutRetestDetector
 from strategy.trend_following.pullback.detector import PullbackDetector
 
@@ -53,6 +54,7 @@ class BacktestTradingPipeline:
         result = self.position_manager.get_backtest_result()
         result["reject_reasons"] = self.reject_stats.reasons
         result["breakout_rejection"] = self.breakout_detector.breakout_rejection
+        result["pipeline_stats"] = self.breakout_detector.pipeline_stats
         return result
 
     def _process_timestamp(self, symbols: list[str], timestamp: Any) -> None:

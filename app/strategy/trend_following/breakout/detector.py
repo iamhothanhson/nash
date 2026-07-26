@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict
 
 from app.core.constants import BREAKOUT
+from app.strategy.trend_following.breakout.types import BreakoutPipelineStats
 from core.enums import RejectReason, RejectionStage
 from core.types import RejectionMetric
 from strategy.models import SetupCandidate
@@ -23,6 +24,7 @@ class BreakoutDetector:
     def __init__(self):
         self.reject_stats = None
         self.breakout_rejection = BreakoutRejectionAnalyzer()
+        self.pipeline_stats = BreakoutPipelineStats()
 
     def detect(self, market_state):
         self._current_ts = getattr(market_state, "timestamp", None)
@@ -31,11 +33,17 @@ class BreakoutDetector:
             market_state.data_15m, market_state.indicators
         )
 
+        self.pipeline_stats.candidates += 1
+
         if breakout_feature.direction == "LONG":
+            self.pipeline_stats.long_candidates += 1
             if not self.hard_check_long(breakout_feature, market_state.indicators):
                 return None
+            self.pipeline_stats.hard_pass += 1
             if not self.soft_check_long(breakout_feature, market_state.indicators):
                 return None
+            self.pipeline_stats.soft_pass += 1
+            self.pipeline_stats.setups += 1
             return SetupCandidate(
                 setup_type=BREAKOUT,
                 direction="LONG",
@@ -47,10 +55,14 @@ class BreakoutDetector:
             )
 
         elif breakout_feature.direction == "SHORT":
+            self.pipeline_stats.short_candidates += 1
             if not self.hard_check_short(breakout_feature, market_state.indicators):
                 return None
+            self.pipeline_stats.hard_pass += 1
             if not self.soft_check_short(breakout_feature, market_state.indicators):
                 return None
+            self.pipeline_stats.soft_pass += 1
+            self.pipeline_stats.setups += 1
             return SetupCandidate(
                 setup_type=BREAKOUT,
                 direction="SHORT",

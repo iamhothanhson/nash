@@ -90,6 +90,20 @@ def main() -> None:
                 f"max={max(values):.2f}"
             )
 
+    stats = result.get("pipeline_stats")
+    if stats:
+        total = stats.candidates or 1
+        hard_pct = stats.hard_pass / total * 100
+        soft_pct = stats.soft_pass / stats.hard_pass * 100 if stats.hard_pass else 0
+        setup_pct = stats.setups / stats.soft_pass * 100 if stats.soft_pass else 0
+        print("\n\nBREAKOUT PIPELINE")
+        print(f"{'Candidates':<20} {stats.candidates}")
+        print(f"  {'LONG':<18} {stats.long_candidates}")
+        print(f"  {'SHORT':<18} {stats.short_candidates}")
+        print(f"{'Hard pass':<20} {stats.hard_pass} ({hard_pct:.1f}%)")
+        print(f"{'Soft pass':<20} {stats.soft_pass} ({soft_pct:.1f}%)")
+        print(f"{'Final setups':<20} {stats.setups} ({setup_pct:.1f}%)")
+
 
 if __name__ == "__main__":
     main()

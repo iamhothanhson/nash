@@ -36,9 +36,9 @@ class IndicatorBuilder:
             try:
                 ema20_15 = calculate_ema(data_15m, 20)
                 indicators.ema20_15m = ema20_15
-                val = float(ema20_15.iloc[-1] - ema20_15.iloc[-SLOPE_LOOKBACK])
-                indicators.ema20_slope_15m = val
-                indicators.ema_slope = val
+                ema_current = float(ema20_15.iloc[-1])
+                ema_prev = float(ema20_15.iloc[-SLOPE_LOOKBACK])
+                indicators.ema20_slope_15m = (ema_current - ema_prev) / ema_prev if ema_prev else 0.0
             except Exception:
                 pass
 
@@ -76,9 +76,9 @@ class IndicatorBuilder:
             try:
                 ema20_1h = calculate_ema(data_1h, 20)
                 indicators.ema20_1h = ema20_1h
-                indicators.ema20_slope_1h = float(
-                    ema20_1h.iloc[-1] - ema20_1h.iloc[-SLOPE_LOOKBACK]
-                )
+                ema20_1h_current = float(ema20_1h.iloc[-1])
+                ema20_1h_prev = float(ema20_1h.iloc[-SLOPE_LOOKBACK])
+                indicators.ema20_slope_1h = (ema20_1h_current - ema20_1h_prev) / ema20_1h_prev if ema20_1h_prev else 0.0
             except Exception:
                 indicators.ema20_slope_1h = 0.0
 

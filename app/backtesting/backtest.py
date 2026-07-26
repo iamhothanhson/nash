@@ -111,6 +111,9 @@ def main() -> None:
             vals = stats.setup_skip_score_values
             print(f"{'  Skipped Score Range':<20} {min(vals):.0f}-{max(vals):.0f} avg={sum(vals)/len(vals):.0f}")
         print(f"{'Signal built':<20} {stats.signal_built}")
+        print(f"{'  skip':<20} {stats.signal_skip}")
+        for reason, count in stats.signal_skip_reasons.most_common():
+            print(f"{'  ' + reason:<20} {count}")
         print(f"{'Risk allowed':<20} {stats.risk_allowed}")
         print(f"{'Order planned':<20} {stats.order_planned}")
 

@@ -1,9 +1,6 @@
 from __future__ import annotations
 
 # Trend-following strategy parameters (code defaults).
-
-MAX_SL_DISTANCE: float = 0.02
-
 # Breakout retest entry filters
 TREND_BREAKOUT_RETEST_BLOCK_SYMBOLS: tuple[str, ...] = ("FETUSDT", "RENDERUSDT")
 TREND_BREAKOUT_RETEST_MAX_LEVEL_DEV: float = 0.0080

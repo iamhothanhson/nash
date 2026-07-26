@@ -117,9 +117,9 @@ class BreakoutDetector:
             reasons.append(f"low_volume {indicators.volume_ratio:.2f}")
             metrics.append(RejectionMetric("volume_ratio", indicators.volume_ratio, soft["min_volume_ratio"]))
 
-        if indicators.ema_slope < soft["min_ema_slope"] - EPSILON:
-            reasons.append(f"weak_ema_slope {indicators.ema_slope:.5f}")
-            metrics.append(RejectionMetric("ema_slope", indicators.ema_slope, soft["min_ema_slope"]))
+        if indicators.ema20_slope_15m < soft["min_ema_slope"] - EPSILON:
+            reasons.append(f"weak_ema_slope {indicators.ema20_slope_15m:.5f}")
+            metrics.append(RejectionMetric("ema_slope", indicators.ema20_slope_15m, soft["min_ema_slope"]))
 
         if indicators.rsi < soft["min_rsi"] - EPSILON:
             reasons.append(f"weak_rsi {indicators.rsi:.1f}")
@@ -183,9 +183,9 @@ class BreakoutDetector:
             reasons.append(f"low_volume {indicators.volume_ratio:.2f}")
             metrics.append(RejectionMetric("volume_ratio", indicators.volume_ratio, soft["min_volume_ratio"]))
 
-        if indicators.ema_slope > soft["max_ema_slope"] + EPSILON:
-            reasons.append(f"weak_ema_slope {indicators.ema_slope:.5f}")
-            metrics.append(RejectionMetric("ema_slope", indicators.ema_slope, soft["max_ema_slope"]))
+        if indicators.ema20_slope_15m > soft["max_ema_slope"] + EPSILON:
+            reasons.append(f"weak_ema_slope {indicators.ema20_slope_15m:.5f}")
+            metrics.append(RejectionMetric("ema_slope", indicators.ema20_slope_15m, soft["max_ema_slope"]))
 
         if indicators.rsi > soft["max_rsi"] + EPSILON:
             reasons.append(f"weak_rsi {indicators.rsi:.1f}")

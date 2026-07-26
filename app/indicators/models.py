@@ -19,6 +19,6 @@ class Indicators:
     rsi: Any = None
     volume_sma20: float | None = None
     volume_ratio: float | None = None
-    ema_slope: float | None = None
+
     symbol: str = ""
     timestamp: Any = None

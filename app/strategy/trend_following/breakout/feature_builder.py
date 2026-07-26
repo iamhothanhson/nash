@@ -19,7 +19,7 @@ class FeatureBuilder:
                 direction="LONG",
                 breakout_level=0.0,
                 close_above_level=False,
-                breakout_strength_pct=0.0,
+                breakout_strength=0.0,
                 distance_from_level_pct=0.0,
                 candle_body_ratio=0.0,
                 wick_ratio=0.0,
@@ -56,7 +56,7 @@ class FeatureBuilder:
                 direction="UNKNOWN",
                 breakout_level=0.0,
                 close_above_level=False,
-                breakout_strength_pct=0.0,
+                breakout_strength=0.0,
                 distance_from_level_pct=0.0,
                 candle_body_ratio=0.0,
                 wick_ratio=0.0,
@@ -67,11 +67,11 @@ class FeatureBuilder:
             )
 
         dist = (
-            (current_close - breakout_level) / breakout_level * 100
+            (current_close - breakout_level) / breakout_level
             if direction == "LONG"
-            else (breakout_level - current_close) / breakout_level * 100
+            else (breakout_level - current_close) / breakout_level
         )
-        distance_pct = max(dist, 0.0)
+        distance = max(dist, 0.0)
 
         candle_range = current_high - current_low
         body = abs(current_close - current_open)
@@ -101,8 +101,8 @@ class FeatureBuilder:
             direction=direction,
             breakout_level=breakout_level,
             close_above_level=close_above or direction == "LONG",
-            breakout_strength_pct=distance_pct,
-            distance_from_level_pct=distance_pct,
+            breakout_strength=distance,
+            distance_from_level_pct=distance,
             candle_body_ratio=body_ratio,
             wick_ratio=wick_ratio,
             touch_count=touch_count,

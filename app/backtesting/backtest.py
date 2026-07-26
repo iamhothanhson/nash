@@ -95,14 +95,24 @@ def main() -> None:
         total = stats.candidates or 1
         hard_pct = stats.hard_pass / total * 100
         soft_pct = stats.soft_pass / stats.hard_pass * 100 if stats.hard_pass else 0
-        setup_pct = stats.setups / stats.soft_pass * 100 if stats.soft_pass else 0
+        setup_pct = stats.setup_candidates / stats.soft_pass * 100 if stats.soft_pass else 0
         print("\n\nBREAKOUT PIPELINE")
         print(f"{'Candidates':<20} {stats.candidates}")
         print(f"  {'LONG':<18} {stats.long_candidates}")
         print(f"  {'SHORT':<18} {stats.short_candidates}")
         print(f"{'Hard pass':<20} {stats.hard_pass} ({hard_pct:.1f}%)")
         print(f"{'Soft pass':<20} {stats.soft_pass} ({soft_pct:.1f}%)")
-        print(f"{'Final setups':<20} {stats.setups} ({setup_pct:.1f}%)")
+        print(f"{'Setup candidates':<20} {stats.setup_candidates} ({setup_pct:.1f}%)")
+        print(f"{'Setup built':<20} {stats.setup_built}")
+        print(f"{'  skip no data':<20} {stats.setup_skip_no_data}")
+        print(f"{'  skip no entry':<20} {stats.setup_skip_no_entry}")
+        print(f"{'  skip score':<20} {stats.setup_skip_score}")
+        if stats.setup_skip_score_values:
+            vals = stats.setup_skip_score_values
+            print(f"{'  Skipped Score Range':<20} {min(vals):.0f}-{max(vals):.0f} avg={sum(vals)/len(vals):.0f}")
+        print(f"{'Signal built':<20} {stats.signal_built}")
+        print(f"{'Risk allowed':<20} {stats.risk_allowed}")
+        print(f"{'Order planned':<20} {stats.order_planned}")
 
 
 if __name__ == "__main__":

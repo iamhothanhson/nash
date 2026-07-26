@@ -1,9 +1,19 @@
 from app.core.types import MarketRegime
 
+BREAKOUT_MIN_STRENGTH = 0.0035
 
 BREAKOUT_LONG_HARD = {
     "close_above_recent_high": True,
-    "min_strength": 0.35,
+    "min_strength": BREAKOUT_MIN_STRENGTH,
+    "require_ema_alignment": True,
+    # Avoid ranging markets
+    "min_adx": 20,
+    "min_adx_1h": 20,
+}
+
+BREAKOUT_SHORT_HARD = {
+    "close_below_recent_low": True,
+    "min_strength": BREAKOUT_MIN_STRENGTH,
     "require_ema_alignment": True,
     # Avoid ranging markets
     "min_adx": 20,
@@ -25,15 +35,6 @@ BREAKOUT_LONG_SOFT = {
 
     # Close near the high (little upper wick)
     "max_close_to_high_pct": 0.35,
-}
-
-BREAKOUT_SHORT_HARD = {
-    "close_below_recent_low": True,
-    "min_strength": 0.35,
-    "require_ema_alignment": True,
-    # Avoid ranging markets
-    "min_adx": 20,
-    "min_adx_1h": 20,
 }
 
 BREAKOUT_SHORT_SOFT = {

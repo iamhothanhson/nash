@@ -1,4 +1,3 @@
-MIN_SETUP_SCORE = 80
 BREAKOUT = "breakout"
 BREAKOUT_RETEST = "breakout_retest"
 PULLBACK = "pullback"

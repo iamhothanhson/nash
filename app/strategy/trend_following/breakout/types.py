@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -8,4 +8,12 @@ class BreakoutPipelineStats:
     short_candidates: int = 0
     hard_pass: int = 0
     soft_pass: int = 0
-    setups: int = 0
+    setup_candidates: int = 0
+    setup_built: int = 0
+    setup_skip_no_data: int = 0
+    setup_skip_no_entry: int = 0
+    setup_skip_score: int = 0
+    setup_skip_score_values: list[int] = field(default_factory=list)
+    signal_built: int = 0
+    risk_allowed: int = 0
+    order_planned: int = 0

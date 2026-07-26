@@ -60,7 +60,7 @@ def save_entry_snapshot(snapshot: EntrySnapshot) -> str:
         "setup_features": {
             "setup_score": round(snapshot.setup_features.setup_score, 2),
             "confirmation_mode": snapshot.setup_features.confirmation_mode,
-            "breakout_strength_pct": round(snapshot.setup_features.breakout_strength_pct, 2),
+            "breakout_strength": round(snapshot.setup_features.breakout_strength, 4),
             "distance_from_level_pct": round(snapshot.setup_features.distance_from_level_pct, 2),
             "candle_body_ratio": round(snapshot.setup_features.candle_body_ratio, 2),
             "wick_ratio": round(snapshot.setup_features.wick_ratio, 2),
@@ -158,7 +158,7 @@ def build_entry_snapshot(
         setup_features=SetupFeatureSnapshot(
             setup_score=setup_score,
             confirmation_mode=feat.get("confirmation_mode", ""),
-            breakout_strength_pct=feat.get("breakout_strength_pct", 0.0),
+            breakout_strength=feat.get("breakout_strength", 0.0),
             distance_from_level_pct=feat.get("distance_from_level_pct", 0.0),
             candle_body_ratio=feat.get("candle_body_ratio", 0.0),
             wick_ratio=feat.get("wick_ratio", 0.0),

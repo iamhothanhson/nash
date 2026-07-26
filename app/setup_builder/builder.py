@@ -2,7 +2,8 @@ from __future__ import annotations
 from typing import Any
 from turtle import pd
 
-from app.core.constants import BREAKOUT, MIN_SETUP_SCORE
+from app.core.constants import BREAKOUT
+from app.setup_builder.config import MIN_SETUP_SCORE
 from core.enums import RejectReason
 from market_analyzer.market_state import MarketState
 from setup_builder.config import Grade as GradeMap
@@ -20,10 +21,13 @@ class SetupBuilder:
         candidate: SetupCandidate,
         market_state: MarketState,
         reject_stats: Any = None,
+        pipeline_stats: Any = None,
     ) -> Setup:
         data_15m = market_state.data_15m
 
         if data_15m is None or data_15m.empty:
+            if pipeline_stats:
+                pipeline_stats.setup_skip_no_data += 1
             return None
 
         entry = cls._compute_entry(
@@ -31,6 +35,8 @@ class SetupBuilder:
         )
 
         if entry is None:
+            if pipeline_stats:
+                pipeline_stats.setup_skip_no_entry += 1
             return None
 
         if candidate.setup_type == BREAKOUT:
@@ -47,9 +53,15 @@ class SetupBuilder:
         if score < MIN_SETUP_SCORE:
             if reject_stats:
                 reject_stats.reject(RejectReason.SCORE)
+            if pipeline_stats:
+                pipeline_stats.setup_skip_score += 1
+                pipeline_stats.setup_skip_score_values.append(score)
             return None
 
         grade_result = Grader.grade(score)
+
+        if pipeline_stats:
+            pipeline_stats.setup_built += 1
 
         return Setup(
             symbol=market_state.symbol,

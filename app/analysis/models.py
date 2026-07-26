@@ -38,7 +38,7 @@ class SetupFeatureSnapshot:
     setup_score: float
     confirmation_mode: str
 
-    breakout_strength_pct: float
+    breakout_strength: float
     distance_from_level_pct: float
 
     candle_body_ratio: float

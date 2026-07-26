@@ -10,7 +10,7 @@ class BreakoutFeatures:
     direction: Direction
     breakout_level: float
     close_above_level: bool
-    breakout_strength_pct: float
+    breakout_strength: float
     distance_from_level_pct: float
     candle_body_ratio: float
     wick_ratio: float
@@ -31,7 +31,7 @@ class SetupFeatures:
                 direction="LONG",
                 breakout_level=0.0,
                 close_above_level=False,
-                breakout_strength_pct=0.0,
+                breakout_strength=0.0,
                 distance_from_level_pct=0.0,
                 candle_body_ratio=0.0,
                 wick_ratio=0.0,

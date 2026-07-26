@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.signal_builder.models import TradeSignal
 from core.utils import get_coin_config, resolve_strategy_family
 from app.core.constants import BREAKOUT
@@ -48,6 +50,7 @@ class SignalBuilder:
     def build(
         cls,
         setup: Setup,
+        pipeline_stats: Any = None,
     ) -> TradeSignal | None:
 
         indicators = setup.market_state.indicators
@@ -89,6 +92,9 @@ class SignalBuilder:
             tp3_r=tp3_r,
             max_tp3_distance=None,
         )
+
+        if pipeline_stats:
+            pipeline_stats.signal_built += 1
 
         return TradeSignal(
             symbol=setup.symbol,

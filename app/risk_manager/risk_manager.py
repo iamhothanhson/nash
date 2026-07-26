@@ -28,6 +28,7 @@ class RiskManager:
         signal: Any,
         account: Any,
         reject_stats: Any = None,
+        pipeline_stats: Any = None,
     ) -> RiskResult:
         entry = float(getattr(signal, "entry", 0.0))
         stop_loss = float(getattr(signal, "stop_loss", 0.0))
@@ -65,6 +66,9 @@ class RiskManager:
             )
 
         quantity = position_notional / entry
+
+        if pipeline_stats:
+            pipeline_stats.risk_allowed += 1
 
         return RiskResult(
             allowed=True,

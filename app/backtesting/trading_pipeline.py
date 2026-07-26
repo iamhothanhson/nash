@@ -101,14 +101,16 @@ class BacktestTradingPipeline:
         if not candidates:
             return None 
 
+        pipeline_stats = self.breakout_detector.pipeline_stats
+
         # Setup Builder
         best = self._select_best_candidate(candidates)
-        setup = SetupBuilder.build_from_candidate(candidate=best, market_state=market_state, reject_stats=self.reject_stats)
+        setup = SetupBuilder.build_from_candidate(candidate=best, market_state=market_state, reject_stats=self.reject_stats, pipeline_stats=pipeline_stats)
         if setup is None:
             return None
 
         # Signal Builder -> TradeSignal
-        signal = SignalBuilder.build(setup=setup)
+        signal = SignalBuilder.build(setup=setup, pipeline_stats=pipeline_stats)
         if signal is None:
             return None
 
@@ -117,12 +119,12 @@ class BacktestTradingPipeline:
         account = SimpleNamespace(
             available_balance=float(account_raw.available_balance),
         )
-        risk = RiskManager.calculate(signal=signal, account=account, reject_stats=self.reject_stats)
+        risk = RiskManager.calculate(signal=signal, account=account, reject_stats=self.reject_stats, pipeline_stats=pipeline_stats)
         if not risk.allowed:
             return None
 
         # Order Plan
-        order_plan = OrderPlanner.build_order_plan(signal=signal, risk=risk)
+        order_plan = OrderPlanner.build_order_plan(signal=signal, risk=risk, pipeline_stats=pipeline_stats)
         if order_plan is None:
             return None
 

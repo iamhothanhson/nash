@@ -43,7 +43,7 @@ class BreakoutDetector:
             if not self.soft_check_long(breakout_feature, market_state.indicators):
                 return None
             self.pipeline_stats.soft_pass += 1
-            self.pipeline_stats.setups += 1
+            self.pipeline_stats.setup_candidates += 1
             return SetupCandidate(
                 setup_type=BREAKOUT,
                 direction="LONG",
@@ -62,7 +62,7 @@ class BreakoutDetector:
             if not self.soft_check_short(breakout_feature, market_state.indicators):
                 return None
             self.pipeline_stats.soft_pass += 1
-            self.pipeline_stats.setups += 1
+            self.pipeline_stats.setup_candidates += 1
             return SetupCandidate(
                 setup_type=BREAKOUT,
                 direction="SHORT",
@@ -84,9 +84,9 @@ class BreakoutDetector:
             reasons.append("no_close_above_high")
             metrics.append(RejectionMetric("close_above_level", float(features.close_above_level), float(hard["close_above_recent_high"])))
 
-        if features.breakout_strength_pct < hard["min_strength"] - EPSILON:
-            reasons.append(f"weak_strength {features.breakout_strength_pct:.4f}")
-            metrics.append(RejectionMetric("breakout_strength_pct", features.breakout_strength_pct, hard["min_strength"]))
+        if features.breakout_strength < hard["min_strength"] - EPSILON:
+            reasons.append(f"weak_strength {features.breakout_strength:.4f}")
+            metrics.append(RejectionMetric("breakout_strength", features.breakout_strength, hard["min_strength"]))
 
         if hard["require_ema_alignment"] and not features.htf_confirmed:
             reasons.append("ema_alignment")
@@ -150,9 +150,9 @@ class BreakoutDetector:
             reasons.append("no_close_below_low")
             metrics.append(RejectionMetric("close_below_level", float(not features.close_above_level), 1.0))
 
-        if features.breakout_strength_pct < hard["min_strength"] - EPSILON:
-            reasons.append(f"weak_strength {features.breakout_strength_pct:.4f}")
-            metrics.append(RejectionMetric("breakout_strength_pct", features.breakout_strength_pct, hard["min_strength"]))
+        if features.breakout_strength < hard["min_strength"] - EPSILON:
+            reasons.append(f"weak_strength {features.breakout_strength:.4f}")
+            metrics.append(RejectionMetric("breakout_strength", features.breakout_strength, hard["min_strength"]))
 
         if hard["require_ema_alignment"] and not features.htf_confirmed:
             reasons.append("ema_alignment")

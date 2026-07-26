@@ -30,7 +30,7 @@ class OrderPlanner:
         return 0.0
 
     @staticmethod
-    def build_order_plan(signal: Any, risk: Any | None = None, **kwargs: Any) -> OrderPlan | None:
+    def build_order_plan(signal: Any, risk: Any | None = None, pipeline_stats: Any = None, **kwargs: Any) -> OrderPlan | None:
         if signal is None:
             return None
 
@@ -76,6 +76,9 @@ class OrderPlanner:
         tp1_pct = TP_CONFIG["tp1_r"] * sl_distance * 100
         tp2_pct = TP_CONFIG["tp2_r"] * sl_distance * 100
         tp3_pct = TP_CONFIG["tp3_r"] * sl_distance * 100
+
+        if pipeline_stats:
+            pipeline_stats.order_planned += 1
 
         return OrderPlan(
             symbol=str(getattr(signal, "symbol", "UNKNOWN")).strip().upper(),

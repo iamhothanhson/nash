@@ -28,7 +28,7 @@ class BreakoutRejectionAnalyzer:
         timestamp: datetime,
         symbol: str,
         side: str,
-        stage: str,
+        stage: RejectionStage,
         reasons: list[str],
         metrics: list[RejectionMetric] | None = None,
     ):
@@ -44,25 +44,24 @@ class BreakoutRejectionAnalyzer:
         )
 
     def summary(self) -> dict[str, list[tuple[str, int, float]]]:
-        groups: dict[tuple[str, str], dict[str, int]] = {}
-        group_counts: dict[tuple[str, str], int] = {}
+        groups: dict[str, dict[str, int]] = {}
+        group_counts: dict[str, int] = {}
 
         for item in self.items:
-            key = (item.stage.value if hasattr(item.stage, 'value') else str(item.stage), item.side)
-            if key not in groups:
-                groups[key] = {}
-                group_counts[key] = 0
-            group_counts[key] += 1
+            stage = item.stage.value if hasattr(item.stage, 'value') else str(item.stage)
+            if stage not in groups:
+                groups[stage] = {}
+                group_counts[stage] = 0
+            group_counts[stage] += 1
             for reason in item.reasons:
                 name = reason.split(" ")[0]
-                groups[key][name] = groups[key].get(name, 0) + 1
+                groups[stage][name] = groups[stage].get(name, 0) + 1
 
         result = {}
-        for key, reasons in groups.items():
-            stage, side = key
-            total = group_counts[key]
+        for stage, reasons in groups.items():
+            total = group_counts[stage]
             items = [(r, c, c / total * 100) for r, c in sorted(reasons.items(), key=lambda x: -x[1])]
-            result[f"{stage}_{side}"] = items
+            result[stage] = items
 
         return result
 

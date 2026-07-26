@@ -8,11 +8,15 @@ class TrailType(Enum):
 
 class RejectReason(Enum):
     STRUCTURE = auto()
-    BREAKOUT_HARD = auto()
-    BREAKOUT_SHORT = auto()
+    BREAKOUT_HARD_LONG = auto()
+    BREAKOUT_HARD_SHORT = auto()
+    BREAKOUT_SOFT_LONG= auto()
+    BREAKOUT_SOFT_SHORT = auto()
     SCORE = auto()
     RISK = auto()
 
 class RejectionStage(Enum):
-    HARD = "HARD"
-    SOFT = "SOFT"
+    HARD_LONG = "HARD_LONG"
+    HARD_SHORT = "HARD_SHORT"
+    SOFT_LONG = "SOFT_LONG"
+    SOFT_SHORT = "SOFT_SHORT"

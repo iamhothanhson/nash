@@ -1,9 +1,6 @@
-Grade: dict = {
-    "A+": "A+",
-    "A": "A",
-    "Skip": "Skip",
-}
-
 MARKET_STRUCTURE = ("HHHL", "LHLL")
-
-MIN_SETUP_SCORE = 80
+A_PLUS = "A+"
+A = "A"
+SKIP = "SKIP"
+SCORE_A_PLUS = 85
+SCORE_A = 70

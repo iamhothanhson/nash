@@ -13,6 +13,7 @@ class RejectReason(Enum):
     BREAKOUT_SOFT_LONG= auto()
     BREAKOUT_SOFT_SHORT = auto()
     SCORE = auto()
+    GRADE = auto()
     RISK = auto()
 
 class RejectionStage(Enum):

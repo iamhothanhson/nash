@@ -3,10 +3,9 @@ from typing import Any
 from turtle import pd
 
 from app.core.constants import BREAKOUT
-from app.setup_builder.config import MIN_SETUP_SCORE
+from app.setup_builder.config import SCORE_A
 from core.enums import RejectReason
 from market_analyzer.market_state import MarketState
-from setup_builder.config import Grade as GradeMap
 from setup_builder.models import Direction, Setup, SetupType
 from setup_builder.grader import Grader
 from setup_builder.scorer import Scorer
@@ -50,7 +49,7 @@ class SetupBuilder:
         else:
             score = 0
 
-        if score < MIN_SETUP_SCORE:
+        if score < SCORE_A:
             if reject_stats:
                 reject_stats.reject(RejectReason.SCORE)
             if pipeline_stats:

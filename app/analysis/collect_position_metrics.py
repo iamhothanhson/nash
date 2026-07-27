@@ -48,8 +48,8 @@ def save_entry_snapshot(snapshot: EntrySnapshot) -> str:
             "is_high_volatility": snapshot.market_state.is_high_volatility,
         },
         "indicators": {
-            "ema_slope_15m": round(snapshot.indicators.ema_slope_15m, 2),
-            "ema_slope_1h": round(snapshot.indicators.ema_slope_1h, 2),
+            "ema_slope_15m": round(snapshot.indicators.ema_slope_15m, 4),
+            "ema_slope_1h": round(snapshot.indicators.ema_slope_1h, 4),
             "adx_15m": round(snapshot.indicators.adx_15m, 2),
             "adx_1h": round(snapshot.indicators.adx_1h, 2),
             "atr_percent": round(snapshot.indicators.atr_percent, 2),

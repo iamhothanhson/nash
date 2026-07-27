@@ -17,9 +17,9 @@ from strategy.models import SetupCandidate
 class BreakoutRetestDetector:
 
     def detect(self, market_state) -> SetupCandidate | None:
-        if market_state.structure == MarketStructure.HHHL:
+        if market_state.market_structure_1h == MarketStructure.HHHL:
             return self.detect_long(market_state)
-        if market_state.structure == MarketStructure.LHLL:
+        if market_state.market_structure_1h == MarketStructure.LHLL:
             return self.detect_short(market_state)
         return None
 
@@ -38,7 +38,7 @@ class BreakoutRetestDetector:
         if not rf.retest_rejection_long:
             return None
 
-        ema_slope = float(ind.ema_slope_15m or 0.0)
+        ema_slope = float(ind.ema20_slope_15m or 0.0)
         rsi_raw = ind.rsi_15m if ind.rsi_15m is not None else 0.0
         rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
         max_dev = float(TREND_BREAKOUT_RETEST_MAX_LEVEL_DEV)
@@ -90,7 +90,7 @@ class BreakoutRetestDetector:
         if not rf.retest_rejection_short:
             return None
 
-        ema_slope = float(ind.ema_slope_15m or 0.0)
+        ema_slope = float(ind.ema20_slope_15m or 0.0)
         rsi_raw = ind.rsi_15m if ind.rsi_15m is not None else 0.0
         rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
         max_dev = float(TREND_BREAKOUT_RETEST_MAX_LEVEL_DEV)

@@ -6,7 +6,7 @@ from typing import Any
 from typing import Any
 
 from core.enums import RejectReason
-from risk_manager.config import SCORE_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
+from risk_manager.config import GRADE_RISK_MULTIPLIERS, REGIME_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
 from app.core import settings
 
 
@@ -46,9 +46,10 @@ class RiskManager:
         
         base_risk_per_trade = float(settings.RISK_PER_TRADE)
         setup_type = str(getattr(signal, "setup_type", "")).strip()
-        score = int(getattr(signal, "setup_score", 0))
+        setup_grade = str(getattr(signal, "setup_grade", "")).strip().upper()
+        regime = str(getattr(signal, "market_state.regime", "")).strip()
         
-        mult = cls.compute_risk_multiplier(setup_type, score)
+        mult = cls.compute_risk_multiplier(setup_type, setup_grade, regime)
         risk_per_trade = base_risk_per_trade * mult
         risk_amount = available_balance * risk_per_trade
 
@@ -96,14 +97,13 @@ class RiskManager:
     @staticmethod
     def compute_risk_multiplier(
         setup_type: str,
-        score: int,
+        setup_grade: str,
+        regime: str
     ) -> float:
         setup_mult = SETUP_RISK_MULTIPLIERS.get(setup_type, 1.0)
-        score_mult = next(
-            (v for k, v in sorted(SCORE_RISK_MULTIPLIERS.items(), reverse=True) if score >= k),
-            1.0,
-        )
-        return setup_mult * score_mult
+        grade_mult = GRADE_RISK_MULTIPLIERS.get(setup_grade, 1.0)
+        regime_mult = REGIME_RISK_MULTIPLIERS.get(regime, 1.0)
+        return setup_mult * grade_mult * regime_mult
 
     @classmethod
     def _reject(cls, reason: str, reject_stats: Any = None) -> RiskResult:

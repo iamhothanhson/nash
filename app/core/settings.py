@@ -61,13 +61,4 @@ TP1_R = float(os.getenv("TP1_R", "1.0"))
 TP2_R = float(os.getenv("TP2_R", "1.5"))
 MAX_EXECUTION_RISK_PER_TRADE = float(os.getenv("MAX_EXECUTION_RISK_PER_TRADE", "0.03"))
 
-_ALLOWED_SYMBOLS_RAW = os.getenv("ALLOWED_SYMBOLS", "TAOUSDT,RENDERUSDT,FETUSDT,SOLUSDT")
-ALLOWED_SYMBOLS = [s.strip().upper().replace("/", "") for s in _ALLOWED_SYMBOLS_RAW.split(",") if s.strip()]
-_ALLOWED_SET = frozenset(ALLOWED_SYMBOLS)
-
-_SYMBOLS_RAW = os.getenv("SYMBOLS", "").strip()
-if _SYMBOLS_RAW:
-    _symbols = [s.strip().upper().replace("/", "") for s in _SYMBOLS_RAW.split(",") if s.strip()]
-else:
-    _symbols = list(ALLOWED_SYMBOLS)
-SYMBOLS = [s for s in _symbols if s in _ALLOWED_SET]
+_ALLOWED_SYMBOLS = os.getenv("ALLOWED_SYMBOLS", "TAOUSDT,RENDERUSDT,FETUSDT")

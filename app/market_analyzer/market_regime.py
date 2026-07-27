@@ -4,11 +4,7 @@ from typing import Any
 
 import pandas as pd
 
-from core.types import MarketRegime, MarketStructure
-from indicators.volatility import _atr_percentile, calculate_atr
-from indicators.volume import _volume_ratio
-from indicators.momentum import calculate_rsi
-from market_analyzer.market_trend import calculate_adx, calculate_ema
+from core.types import MarketRegime, MarketStructure, TrendDirection
 
 ATR_PERIOD_REGIME = 14
 ADX_PERIOD_REGIME = 14
@@ -16,7 +12,123 @@ RSI_PERIOD_REGIME = 14
 EMA_PERIOD_REGIME = 20
 SLOPE_LOOKBACK = 5
 
-from core.types import TrendDirection
+
+def _trend_direction_score(trend_direction: TrendDirection) -> int:
+    if trend_direction == TrendDirection.BULLISH:
+        return 20
+    if trend_direction == TrendDirection.BEARISH:
+        return -20
+    return 0
+
+
+def _ema_slope_score(ema_slope_1h: float, trend_direction: TrendDirection) -> int:
+    slope = abs(ema_slope_1h)
+    if slope >= 0.004:
+        score = 20
+    elif slope >= 0.002:
+        score = 15
+    elif slope >= 0.001:
+        score = 10
+    elif slope >= 0.0005:
+        score = 5
+    else:
+        score = 0
+    return score if trend_direction == TrendDirection.BULLISH else -score if trend_direction == TrendDirection.BEARISH else 0
+
+
+def _adx_score(adx_1h: float, trend_direction: TrendDirection) -> int:
+    if adx_1h >= 35:
+        score = 20
+    elif adx_1h >= 30:
+        score = 15
+    elif adx_1h >= 25:
+        score = 10
+    elif adx_1h >= 20:
+        score = 5
+    else:
+        score = 0
+    return score if trend_direction == TrendDirection.BULLISH else -score if trend_direction == TrendDirection.BEARISH else 0
+
+
+def _market_structure_score(market_structure_1h: MarketStructure, current_score: int) -> int:
+    if market_structure_1h == MarketStructure.HHHL:
+        return 20
+    if market_structure_1h == MarketStructure.LHLL:
+        return -20
+    if market_structure_1h == MarketStructure.RANGE:
+        return -10 if current_score > 0 else 10 if current_score < 0 else 0
+    return 0
+
+
+def _volume_ratio_score(volume_ratio_15m: float, trend_direction: TrendDirection) -> int:
+    if volume_ratio_15m >= 1.5:
+        score = 10
+    elif volume_ratio_15m >= 1.2:
+        score = 5
+    else:
+        score = 0
+    return score if trend_direction == TrendDirection.BULLISH else -score if trend_direction == TrendDirection.BEARISH else 0
+
+
+def _atr_penalty(atr_percentile_15m: int, score: int) -> int:
+    if atr_percentile_15m >= 90:
+        return int(score * 0.6)
+    if atr_percentile_15m >= 80:
+        return int(score * 0.8)
+    return score
+
+
+def regime_score(
+    *,
+    trend_direction: TrendDirection,
+    ema_slope_1h: float,
+    adx_1h: float,
+    market_structure_1h: MarketStructure,
+    atr_percentile_15m: int,
+    volume_ratio_15m: float,
+) -> int:
+    score = _trend_direction_score(trend_direction)
+    score += _ema_slope_score(ema_slope_1h, trend_direction)
+    score += _adx_score(adx_1h, trend_direction)
+    score += _market_structure_score(market_structure_1h, score)
+    score += _volume_ratio_score(volume_ratio_15m, trend_direction)
+    score = _atr_penalty(atr_percentile_15m, score)
+    return max(-100, min(100, score))
+
+
+def classify_market_regime(
+    score: int,
+    *,
+    atr_percentile_15m: int,
+    adx_1h: float,
+) -> MarketRegime:
+
+    # High volatility + weak trend
+    if atr_percentile_15m >= 80 and adx_1h < 20:
+        return MarketRegime.HIGH_VOLATILITY_CHOP
+
+    if score >= 70:
+        return MarketRegime.STRONG_BULLISH
+
+    if score >= 40:
+        return MarketRegime.BULLISH
+
+    if score >= 15:
+        return MarketRegime.WEAK_BULLISH
+
+    if score <= -70:
+        return MarketRegime.STRONG_BEARISH
+
+    if score <= -40:
+        return MarketRegime.BEARISH
+
+    if score <= -15:
+        return MarketRegime.WEAK_BEARISH
+
+    return MarketRegime.RANGE
+
+def _regime_confidence(score: int) -> int:
+    return min(100, abs(score))
 
 def _trend_direction(ema_slope: float) -> TrendDirection:
     if ema_slope > 0.0003:
@@ -24,105 +136,3 @@ def _trend_direction(ema_slope: float) -> TrendDirection:
     if ema_slope < -0.0003:
         return TrendDirection.BEARISH
     return TrendDirection.NEUTRAL
-
-
-def _classify_regime(
-    adx: float,
-    atr_percentile: int,
-    ema_slope: float,
-    trend_dir: TrendDirection,
-    market_structure: MarketStructure,
-) -> MarketRegime:
-
-    strong = (
-        adx > 25
-        and abs(ema_slope) > 0.001
-        and market_structure in (MarketStructure.HHHL, MarketStructure.LHLL)
-        and atr_percentile < 80
-    )
-
-    weak = adx < 20 or (
-        adx < 23 and market_structure == MarketStructure.RANGE
-    )
-
-    hv = atr_percentile > 78
-
-    if strong:
-        if trend_dir == TrendDirection.BULLISH:
-            return MarketRegime.STRONG_BULLISH
-        if trend_dir == TrendDirection.BEARISH:
-            return MarketRegime.STRONG_BEARISH
-
-    if weak and hv:
-        return MarketRegime.HIGH_VOLATILITY_CHOP
-
-    if weak:
-        if trend_dir == TrendDirection.BULLISH:
-            return MarketRegime.WEAK_BULLISH
-        if trend_dir == TrendDirection.BEARISH:
-            return MarketRegime.WEAK_BEARISH
-        return MarketRegime.RANGE
-
-    if market_structure in (MarketStructure.HHHL, MarketStructure.LHLL) and adx >= 22:
-        if trend_dir == TrendDirection.BULLISH:
-            return MarketRegime.BULLISH
-        if trend_dir == TrendDirection.BEARISH:
-            return MarketRegime.BEARISH
-
-    return MarketRegime.RANGE
-
-from core.types import TrendDirection, MarketStructure
-
-def _regime_confidence(
-    adx: float,
-    ema_slope: float,
-    volume_ratio: float,
-    market_structure: MarketStructure,
-    trend_dir: TrendDirection,
-) -> int:
-    score = 50
-
-    # ADX (0-20)
-    if adx >= 35:
-        score += 20
-    elif adx >= 30:
-        score += 15
-    elif adx >= 25:
-        score += 10
-    elif adx >= 20:
-        score += 5
-    else:
-        score -= 10
-
-    # EMA slope (0-15)
-    slope = abs(ema_slope)
-    if slope >= 0.004:
-        score += 15
-    elif slope >= 0.002:
-        score += 10
-    elif slope >= 0.001:
-        score += 5
-
-    # Volume confirmation (0-10)
-    if volume_ratio >= 1.5:
-        score += 10
-    elif volume_ratio >= 1.2:
-        score += 7
-    elif volume_ratio >= 1.0:
-        score += 3
-
-    # Market structure (0-10)
-    if market_structure in (MarketStructure.HHHL, MarketStructure.LHLL):
-        score += 10
-    elif market_structure == MarketStructure.RANGE:
-        score -= 5
-
-    # Trend consistency (-10)
-    if (
-        ema_slope > 0 and trend_dir == TrendDirection.BEARISH
-    ) or (
-        ema_slope < 0 and trend_dir == TrendDirection.BULLISH
-    ):
-        score -= 10
-
-    return max(0, min(100, round(score)))

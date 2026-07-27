@@ -146,7 +146,7 @@ def build_entry_snapshot(
             is_high_volatility=getattr(market_state, "is_high_volatility", False),
         ),
         indicators=IndicatorSnapshot(
-            ema_slope_15m=ind_val("ema_slope", 0.0),
+            ema_slope_15m=ind_val("ema20_slope_15m", 0.0),
             ema_slope_1h=ind_val("ema20_slope_1h", 0.0),
             adx_15m=series_last(getattr(ind, "adx_15m", None)),
             adx_1h=series_last(getattr(ind, "adx_1h", None)),

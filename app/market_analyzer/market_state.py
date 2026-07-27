@@ -39,7 +39,7 @@ class MarketState:
     trend_direction: TrendDirection
     trend_aligned: bool
     regime: MarketRegime
-    structure: MarketStructure
+    market_structure_1h: MarketStructure
     regime_confidence: float
     is_trending: bool
     is_ranging: bool

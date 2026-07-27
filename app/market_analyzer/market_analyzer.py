@@ -1,12 +1,11 @@
 from datetime import datetime, timezone
 
-from core.types import MarketRegime, MarketStructure, TrendDirection
-from indicators.indicator_builder import IndicatorBuilder
-from market_analyzer.market_regime import _classify_regime, _regime_confidence, _trend_direction
+from core.types import MarketRegime, MarketStructure
+from market_analyzer.market_regime import classify_market_regime, regime_score, _regime_confidence
 from market_analyzer.market_state import MarketState
 from market_analyzer.market_structure import detect_market_structure
-from market_analyzer.market_trend import calculate_adx
 from setup_builder.models import Setup
+from market_analyzer.market_regime import _trend_direction
 
 
 class MarketAnalyzer:
@@ -29,27 +28,22 @@ class MarketAnalyzer:
 
         ms_15m = detect_market_structure(data_15m["high"], data_15m["low"]) if data_15m is not None else MarketStructure.RANGE
 
-        adx_v = 0.0
-        if data_15m is not None and len(data_15m) >= 14:
-            try:
-                adx_v = float(calculate_adx(data_15m, 14).iloc[-1])
-            except Exception:
-                pass
-
+        adx_v = float(indicators.adx_15m.iloc[-1]) if indicators.adx_15m is not None else 0.0
         ema_slp = indicators.ema20_slope_15m or 0.0
         vol_r = indicators.volume_ratio or 1.0
         atr_pctl = indicators.atr_percentile or 50
+        trend_dir = _trend_direction(ema_slp)
 
-        trend_dir_str = _trend_direction(ema_slp)
-        trend_dir = (
-            TrendDirection.BULLISH if trend_dir_str.lower() == "bullish"
-            else TrendDirection.BEARISH if trend_dir_str.lower() == "bearish"
-            else TrendDirection.NEUTRAL
+        score = regime_score(
+            trend_direction=trend_dir,
+            ema_slope_1h=ema_slp,
+            adx_1h=adx_v,
+            market_structure_1h=ms_1h,
+            atr_percentile_15m=atr_pctl,
+            volume_ratio_15m=vol_r,
         )
-
-        regime = _classify_regime(adx_v, atr_pctl, ema_slp, trend_dir_str, ms_15m)
-        structure = _map_structure(ms_1h)
-        rc = float(_regime_confidence(adx_v, ema_slp, vol_r, ms_15m, trend_dir_str))
+        regime = classify_market_regime(score, atr_percentile_15m=atr_pctl, adx_1h=adx_v)
+        rc = float(_regime_confidence(score))
 
         is_trending = regime in (
             MarketRegime.STRONG_BULLISH, MarketRegime.BULLISH,
@@ -72,7 +66,7 @@ class MarketAnalyzer:
             trend_direction=trend_dir,
             trend_aligned=trend_aligned,
             regime=regime,
-            structure=structure,
+            market_structure_1h=ms_1h,
             regime_confidence=rc,
             is_trending=is_trending,
             is_ranging=is_ranging,
@@ -84,7 +78,3 @@ class MarketAnalyzer:
         )
 
         return market_state
-
-
-def _map_structure(ms: MarketStructure) -> MarketStructure:
-    return ms if isinstance(ms, MarketStructure) else MarketStructure.UNKNOWN

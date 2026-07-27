@@ -25,9 +25,9 @@ def _cfg_float(cfg: dict | None, key: str, default: float) -> float:
 class PullbackDetector:
 
     def detect(self, market_state, *, cfg: dict | None = None) -> SetupCandidate | None:
-        if market_state.structure == MarketStructure.HHHL:
+        if market_state.market_structure_1h == MarketStructure.HHHL:
             return self.detect_long(market_state, cfg=cfg)
-        if market_state.structure == MarketStructure.LHLL:
+        if market_state.market_structure_1h == MarketStructure.LHLL:
             return self.detect_short(market_state, cfg=cfg)
         return None
 
@@ -39,7 +39,7 @@ class PullbackDetector:
         pf = features.pullback
         ind = market_state.indicators or {}
 
-        ema_slope = float(ind.ema_slope_15m or 0.0)
+        ema_slope = float(ind.ema20_slope_15m or 0.0)
         rsi_raw = ind.rsi_15m if ind.rsi_15m is not None else 0.0
         rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
 
@@ -102,7 +102,7 @@ class PullbackDetector:
         pf = features.pullback
         ind = market_state.indicators or {}
 
-        ema_slope = float(ind.ema_slope_15m or 0.0)
+        ema_slope = float(ind.ema20_slope_15m or 0.0)
         rsi_raw = ind.rsi_15m if ind.rsi_15m is not None else 0.0
         rsi = float(rsi_raw.iloc[-1]) if hasattr(rsi_raw, "iloc") else float(rsi_raw)
 

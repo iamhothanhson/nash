@@ -53,7 +53,7 @@ class Scorer:
             rsi, indicators.rsi,
             ema, indicators.ema20_slope_15m,
             body, features.candle_body_ratio,
-            structure, market_state.structure.name,
+            structure, market_state.market_structure_1h.name,
             adx, adx_15m, adx_1h,
             htf, features.htf_confirmed,
         )
@@ -151,11 +151,11 @@ class Scorer:
     @staticmethod
     def _score_market_structure(side: str, market_state: MarketState) -> int:
         # Max: 10
-        if side == "LONG" and market_state.structure == MarketStructure.HHHL:
+        if side == "LONG" and market_state.market_structure_1h == MarketStructure.HHHL:
             return 10
-        if side == "SHORT" and market_state.structure == MarketStructure.LHLL:
+        if side == "SHORT" and market_state.market_structure_1h == MarketStructure.LHLL:
             return 10
-        if market_state.structure == MarketStructure.RANGE:
+        if market_state.market_structure_1h == MarketStructure.RANGE:
             return 5
         return 0
 

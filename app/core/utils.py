@@ -6,7 +6,7 @@ from app.core.constants import LIQUIDITY_SWEEP_REVERSAL, TREND_FOLLOWING
 from coins.loader import get_coin_config
 
 
-TREND_FOLLOWING_SETUPS = frozenset({"breakout", "breakout_retest", "pullback"})
+TREND_FOLLOWING_SETUPS = frozenset({"breakout", "pullback"})
 
 def dynamic_strength_threshold(atr_pct: float, config: dict[str, Any]) -> float:
     return max(config["min_strength"], atr_pct * config["min_strength_atr_factor"])

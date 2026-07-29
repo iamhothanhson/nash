@@ -5,12 +5,11 @@ from enum import Enum
 from typing import Any, Optional
 
 from market_analyzer.market_state import MarketState
-from app.core.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK
+from app.core.constants import BREAKOUT, PULLBACK
 
 
 class SetupType(str, Enum):
     BREAKOUT = BREAKOUT
-    BREAKOUT_RETEST = BREAKOUT_RETEST
     PULLBACK = PULLBACK
 
 

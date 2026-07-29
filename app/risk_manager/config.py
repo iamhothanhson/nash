@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from app.core.constants import BREAKOUT, BREAKOUT_RETEST, PULLBACK
+from app.core.constants import BREAKOUT, PULLBACK
 from app.core.types import MarketRegime
 
 SETUP_RISK_MULTIPLIERS = {
-    BREAKOUT : 1.0,
-    BREAKOUT_RETEST: 0.5,
+    BREAKOUT: 1.0,
     PULLBACK: 0.5
 }
 

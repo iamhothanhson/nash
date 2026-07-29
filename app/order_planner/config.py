@@ -10,11 +10,6 @@ MAX_TP_CONFIG = {
         "max_tp2_pct": 2.5,
         "max_tp3_pct": 3.0
     },
-    "breakout_retest": {
-        "max_tp1_pct": 0.8,
-        "max_tp2_pct": 1.5,
-        "max_tp3_pct": 2.5
-    },
     "pullback": {
         "max_tp1_pct": 0.8,
         "max_tp2_pct": 1.5,

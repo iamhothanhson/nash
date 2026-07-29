@@ -19,7 +19,6 @@ class CoinConfigDict(TypedDict, total=False):
     partial_close: list[float]
     min_body: float
     max_opened_positions: int
-    max_breakout_retest_position: int
     volatility_threshold: float
     bars_since_last_close: int
     price_rounding_decimal: int

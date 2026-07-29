@@ -51,7 +51,6 @@ def print_result(result: dict) -> None:
     family_groups = defaultdict(list)
     family_names = {
         "breakout": "Breakout",
-        "breakout_retest": "Retest",
         "pullback": "Pullback",
     }
 

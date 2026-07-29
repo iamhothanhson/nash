@@ -1,15 +1,6 @@
 from __future__ import annotations
 
 # Trend-following strategy parameters (code defaults).
-# Breakout retest entry filters
-TREND_BREAKOUT_RETEST_BLOCK_SYMBOLS: tuple[str, ...] = ("FETUSDT", "RENDERUSDT")
-TREND_BREAKOUT_RETEST_MAX_LEVEL_DEV: float = 0.0080
-TREND_BREAKOUT_RETEST_MIN_BODY_RATIO: float = 0.10
-TREND_BREAKOUT_RETEST_MIN_RECLAIM_PCT: float = 0.0000
-TREND_BREAKOUT_RETEST_MIN_VOL_RATIO: float = 0.50
-TREND_BREAKOUT_RETEST_LONG_RSI_MIN: float = 45.0
-TREND_BREAKOUT_RETEST_SHORT_RSI_MAX: float = 55.0
-
 # Pullback entry filters
 PULLBACK_EMA_SLOPE_MIN: float = 0.0005
 PULLBACK_LONG_RSI_MIN: float = 51.0

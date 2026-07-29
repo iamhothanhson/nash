@@ -75,13 +75,6 @@ class PositionService:
             target_type="take_profit",
         )
 
-        tp3_percent = self._calculate_price_percent(
-            entry_price=execution.entry_price,
-            target_price=plan.tp3,
-            direction=execution.direction,
-            target_type="take_profit",
-        )
-
         return {
             "status": "Open",
             "symbol": execution.symbol,
@@ -120,17 +113,7 @@ class PositionService:
                     "price": plan.tp2,
                     "percent": round(tp2_percent, 2),
                     "quantity": plan.tp2_qty,
-                    "partial_close_percent": 30.0,
-                    "order_id": None,
-                    "hit": False,
-                },
-                {
-                    "name": "tp3",
-                    "execution_mode": "managed",
-                    "price": plan.tp3,
-                    "percent": round(tp3_percent, 2),
-                    "quantity": plan.tp3_qty,
-                    "partial_close_percent": 20.0,
+                    "partial_close_percent": 50.0,
                     "order_id": None,
                     "hit": False,
                 },

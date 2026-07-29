@@ -67,15 +67,13 @@ class OrderPlanner:
                 return None
 
         tp1_qty = quantity * TP_CLOSE_PCT.get("tp_1", 0) / 100.0
-        tp2_qty = quantity * TP_CLOSE_PCT.get("tp_2", 0) / 100.0
-        tp3_qty = quantity * TP_CLOSE_PCT.get("tp_3", 0) / 100.0
+        tp2_qty = quantity - tp1_qty
 
         risk_percent=risk_amount / (position_notional * sl_distance) * 100.0 if position_notional > 0 and sl_distance > 0 else 0.0
         margin_usdt = position_notional / float(settings.LEVERAGE)
 
         tp1_pct = TP_CONFIG["tp1_r"] * sl_distance * 100
         tp2_pct = TP_CONFIG["tp2_r"] * sl_distance * 100
-        tp3_pct = TP_CONFIG["tp3_r"] * sl_distance * 100
 
         if pipeline_stats:
             pipeline_stats.order_planned += 1
@@ -88,13 +86,10 @@ class OrderPlanner:
             stop_loss=stop_loss,
             tp1=float(getattr(signal, "tp1", 0.0)),
             tp2=float(getattr(signal, "tp2", 0.0)),
-            tp3=float(getattr(signal, "tp3", 0.0)),
             tp1_pct=tp1_pct,
             tp2_pct=tp2_pct,
-            tp3_pct=tp3_pct,
             tp1_qty=tp1_qty,
             tp2_qty=tp2_qty,
-            tp3_qty=tp3_qty,
             notional=position_notional,
             risk_amount=risk_amount,
             risk_percent=risk_percent,

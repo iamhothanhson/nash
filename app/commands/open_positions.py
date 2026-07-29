@@ -81,7 +81,6 @@ def _append_runtime_position(
     stop_loss: float,
     tp1: float,
     tp2: float,
-    tp3: float,
     stop_exchange_order_id: int | None,
 ) -> None:
     path = _position_state_path()
@@ -130,16 +129,9 @@ def _append_runtime_position(
             },
             {
                 "price": round_price(sym_u, tp2),
-                "tp2_partial_close": round_ratio(30.0),
+                "tp2_partial_close": round_ratio(50.0),
                 "tp2_hit": False,
                 "tp2_order_id": None,
-                "exchange_tp_orders_placed": False,
-            },
-            {
-                "price": round_price(sym_u, tp3),
-                "tp3_partial_close": round_ratio(20.0),
-                "tp3_hit": False,
-                "tp3_order_id": None,
                 "exchange_tp_orders_placed": False,
             },
         ],
@@ -275,12 +267,10 @@ def main() -> int:
         sl = round(float(price) * (1.0 - (2 * float(args.sl_pct))), 4)
         tp1 = round(float(price) * (1.0 + (1 *float(args.tp_pct))), 4)
         tp2 = round(float(price) * (1.0 + (2 * float(args.tp_pct))), 4)
-        tp3 = round(float(price) * (1.0 + (3 * float(args.tp_pct))), 4)
     else:
         sl = round(float(price) * (1.0 + (2 * float(args.sl_pct))), 4)
         tp1 = round(float(price) * (1.0 - (1 * float(args.tp_pct))), 4)
         tp2 = round(float(price) * (1.0 - (2 * float(args.tp_pct))), 4)
-        tp3 = round(float(price) * (1.0 - (3 * float(args.tp_pct))), 4)
 
     try:
         engine = create_execution_engine()
@@ -372,7 +362,6 @@ def main() -> int:
         stop_loss=float(sl),
         tp1=float(tp1),
         tp2=float(tp2),
-        tp3=float(tp3),
         stop_exchange_order_id=stop_exchange_order_id,
     )
     risk_limit_tracking.record_new_open(balance_usdt=_account_risk_balance_usdt(engine))
@@ -382,31 +371,10 @@ def main() -> int:
     size_usdt = float(args.size_usdt)
     tp1_px = float(tp1)
     tp2_px = float(tp2)
-    tp3_px = float(tp3)
-    pc_raw = get_coin_config(symbol).get("partial_close", [0.5, 0.3, 0.2])
-    if not isinstance(pc_raw, list) or len(pc_raw) < 3:
-        pc_raw = [0.5, 0.3, 0.2]
-    partial_close = [float(pc_raw[0]), float(pc_raw[1]), float(pc_raw[2])]
-    log_position_open(
-        time_iso=open_iso,
-        symbol=symbol,
-        direction=direction,
-        entry=float(fill_entry),
-        stop_loss=float(sl),
-        tp1=tp1_px,
-        tp2=tp2_px,
-        tp3=tp3_px,
-        size_usdt=size_usdt,
-        leverage=int(settings.LEVERAGE),
-        risk_usdt=float(risk_usdt),
-        partial_close=partial_close,
-        strategy_family="liquidity",
-        setup_type="manual_open_trade",
-        sl_order_id=stop_exchange_order_id,
-        tp1_order_id=tp1_exchange_order_id,
-        tp2_order_id=None,
-        tp3_order_id=None,
-    )
+    pc_raw = get_coin_config(symbol).get("partial_close", [0.5, 0.5])
+    if not isinstance(pc_raw, list) or len(pc_raw) < 2:
+        pc_raw = [0.5, 0.5]
+    partial_close = [float(pc_raw[0]), float(pc_raw[1])]
     open_line = format_position_open_standard_line(
         symbol=symbol,
         entry=float(fill_entry),
@@ -416,7 +384,6 @@ def main() -> int:
         risk_usdt=float(risk_usdt),
         tp1=tp1_px,
         tp2=tp2_px,
-        tp3=tp3_px,
         price_decimals=price_dp,
         strategy_family="liquidity",
         setup_type="manual_open_trade",
@@ -440,7 +407,6 @@ def main() -> int:
         stop_loss=float(sl),
         tp1=tp1_px,
         tp2=tp2_px,
-        tp3=tp3_px,
         price_decimals=price_dp,
         status="Entry Filled" if has_sl else "Entry Filled (stop MISSING)",
     )

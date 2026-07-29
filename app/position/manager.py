@@ -15,7 +15,7 @@ RUNTIME_POSITIONS = Path("data/runtime/positions.json")
 
 
 class PositionManager:
-    """Poll order status by ID, place delayed TP2/TP3, persist to positions.json."""
+    """Poll order status by ID, place delayed TP2, persist to positions.json."""
 
     def __init__(self) -> None:
         self._client: BinanceFuturesClient | None = None
@@ -105,7 +105,6 @@ class PositionManager:
         tps = pos.get("take_profit", [])
         tp1 = tps[0] if len(tps) > 0 else {}
         tp2 = tps[1] if len(tps) > 1 else {}
-        tp3 = tps[2] if len(tps) > 2 else {}
 
         # --- 1. SL ---
         sl_id = sl.get("sl_order_id")
@@ -141,21 +140,9 @@ class PositionManager:
             resp = self.client.get_order(sym, tp2_id)
             if resp.get("status") == "FILLED":
                 tp2["tp2_hit"] = True
-                self._add_partial_pnl(pos, resp)
-                tp1_price = tp1.get("price", self._entry_price(pos))
-                self._replace_sl(sym, tp1_price, pos)
-                self._place_tp3(tp3, pos)
-                changed = True
-
-        # --- 4. TP3 ---
-        tp3_id = tp3.get("tp3_order_id")
-        if tp3_id and not tp3.get("tp3_hit"):
-            resp = self.client.get_order(sym, tp3_id)
-            if resp.get("status") == "FILLED":
-                tp3["tp3_hit"] = True
                 pos["status"] = "Closed"
                 pos["closed"] = _now()
-                pos["closed_reason"] = "TP3 FILLED"
+                pos["closed_reason"] = "TP2 FILLED"
                 self._add_partial_pnl(pos, resp)
                 changed = True
 
@@ -200,15 +187,6 @@ class PositionManager:
         resp = self._place_tp_order(pos["symbol"], tp2["price"], qty, side, ps)
         if resp:
             tp2["tp2_order_id"] = resp.get("orderId")
-
-    def _place_tp3(self, tp3: dict[str, Any], pos: dict[str, Any]) -> None:
-        qty_pct = tp3.get("tp3_partial_close", 20)
-        qty = qty_pct / 100 * pos["entry_qty"]
-        side = "SELL" if pos["side"] == "LONG" else "BUY"
-        ps = pos.get("pos_side")
-        resp = self._place_tp_order(pos["symbol"], tp3["price"], qty, side, ps)
-        if resp:
-            tp3["tp3_order_id"] = resp.get("orderId")
 
     def _place_tp_order(self, symbol: str, price: float, qty: float, side: str, ps: str | None) -> dict[str, Any] | None:
         if price <= 0 or qty <= 0:

@@ -9,11 +9,9 @@ class OrderPlan:
     stop_loss: float
     tp1: float
     tp2: float
-    tp3: float
     qty: float
     tp1_qty: float
     tp2_qty: float
-    tp3_qty: float
     notional: float
     risk_amount: float
     risk_percent: float
@@ -25,7 +23,6 @@ class OrderPlan:
     risk_multiplier: float
     tp1_pct: float = 0.0
     tp2_pct: float = 0.0
-    tp3_pct: float = 0.0
     setup_grade: str = ""
     margin_usdt: float = 0.0
     market_structure: str = "None"

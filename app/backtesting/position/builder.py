@@ -32,7 +32,6 @@ def build_position(
         take_profits=[
             TakeProfit(level=1, price=order_plan.tp1, qty=order_plan.tp1_qty, pct=order_plan.tp1_pct, trail_type=TrailType.BREAK_EVEN),
             TakeProfit(level=2, price=order_plan.tp2, qty=order_plan.tp2_qty, pct=order_plan.tp2_pct, trail_type=TrailType.ATR),
-            TakeProfit(level=3, price=order_plan.tp3, qty=order_plan.tp3_qty, pct=order_plan.tp3_pct),
         ],
         balance_usdt=wallet_balance,
         opened=timestamp,

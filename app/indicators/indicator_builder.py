@@ -49,8 +49,8 @@ class IndicatorBuilder:
 
             try:
                 atr_s = calculate_atr(data_15m, 14)
-                indicators.atr_15m = atr_s
                 atr_v = float(atr_s.iloc[-1])
+                indicators.atr_15m = atr_v
                 close_v = float(data_15m["close"].iloc[-1])
                 indicators.atr_percent = atr_v / max(close_v, 1e-12)
                 indicators.atr_percentile = _atr_percentile(atr_s, atr_v)

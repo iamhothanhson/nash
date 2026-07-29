@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Any
 from turtle import pd
 
+from app.core.config import BREAKOUT_CONFIG
 from app.core.constants import BREAKOUT
 from app.setup_builder.config import SCORE_A
 from core.enums import RejectReason
@@ -62,6 +63,8 @@ class SetupBuilder:
         if pipeline_stats:
             pipeline_stats.setup_built += 1
 
+        config = BREAKOUT_CONFIG if candidate.setup_type == BREAKOUT else {}
+
         return Setup(
             symbol=market_state.symbol,
             entry=entry,
@@ -72,6 +75,7 @@ class SetupBuilder:
             grade=grade_result.grade,
             market_state=market_state,
             features=candidate.features,
+            config=config,
             anchor=candidate.anchor,
         )
 

@@ -30,6 +30,7 @@ class Setup:
     market_state: MarketState
     features: dict[str, Any]
     timestamp: int
+    config: dict[str, Any]
     anchor: float = 0.0
     trade_allowed: bool = False
 

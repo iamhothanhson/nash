@@ -8,7 +8,7 @@ from app.core.enums import TrailType
 
 
 Direction = Literal["LONG", "SHORT"]
-ExitReason = Literal["STOP_LOSS", "TP1", "TP2", "TP3", "END_OF_BACKTEST"]
+ExitReason = Literal["STOP_LOSS", "TP1", "TP2", "END_OF_BACKTEST"]
 
 
 @dataclass
@@ -59,7 +59,6 @@ class BacktestPosition:
     sl_order_id: str | None = None
     tp1_order_id: str | None = None
     tp2_order_id: str | None = None
-    tp3_order_id: str | None = None
 
 
 @dataclass

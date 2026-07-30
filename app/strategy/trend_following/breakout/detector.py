@@ -45,6 +45,7 @@ class BreakoutDetector:
             self.pipeline_stats.soft_pass += 1
             self.pipeline_stats.setup_candidates += 1
             return SetupCandidate(
+                strategy_family=TREND_FOLLOWING,
                 setup_type=BREAKOUT,
                 direction="LONG",
                 trigger_type="breakout",

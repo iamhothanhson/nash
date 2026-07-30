@@ -8,6 +8,7 @@ from typing import Any
 from core.enums import RejectReason
 from risk_manager.config import GRADE_RISK_MULTIPLIERS, REGIME_RISK_MULTIPLIERS, SETUP_RISK_MULTIPLIERS
 from app.core import settings
+from app.core.config import SETUP_CONFIGS
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,6 +23,28 @@ class RiskResult:
 
 
 class RiskManager:
+    @staticmethod
+    def validate_sl_distance(
+        sl_distance: float,
+        setup_type: str,
+    ) -> tuple[bool, str]:
+        if sl_distance <= 0:
+            return False, "Invalid SL distance"
+
+        config = SETUP_CONFIGS.get(setup_type)
+        if config is None:
+            return True, ""
+
+        min_sl = config.get("min_sl_distance")
+        max_sl = config.get("max_sl_distance")
+
+        if min_sl is not None and sl_distance < min_sl:
+            return False, f"SL distance {sl_distance:.4f} below minimum {min_sl:.4f}"
+        if max_sl is not None and sl_distance > max_sl:
+            return False, f"SL distance {sl_distance:.4f} above maximum {max_sl:.4f}"
+
+        return True, ""
+
     @classmethod
     def calculate(
         cls,
@@ -39,13 +62,15 @@ class RiskManager:
             return cls._reject("Invalid stop loss", reject_stats=reject_stats)
 
         sl_distance = getattr(signal, "sl_distance", 0.0)
-        if sl_distance <= 0:
-            return cls._reject("Invalid SL distance", reject_stats=reject_stats)
+        setup_type = str(getattr(signal, "setup_type", "")).strip()
+
+        valid, reason = cls.validate_sl_distance(sl_distance, setup_type)
+        if not valid:
+            return cls._reject(reason, reject_stats=reject_stats)
 
         available_balance = account.available_balance
         
         base_risk_per_trade = float(settings.RISK_PER_TRADE)
-        setup_type = str(getattr(signal, "setup_type", "")).strip()
         setup_grade = str(getattr(signal, "setup_grade", "")).strip().upper()
         regime = str(getattr(signal, "market_state.regime", "")).strip()
         

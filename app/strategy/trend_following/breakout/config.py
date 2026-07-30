@@ -1,7 +1,6 @@
 from app.core.types import MarketRegime
 
 BREAKOUT_MIN_STRENGTH = 0.0035
-MIN_SL_DISTANCE = 0.003
 
 BREAKOUT_LONG_HARD = {
     "close_above_recent_high": True,

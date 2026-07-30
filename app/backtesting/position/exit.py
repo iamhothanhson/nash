@@ -25,6 +25,9 @@ class Exit(Closing):
 
             self._update_trailing_tp(pos, tp)
 
+            if tp.level == 2 and not pos.take_profits[0].hit:
+                continue
+
             if not self._tp_touched(tp, high, low, is_long):
                 continue
 

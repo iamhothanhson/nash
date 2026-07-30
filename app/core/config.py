@@ -6,6 +6,12 @@ BREAKOUT_CONFIG = {
         "type": "atr_trailing",
         "atr_mult": 2.0,
     },
+    "min_sl_distance": 0.01,
+    "max_sl_distance": 0.03
+}
+
+SETUP_CONFIGS: dict[str, dict] = {
+    "breakout": BREAKOUT_CONFIG,
 }
 
 TP_CLOSE_PCT = {

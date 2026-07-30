@@ -13,9 +13,6 @@ def tp_from_r(
     direction: Direction,
     rr: float,
 ) -> float:
-    """
-    TP = Entry ± (Risk × RR)
-    """
 
     risk = abs(entry - stop_loss)
 

@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Any
 
+from app.signal_builder.models import TrailingStopConfig
+
+
 @dataclass(slots=True)
 class OrderPlan:
     symbol: str
@@ -8,7 +11,6 @@ class OrderPlan:
     entry: float
     stop_loss: float
     tp1: float
-    tp2: float
     qty: float
     tp1_qty: float
     tp2_qty: float
@@ -28,3 +30,4 @@ class OrderPlan:
     market_structure: str = "None"
     market_state: Any | None = None
     features: dict[str, Any] | None = None
+    trailing_stop: TrailingStopConfig | None = None

@@ -9,6 +9,7 @@ from app.setup_builder.models import Direction, SetupType, StrategyFamily
 class TrailingStopConfig:
     type: Literal["atr"]
     atr_mult: float
+    atr_value: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -21,10 +22,10 @@ class TradeSignal:
     tp1_r: float = 0.0
     tp1_pct: float = 0.0
     trailing_stop: TrailingStopConfig | None = None
-    setup_score: int
-    setup_type: SetupType
-    strategy_family: StrategyFamily 
-    confirmation_mode: str
+    setup_score: int = 0
+    setup_type: SetupType = ""
+    strategy_family: StrategyFamily = ""
+    confirmation_mode: str = ""
     setup_grade: str = ""
     market_structure: str = "None"
     confidence: float = 0.0

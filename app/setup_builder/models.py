@@ -31,6 +31,7 @@ class Setup:
     features: dict[str, Any]
     timestamp: int
     config: dict[str, Any]
+    strategy_family: str = ""
     anchor: float = 0.0
     trade_allowed: bool = False
 

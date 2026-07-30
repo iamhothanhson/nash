@@ -54,6 +54,11 @@ class BacktestPositionManager(Exit, Closing):
         low = float(candle["low"])
         is_long = pos.direction == "LONG"
 
+        if is_long:
+            pos.highest_price = max(pos.highest_price, high)
+        else:
+            pos.lowest_price = min(pos.lowest_price, low)
+
         self._process_take_profits(pos, symbol, high, low, is_long, timestamp)
 
         if symbol in self.positions:

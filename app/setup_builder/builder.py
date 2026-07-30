@@ -77,6 +77,7 @@ class SetupBuilder:
             features=candidate.features,
             config=config,
             anchor=candidate.anchor,
+            strategy_family=candidate.strategy_family,
         )
 
     @staticmethod

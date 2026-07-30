@@ -7,13 +7,10 @@ def _max_sl_distance(grade: int) -> float:
         return 0.025     # 2.5%
     return 0.02          # 2%
 
-@classmethod
 def compute_stop_loss(entry, anchor, atr, direction, atr_mult):
     if direction == "LONG":
         sl = anchor - atr * atr_mult
-        dist = (entry - sl) / entry
     else:
         sl = anchor + atr * atr_mult
-        dist = (sl - entry) / entry
 
-    return sl, dist
+    return sl

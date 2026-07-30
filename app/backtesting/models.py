@@ -35,13 +35,12 @@ class BacktestPosition:
     risk_amount: float = 0.0
     margin_usdt: float = 0.0
     leverage: int = 0
+    sl_hit: bool = False
 
     # Take Profit
     take_profits: list[TakeProfit] = field(default_factory=list)
-    sl_hit: bool = False
-    atr_trailing: bool = False
-    atr_multiplier: float = 2.0
     highest_price: float = 0.0
+    lowest_price: float = float("inf")
 
     # Runtime
     status: str = "Open"
@@ -70,6 +69,7 @@ class TakeProfit:
     hit: bool = False
     trail_type: TrailType = TrailType.NONE
     atr_multiplier: float | None = None
+    atr_value: float = 0.0
 
 @dataclass
 class BacktestTrade:

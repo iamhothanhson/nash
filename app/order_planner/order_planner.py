@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core import TP_CLOSE_PCT, settings
+from app.core.config import TP_CLOSE_PCT
+from app.core import settings
 from .models import OrderPlan
 
 try:
@@ -71,7 +72,7 @@ class OrderPlanner:
             qty=quantity,
             stop_loss=stop_loss,
             tp1=signal.tp1,
-            tp2=signal.tp2,
+
             tp1_pct=signal.tp1_pct,
             tp1_qty=tp1_qty,
             tp2_qty=quantity - tp1_qty,
@@ -88,6 +89,7 @@ class OrderPlanner:
             strategy_family=signal.strategy_family,
             market_state=signal.market_state,
             features=signal.features,
+            trailing_stop=getattr(signal, "trailing_stop", None),
         )
 
     @staticmethod

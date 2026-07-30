@@ -42,7 +42,8 @@ class SignalBuilder:
         tp1_pct = abs(tp1 - setup.entry) / setup.entry * 100
         trailing_stop = TrailingStopConfig(
             type="atr",
-            tp2_atr_mult=tp2_atr_mult,
+            atr_mult=tp2_atr_mult,
+            atr_value=atr,
         )
 
         if pipeline_stats:

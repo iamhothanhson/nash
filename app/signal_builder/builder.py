@@ -35,6 +35,7 @@ class SignalBuilder:
         if stop_loss is None:
             return None
 
+        sl_distance = abs(setup.entry - stop_loss) / setup.entry
         tp1_r = float(config.get("tp1_rr", 2.0))
         tp2_atr_mult = config["tp2"]["atr_mult"]
 
@@ -57,6 +58,7 @@ class SignalBuilder:
             tp1=tp1,
             tp1_r=tp1_r,
             tp1_pct=tp1_pct,
+            sl_distance=sl_distance,
             trailing_stop=trailing_stop,
             setup_score=int(round(setup.score)),
             setup_grade=setup.grade,

@@ -38,7 +38,7 @@ class RiskManager:
         if stop_loss <= 0:
             return cls._reject("Invalid stop loss", reject_stats=reject_stats)
 
-        sl_distance = abs(entry - stop_loss) / entry
+        sl_distance = getattr(signal, "sl_distance", 0.0)
         if sl_distance <= 0:
             return cls._reject("Invalid SL distance", reject_stats=reject_stats)
 

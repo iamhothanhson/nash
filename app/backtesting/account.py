@@ -3,14 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 
-
-@dataclass
-class BacktestAccountState:
-    wallet_balance: Decimal
-    available_balance: Decimal
-    margin_balance: Decimal
-    unrealized_pnl: Decimal
-
+from app.exchange.models import AccountState
 
 class BacktestAccountService:
     def __init__(self, initial_balance: float = 100) -> None:
@@ -25,8 +18,8 @@ class BacktestAccountService:
     def margin_balance(self) -> float:
         return self.wallet_balance + self.unrealized_pnl
 
-    def get_account_state(self) -> BacktestAccountState:
-        return BacktestAccountState(
+    def get_account_state(self) -> AccountState:
+        return AccountState(
             wallet_balance=Decimal(str(self.wallet_balance)),
             available_balance=Decimal(str(self.available_balance)),
             margin_balance=Decimal(str(self.margin_balance)),

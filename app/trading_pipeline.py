@@ -107,6 +107,7 @@ class TradingPipeline:
         order_plan = OrderPlanner.build_order_plan(
             signal=signal,
             risk=risk,
+            account=account,
         )
 
         if order_plan is None:

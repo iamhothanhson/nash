@@ -21,6 +21,7 @@ class TradeSignal:
     tp1: float
     tp1_r: float = 0.0
     tp1_pct: float = 0.0
+    sl_distance: float = 0.0
     trailing_stop: TrailingStopConfig | None = None
     setup_score: int = 0
     setup_type: SetupType = ""

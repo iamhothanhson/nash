@@ -6,29 +6,15 @@ from app.core.config import TP_CLOSE_PCT
 from app.core import settings
 from .models import OrderPlan
 
-try:
-    from exchange.client import BinanceFuturesClient
-except ImportError:
-    BinanceFuturesClient = None
-
 
 class OrderPlanner:
-    @staticmethod
-    def _available_balance() -> float:
-        if settings.MODE not in ("live", "demo") or BinanceFuturesClient is None:
-            return 0.0
-
-        try:
-            account = BinanceFuturesClient().get_account()
-            return float(account.get("availableBalance", 0))
-        except Exception:
-            return 0.0
 
     @staticmethod
     def build_order_plan(
         signal: Any,
         risk: Any | None = None,
         pipeline_stats: Any = None,
+        account: Any = None,
         **_: Any,
     ) -> OrderPlan | None:
 
@@ -38,7 +24,7 @@ class OrderPlanner:
         entry = float(signal.entry)
         stop_loss = float(signal.stop_loss)
 
-        sl_distance = OrderPlanner._stop_loss_distance(entry, stop_loss)
+        sl_distance = getattr(signal, "sl_distance", 0.0)
         if not sl_distance:
             return None
 
@@ -53,7 +39,7 @@ class OrderPlanner:
             return None
 
         # Cap by available margin
-        result = OrderPlanner._cap_position_size(position_notional, quantity)
+        result = OrderPlanner._adapt_position_size_to_margin(position_notional, quantity, account)
         if result is None:
             return None
 
@@ -61,6 +47,8 @@ class OrderPlanner:
 
         tp1_qty = quantity * TP_CLOSE_PCT["tp_1"] / 100
         margin = position_notional / settings.LEVERAGE
+
+        risk_percent = risk_amount / (position_notional * sl_distance) * 100
 
         if pipeline_stats:
             pipeline_stats.order_planned += 1
@@ -72,14 +60,13 @@ class OrderPlanner:
             qty=quantity,
             stop_loss=stop_loss,
             tp1=signal.tp1,
-
             tp1_pct=signal.tp1_pct,
             tp1_qty=tp1_qty,
             tp2_qty=quantity - tp1_qty,
             notional=position_notional,
             margin_usdt=margin,
             risk_amount=risk_amount,
-            risk_percent=risk_amount / (position_notional * sl_distance) * 100,
+            risk_percent=risk_percent,
             risk_per_trade=risk.risk_per_trade,
             risk_multiplier=risk.risk_multiplier,
             setup_type=signal.setup_type,
@@ -93,22 +80,12 @@ class OrderPlanner:
         )
 
     @staticmethod
-    def _stop_loss_distance(entry: float, stop_loss: float):
-        if entry <= 0 or stop_loss <= 0:
-            return None
-
-        sl_distance = abs(entry - stop_loss) / entry
-        if sl_distance <= 0:
-            return None
-
-        return sl_distance
-
-    @staticmethod
-    def _cap_position_size(
+    def _adapt_position_size_to_margin(
         position_notional: float,
         quantity: float,
+        account: Any = None,
     ) -> tuple[float, float] | None:
-        available = OrderPlanner._available_balance()
+        available = account.available_balance
         if available <= 0:
             return None
 

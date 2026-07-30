@@ -5,7 +5,8 @@ from typing import Any
 
 from dataclasses import asdict
 
-from backtesting.account import BacktestAccountService, BacktestAccountState
+from app.exchange import AccountState
+from backtesting.account import BacktestAccountService
 from backtesting.models import BacktestPosition, BacktestTrade, EquityPoint
 from backtesting.position.builder import build_position
 from backtesting.position.closing import Closing
@@ -25,7 +26,7 @@ class BacktestPositionManager(Exit, Closing):
     def can_open_position(self, symbol: str) -> bool:
         return symbol not in self.positions
 
-    def get_account_state(self) -> BacktestAccountState:
+    def get_account_state(self) -> AccountState:
         return self.account.get_account_state()
 
     def open_position(

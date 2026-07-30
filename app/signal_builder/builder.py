@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any
 
 from app.signal_builder.models import TradeSignal
-from core.utils import resolve_strategy_family
 from app.signal_builder.take_profit import tp_from_r
 from setup_builder.builder import Setup
 from app.signal_builder.stop_loss import compute_stop_loss
@@ -40,9 +39,10 @@ class SignalBuilder:
         tp2_atr_mult = config["tp2"]["atr_mult"]
 
         tp1 = tp_from_r(entry=setup.entry, stop_loss=stop_loss, direction=direction, rr=tp1_r)
+        tp1_pct = abs(tp1 - setup.entry) / setup.entry * 100
         trailing_stop = TrailingStopConfig(
             type="atr",
-            atr_mult=tp2_atr_mult,
+            tp2_atr_mult=tp2_atr_mult,
         )
 
         if pipeline_stats:
@@ -55,11 +55,12 @@ class SignalBuilder:
             stop_loss=stop_loss,
             tp1=tp1,
             tp1_r=tp1_r,
+            tp1_pct=tp1_pct,
             trailing_stop=trailing_stop,
             setup_score=int(round(setup.score)),
             setup_grade=setup.grade,
             setup_type=setup_type,
-            strategy_family=resolve_strategy_family(setup_type),
+            strategy_family=setup.strategy_family,
             confirmation_mode="confirmed",
             market_state=setup.market_state,
             features=getattr(setup, "features", None),

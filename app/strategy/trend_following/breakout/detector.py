@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from app.core.constants import BREAKOUT
+from app.core.constants import BREAKOUT, TREND_FOLLOWING
 from app.strategy.trend_following.breakout.types import BreakoutPipelineStats
 from core.enums import RejectReason, RejectionStage
 from core.types import RejectionMetric
@@ -64,6 +64,7 @@ class BreakoutDetector:
             self.pipeline_stats.soft_pass += 1
             self.pipeline_stats.setup_candidates += 1
             return SetupCandidate(
+                strategy_family=TREND_FOLLOWING,
                 setup_type=BREAKOUT,
                 direction="SHORT",
                 trigger_type="breakout",

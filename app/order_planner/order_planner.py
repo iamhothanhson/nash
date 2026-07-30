@@ -1,106 +1,124 @@
 from __future__ import annotations
+
 from typing import Any
 
-from app.core import settings
-from .config import TP_CLOSE_PCT, TP_CONFIG
+from app.core import TP_CLOSE_PCT, settings
 from .models import OrderPlan
-
 
 try:
     from exchange.client import BinanceFuturesClient
 except ImportError:
-    BinanceFuturesClient = None  # type: ignore[assignment,misc]
-
-
-def risk_controls_allow(*_args: Any, **_kwargs: Any) -> tuple[bool, list[str]]:
-    return True, []
+    BinanceFuturesClient = None
 
 
 class OrderPlanner:
-
     @staticmethod
     def _available_balance() -> float:
-        if settings.MODE in ("live", "demo") and BinanceFuturesClient is not None:
-            try:
-                client = BinanceFuturesClient()
-                account = client.get_account()
-                return float(account.get("availableBalance", 0))
-            except Exception:
-                pass
-        return 0.0
+        if settings.MODE not in ("live", "demo") or BinanceFuturesClient is None:
+            return 0.0
+
+        try:
+            account = BinanceFuturesClient().get_account()
+            return float(account.get("availableBalance", 0))
+        except Exception:
+            return 0.0
 
     @staticmethod
-    def build_order_plan(signal: Any, risk: Any | None = None, pipeline_stats: Any = None, **kwargs: Any) -> OrderPlan | None:
-        if signal is None:
+    def build_order_plan(
+        signal: Any,
+        risk: Any | None = None,
+        pipeline_stats: Any = None,
+        **_: Any,
+    ) -> OrderPlan | None:
+
+        if signal is None or risk is None:
             return None
 
-        entry = float(getattr(signal, "entry", 0.0))
-        stop_loss = float(getattr(signal, "stop_loss", 0.0))
+        entry = float(signal.entry)
+        stop_loss = float(signal.stop_loss)
 
-        if entry <= 0 or stop_loss <= 0:
+        sl_distance = OrderPlanner._stop_loss_distance(entry, stop_loss)
+        if not sl_distance:
             return None
 
-        direction = str(getattr(signal, "direction", "LONG")).upper()
-        sl_distance = abs(entry - stop_loss) / entry
-        if sl_distance <= 0:
+        position_notional = float(risk.position_notional)
+        risk_amount = float(risk.risk_amount)
+
+        if position_notional <= 0 or risk_amount <= 0:
             return None
 
-        risk_amount = float(getattr(risk, "risk_amount", 0.0))
-        position_notional = float(getattr(risk, "position_notional", 0.0))
-        quantity = float(getattr(risk, "quantity", 0.0))
-
-        if risk_amount <= 0:
+        quantity = float(risk.quantity) or position_notional / entry
+        if quantity <= 0:
             return None
-        if quantity <= 0 or position_notional <= 0:
-            quantity = position_notional / entry if entry > 0 and position_notional > 0 else 0.0
-            if quantity <= 0:
-                return None
 
-        # ---- balance check: cap or reject ----
-        available = OrderPlanner._available_balance()
-        required_margin = position_notional / float(settings.LEVERAGE)
-        if available > 0 and required_margin > available:
-            ratio = available / required_margin
-            position_notional = position_notional * ratio
-            quantity = quantity * ratio
-            if position_notional < float(getattr(settings, "MIN_POSITION_NOTIONAL", 5.0)) or quantity <= 0:
-                return None
+        # Cap by available margin
+        result = OrderPlanner._cap_position_size(position_notional, quantity)
+        if result is None:
+            return None
 
-        tp1_qty = quantity * TP_CLOSE_PCT.get("tp_1", 0) / 100.0
-        tp2_qty = quantity - tp1_qty
+        position_notional, quantity = result
 
-        risk_percent=risk_amount / (position_notional * sl_distance) * 100.0 if position_notional > 0 and sl_distance > 0 else 0.0
-        margin_usdt = position_notional / float(settings.LEVERAGE)
-
-        tp1_pct = TP_CONFIG["tp1_r"] * sl_distance * 100
-        tp2_pct = TP_CONFIG["tp2_r"] * sl_distance * 100
+        tp1_qty = quantity * TP_CLOSE_PCT["tp_1"] / 100
+        margin = position_notional / settings.LEVERAGE
 
         if pipeline_stats:
             pipeline_stats.order_planned += 1
 
         return OrderPlan(
-            symbol=str(getattr(signal, "symbol", "UNKNOWN")).strip().upper(),
-            direction=direction,
+            symbol=signal.symbol.upper(),
+            direction=signal.direction.upper(),
             entry=entry,
             qty=quantity,
             stop_loss=stop_loss,
-            tp1=float(getattr(signal, "tp1", 0.0)),
-            tp2=float(getattr(signal, "tp2", 0.0)),
-            tp1_pct=tp1_pct,
-            tp2_pct=tp2_pct,
+            tp1=signal.tp1,
+            tp2=signal.tp2,
+            tp1_pct=signal.tp1_pct,
             tp1_qty=tp1_qty,
-            tp2_qty=tp2_qty,
+            tp2_qty=quantity - tp1_qty,
             notional=position_notional,
+            margin_usdt=margin,
             risk_amount=risk_amount,
-            risk_percent=risk_percent,
-            risk_per_trade=float(getattr(risk, "risk_per_trade", 0.0)),
-            setup_type=str(getattr(signal, "setup_type", "")),
-            setup_score=float(getattr(signal, "setup_score", 0.0)),
-            setup_grade=str(getattr(signal, "setup_grade", "")),
-            confirmation_mode=str(getattr(signal, "confirmation_mode", "")),
-            strategy_family=str(getattr(signal, "strategy_family", "")),
-            risk_multiplier=float(getattr(risk, "risk_multiplier", 1.0)),
-            margin_usdt=margin_usdt,
-            market_state=getattr(signal, "market_state", None),
-            features=getattr(signal, "features", None),
+            risk_percent=risk_amount / (position_notional * sl_distance) * 100,
+            risk_per_trade=risk.risk_per_trade,
+            risk_multiplier=risk.risk_multiplier,
+            setup_type=signal.setup_type,
+            setup_score=signal.setup_score,
+            setup_grade=signal.setup_grade,
+            confirmation_mode=signal.confirmation_mode,
+            strategy_family=signal.strategy_family,
+            market_state=signal.market_state,
+            features=signal.features,
         )
+
+    @staticmethod
+    def _stop_loss_distance(entry: float, stop_loss: float):
+        if entry <= 0 or stop_loss <= 0:
+            return None
+
+        sl_distance = abs(entry - stop_loss) / entry
+        if sl_distance <= 0:
+            return None
+
+        return sl_distance
+
+    @staticmethod
+    def _cap_position_size(
+        position_notional: float,
+        quantity: float,
+    ) -> tuple[float, float] | None:
+        available = OrderPlanner._available_balance()
+        if available <= 0:
+            return None
+
+        max_notional = available * settings.LEVERAGE
+        if position_notional <= max_notional:
+            return position_notional, quantity
+
+        scale = max_notional / position_notional
+        position_notional *= scale
+        quantity *= scale
+
+        if position_notional < settings.MIN_POSITION_NOTIONAL:
+            return None
+
+        return position_notional, quantity

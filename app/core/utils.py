@@ -1,19 +1,10 @@
 from __future__ import annotations
 
 from typing import Any
-
-from app.core.constants import LIQUIDITY_SWEEP_REVERSAL, TREND_FOLLOWING
 from coins.loader import get_coin_config
-
-
-TREND_FOLLOWING_SETUPS = frozenset({"breakout", "pullback"})
 
 def dynamic_strength_threshold(atr_pct: float, config: dict[str, Any]) -> float:
     return max(config["min_strength"], atr_pct * config["min_strength_atr_factor"])
-
-
-def resolve_strategy_family(setup_type: str) -> str:
-    return TREND_FOLLOWING if setup_type in TREND_FOLLOWING_SETUPS else LIQUIDITY_SWEEP_REVERSAL
 
 
 def round_price(symbol: str | None, value: float) -> float:

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class SetupCandidate:
+    strategy_family: str
     setup_type: str
     direction: str
     anchor: float
